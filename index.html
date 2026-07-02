@@ -38,6 +38,11 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            display: none;
+        }
+        
+        .question.visible {
+            display: block;
         }
         
         .question label {
@@ -53,16 +58,19 @@
             margin-bottom: 12px;
         }
         
-        input[type="text"] {
+        input[type="text"],
+        select {
             width: 100%;
             padding: 12px;
             font-size: 16px;
             border: 2px solid #e2e8f0;
             border-radius: 6px;
             transition: border-color 0.2s;
+            background: white;
         }
         
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        select:focus {
             outline: none;
             border-color: #2c5282;
         }
@@ -124,6 +132,11 @@
         
         .actions {
             margin-top: 30px;
+            display: none;
+        }
+        
+        .actions.visible {
+            display: block;
         }
     </style>
 </head>
@@ -135,7 +148,7 @@
     </div>
     
     <!-- Question 1: Monitor numbers -->
-    <div class="question">
+    <div class="question visible" id="q-monitors">
         <label for="monitors">Please list the monitor numbers being used</label>
         <div class="hint">Enter numbers separated by commas (e.g., 4, 12, 16, 23)</div>
         <input type="text" id="monitors" placeholder="e.g., 74, 75, 76, 77">
@@ -148,7 +161,7 @@
     </div>
     
     <!-- Question 2: Start date -->
-    <div class="question">
+    <div class="question" id="q-start-date">
         <label for="start-date">What is your start date?</label>
         <div class="hint">Format: yyyy-mm-dd hh:mm:ss (e.g., 2026-07-03 08:00:00)<br>Standard procedure is to start at 08:00:00 the day after placing the Nasonia in the tubes.</div>
         <input type="text" id="start-date" placeholder="e.g., 2026-07-03 08:00:00">
@@ -156,11 +169,25 @@
         <div class="valid" id="start-date-valid">✓ Valid date format</div>
     </div>
     
-    <div class="actions">
-        <button id="generate-btn" disabled>Generate CSV</button>
+    <!-- Question 3: Sex -->
+    <div class="question" id="q-sex">
+        <label for="sex">What sex wasp are you using?</label>
+        <div class="hint">Select the sex of the wasps in your experiment</div>
+        <select id="sex">
+            <option value="">-- Select an option --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Mixed">Mixed</option>
+        </select>
+        <div class="valid" id="sex-valid" style="display: none;">✓ Sex selected</div>
+    </div>
+    
+    <div class="actions" id="actions">
+        <button id="generate-btn">Generate CSV</button>
     </div>
 
     <script>
+        // Elements
         const monitorsInput = document.getElementById('monitors');
         const monitorsError = document.getElementById('monitors-error');
         const monitorsPreview = document.getElementById('monitors-preview');
@@ -170,13 +197,24 @@
         const startDateError = document.getElementById('start-date-error');
         const startDateValid = document.getElementById('start-date-valid');
         
+        const sexSelect = document.getElementById('sex');
+        const sexValid = document.getElementById('sex-valid');
+        
         const generateBtn = document.getElementById('generate-btn');
+        
+        // Question containers
+        const qMonitors = document.getElementById('q-monitors');
+        const qStartDate = document.getElementById('q-start-date');
+        const qSex = document.getElementById('q-sex');
+        const actions = document.getElementById('actions');
         
         const REGIONS_PER_MONITOR = 32;
         
+        // State
         let parsedMonitors = [];
         let validStartDate = false;
         let startDateValue = '';
+        let selectedSex = '';
         
         function parseMonitors(input) {
             if (!input.trim()) return [];
@@ -202,7 +240,6 @@
             const trimmed = input.trim();
             if (trimmed === '') return { valid: false, empty: true };
             
-            // Regex for yyyy-mm-dd hh:mm:ss
             const regex = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
             const match = trimmed.match(regex);
             
@@ -215,7 +252,6 @@
             const minute = parseInt(match[5], 10);
             const second = parseInt(match[6], 10);
             
-            // Basic range validation
             if (month < 1 || month > 12) return { valid: false, empty: false };
             if (day < 1 || day > 31) return { valid: false, empty: false };
             if (hour < 0 || hour > 23) return { valid: false, empty: false };
@@ -225,14 +261,38 @@
             return { valid: true, empty: false, value: trimmed };
         }
         
-        function updateMonitorsPreview() {
+        function updateVisibility() {
+            // Question 2 appears after Question 1 is valid
+            if (parsedMonitors && parsedMonitors.length > 0) {
+                qStartDate.classList.add('visible');
+            } else {
+                qStartDate.classList.remove('visible');
+            }
+            
+            // Question 3 appears after Question 2 is valid
+            if (validStartDate) {
+                qSex.classList.add('visible');
+            } else {
+                qSex.classList.remove('visible');
+            }
+            
+            // Generate button appears after all questions are complete
+            if (parsedMonitors && parsedMonitors.length > 0 && validStartDate && selectedSex) {
+                actions.classList.add('visible');
+            } else {
+                actions.classList.remove('visible');
+            }
+        }
+        
+        function updateMonitors() {
             const input = monitorsInput.value;
             parsedMonitors = parseMonitors(input);
             
             if (parsedMonitors === null) {
                 monitorsError.style.display = 'block';
                 monitorsPreview.style.display = 'none';
-                updateGenerateButton();
+                parsedMonitors = [];
+                updateVisibility();
                 return;
             }
             
@@ -240,7 +300,7 @@
             
             if (parsedMonitors.length === 0) {
                 monitorsPreview.style.display = 'none';
-                updateGenerateButton();
+                updateVisibility();
                 return;
             }
             
@@ -249,7 +309,7 @@
             
             monitorsPreviewContent.innerHTML = previewLines.join('<br>');
             monitorsPreview.style.display = 'block';
-            updateGenerateButton();
+            updateVisibility();
         }
         
         function updateStartDate() {
@@ -272,27 +332,64 @@
                 startDateValue = '';
             }
             
-            updateGenerateButton();
+            updateVisibility();
         }
         
-        function updateGenerateButton() {
-            const monitorsValid = parsedMonitors && parsedMonitors.length > 0;
-            generateBtn.disabled = !(monitorsValid && validStartDate);
+        function updateSex() {
+            selectedSex = sexSelect.value;
+            
+            if (selectedSex) {
+                sexValid.style.display = 'block';
+            } else {
+                sexValid.style.display = 'none';
+            }
+            
+            updateVisibility();
+        }
+        
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        function generateSexAssignments(count, sexOption) {
+            let assignments = [];
+            
+            if (sexOption === 'Male') {
+                assignments = Array(count).fill('Male');
+            } else if (sexOption === 'Female') {
+                assignments = Array(count).fill('Female');
+            } else if (sexOption === 'Mixed') {
+                // Distribute Male and Female as evenly as possible
+                const half = Math.floor(count / 2);
+                const males = Array(half).fill('Male');
+                const females = Array(count - half).fill('Female');
+                assignments = shuffleArray([...males, ...females]);
+            }
+            
+            return assignments;
         }
         
         function generateCSV() {
-            if (parsedMonitors.length === 0 || !validStartDate) return;
+            if (parsedMonitors.length === 0 || !validStartDate || !selectedSex) return;
             
             const rows = [];
             
             // Header
-            rows.push('file,start_datetime,stop_datetime,region_id,treatment');
+            rows.push('file,start_datetime,stop_datetime,region_id,sex');
             
             // Data rows
             for (const monitorNum of parsedMonitors) {
                 const fileName = `Monitor${monitorNum}.txt`;
+                const sexAssignments = generateSexAssignments(REGIONS_PER_MONITOR, selectedSex);
+                
                 for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
-                    rows.push(`${fileName},${startDateValue},,${region},`);
+                    const sex = sexAssignments[region - 1];
+                    rows.push(`${fileName},${startDateValue},,${region},${sex}`);
                 }
             }
             
@@ -317,8 +414,9 @@
         }
         
         // Event listeners
-        monitorsInput.addEventListener('input', updateMonitorsPreview);
+        monitorsInput.addEventListener('input', updateMonitors);
         startDateInput.addEventListener('input', updateStartDate);
+        sexSelect.addEventListener('change', updateSex);
         generateBtn.addEventListener('click', generateCSV);
     </script>
 </body>
