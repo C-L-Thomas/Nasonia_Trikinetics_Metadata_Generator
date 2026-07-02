@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nasonia Trikinetics Metadata Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: #2c5282;
+            margin-bottom: 10px;
+        }
+        
+        .intro {
+            background: #ebf8ff;
+            border-left: 4px solid #2c5282;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .question {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .question label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+        
+        .question .hint {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 12px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2c5282;
+        }
+        
+        .error {
+            color: #c53030;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .valid {
+            color: #2f855a;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .preview {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .preview-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        
+        button {
+            background: #2c5282;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #1a365d;
+        }
+        
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .actions {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nasonia Trikinetics Metadata Generator</h1>
+    
+    <div class="intro">
+        Welcome to the Nasonia Trikinetics metadata generator. This tool will help you create properly formatted metadata files for your DAM system experiments.
+    </div>
+    
+    <!-- Question 1: Monitor numbers -->
+    <div class="question">
+        <label for="monitors">Please list the monitor numbers being used</label>
+        <div class="hint">Enter numbers separated by commas (e.g., 4, 12, 16, 23)</div>
+        <input type="text" id="monitors" placeholder="e.g., 74, 75, 76, 77">
+        <div class="error" id="monitors-error">Please enter valid monitor numbers separated by commas</div>
+        
+        <div class="preview" id="monitors-preview" style="display: none;">
+            <div class="preview-label">Preview: file column values</div>
+            <div id="monitors-preview-content"></div>
+        </div>
+    </div>
+    
+    <!-- Question 2: Start date -->
+    <div class="question">
+        <label for="start-date">What is your start date?</label>
+        <div class="hint">Format: yyyy-mm-dd hh:mm:ss (e.g., 2026-07-03 08:00:00)<br>Standard procedure is to start at 08:00:00 the day after placing the Nasonia in the tubes.</div>
+        <input type="text" id="start-date" placeholder="e.g., 2026-07-03 08:00:00">
+        <div class="error" id="start-date-error">Please enter a valid date in yyyy-mm-dd hh:mm:ss format</div>
+        <div class="valid" id="start-date-valid">✓ Valid date format</div>
+    </div>
+    
+    <div class="actions">
+        <button id="generate-btn" disabled>Generate CSV</button>
+    </div>
+
+    <script>
+        const monitorsInput = document.getElementById('monitors');
+        const monitorsError = document.getElementById('monitors-error');
+        const monitorsPreview = document.getElementById('monitors-preview');
+        const monitorsPreviewContent = document.getElementById('monitors-preview-content');
+        
+        const startDateInput = document.getElementById('start-date');
+        const startDateError = document.getElementById('start-date-error');
+        const startDateValid = document.getElementById('start-date-valid');
+        
+        const generateBtn = document.getElementById('generate-btn');
+        
+        const REGIONS_PER_MONITOR = 32;
+        
+        let parsedMonitors = [];
+        let validStartDate = false;
+        let startDateValue = '';
+        
+        function parseMonitors(input) {
+            if (!input.trim()) return [];
+            
+            const parts = input.split(',');
+            const numbers = [];
+            
+            for (const part of parts) {
+                const trimmed = part.trim();
+                if (trimmed === '') continue;
+                
+                const num = parseInt(trimmed, 10);
+                if (isNaN(num) || num < 0) {
+                    return null;
+                }
+                numbers.push(num);
+            }
+            
+            return [...new Set(numbers)].sort((a, b) => a - b);
+        }
+        
+        function validateStartDate(input) {
+            const trimmed = input.trim();
+            if (trimmed === '') return { valid: false, empty: true };
+            
+            // Regex for yyyy-mm-dd hh:mm:ss
+            const regex = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
+            const match = trimmed.match(regex);
+            
+            if (!match) return { valid: false, empty: false };
+            
+            const year = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            const day = parseInt(match[3], 10);
+            const hour = parseInt(match[4], 10);
+            const minute = parseInt(match[5], 10);
+            const second = parseInt(match[6], 10);
+            
+            // Basic range validation
+            if (month < 1 || month > 12) return { valid: false, empty: false };
+            if (day < 1 || day > 31) return { valid: false, empty: false };
+            if (hour < 0 || hour > 23) return { valid: false, empty: false };
+            if (minute < 0 || minute > 59) return { valid: false, empty: false };
+            if (second < 0 || second > 59) return { valid: false, empty: false };
+            
+            return { valid: true, empty: false, value: trimmed };
+        }
+        
+        function updateMonitorsPreview() {
+            const input = monitorsInput.value;
+            parsedMonitors = parseMonitors(input);
+            
+            if (parsedMonitors === null) {
+                monitorsError.style.display = 'block';
+                monitorsPreview.style.display = 'none';
+                updateGenerateButton();
+                return;
+            }
+            
+            monitorsError.style.display = 'none';
+            
+            if (parsedMonitors.length === 0) {
+                monitorsPreview.style.display = 'none';
+                updateGenerateButton();
+                return;
+            }
+            
+            const fileNames = parsedMonitors.map(num => `Monitor${num}.txt`);
+            const previewLines = fileNames.map(name => `${name} (×${REGIONS_PER_MONITOR} rows)`);
+            
+            monitorsPreviewContent.innerHTML = previewLines.join('<br>');
+            monitorsPreview.style.display = 'block';
+            updateGenerateButton();
+        }
+        
+        function updateStartDate() {
+            const result = validateStartDate(startDateInput.value);
+            
+            if (result.empty) {
+                startDateError.style.display = 'none';
+                startDateValid.style.display = 'none';
+                validStartDate = false;
+                startDateValue = '';
+            } else if (result.valid) {
+                startDateError.style.display = 'none';
+                startDateValid.style.display = 'block';
+                validStartDate = true;
+                startDateValue = result.value;
+            } else {
+                startDateError.style.display = 'block';
+                startDateValid.style.display = 'none';
+                validStartDate = false;
+                startDateValue = '';
+            }
+            
+            updateGenerateButton();
+        }
+        
+        function updateGenerateButton() {
+            const monitorsValid = parsedMonitors && parsedMonitors.length > 0;
+            generateBtn.disabled = !(monitorsValid && validStartDate);
+        }
+        
+        function generateCSV() {
+            if (parsedMonitors.length === 0 || !validStartDate) return;
+            
+            const rows = [];
+            
+            // Header
+            rows.push('file,start_datetime,stop_datetime,region_id,treatment');
+            
+            // Data rows
+            for (const monitorNum of parsedMonitors) {
+                const fileName = `Monitor${monitorNum}.txt`;
+                for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
+                    rows.push(`${fileName},${startDateValue},,${region},`);
+                }
+            }
+            
+            const csvContent = rows.join('\n');
+            downloadCSV(csvContent, 'metadata.csv');
+        }
+        
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        // Event listeners
+        monitorsInput.addEventListener('input', updateMonitorsPreview);
+        startDateInput.addEventListener('input', updateStartDate);
+        generateBtn.addEventListener('click', generateCSV);
+    </script>
+</body>
+</html>
