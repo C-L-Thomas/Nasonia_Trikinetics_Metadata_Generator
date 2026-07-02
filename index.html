@@ -252,6 +252,59 @@
                 <div class="valid" id="sex-valid" style="display: none;">✓ Sex selected</div>
             </div>
             
+            <!-- Question 4: Mated -->
+            <div class="question" id="q-mated">
+                <label for="mated">Are your wasps mated?</label>
+                <div class="hint">Select the mating status of your wasps</div>
+                <select id="mated">
+                    <option value="">-- Select an option --</option>
+                    <option value="Yes">Yes</option>
+                    <option value="Unknown">Unknown</option>
+                    <option value="No">No</option>
+                </select>
+                <div class="valid" id="mated-valid" style="display: none;">✓ Mating status selected</div>
+            </div>
+            
+            <!-- Question 5: Base media -->
+            <div class="question" id="q-base-media">
+                <label for="base-media">What is your base media?</label>
+                <div class="hint">Select the food media used in your experiment</div>
+                <select id="base-media">
+                    <option value="">-- Select an option --</option>
+                    <option value="Nasonia_Sucrose">Nasonia_Sucrose</option>
+                    <option value="Drosophila_SYA">Drosophila_SYA</option>
+                </select>
+                <div class="valid" id="base-media-valid" style="display: none;">✓ Base media selected</div>
+            </div>
+            
+            <!-- Question 6: Incubator -->
+            <div class="question" id="q-incubator">
+                <label for="incubator">Which incubator are your wasps housed in?</label>
+                <div class="hint">Select the incubator location</div>
+                <select id="incubator">
+                    <option value="">-- Select an option --</option>
+                    <option value="Incubator_1">Incubator_1</option>
+                    <option value="Incubator_2">Incubator_2</option>
+                    <option value="Incubator_3">Incubator_3</option>
+                    <option value="Incubator_4">Incubator_4</option>
+                </select>
+                <div class="valid" id="incubator-valid" style="display: none;">✓ Incubator selected</div>
+            </div>
+            
+            <!-- Question 7: Food change -->
+            <div class="question" id="q-food-change">
+                <label for="food-change">Are you doing a food change?</label>
+                <div class="hint">Select the frequency of food changes</div>
+                <select id="food-change">
+                    <option value="">-- Select an option --</option>
+                    <option value="No">No</option>
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Bi-Weekly">Bi-Weekly</option>
+                </select>
+                <div class="valid" id="food-change-valid" style="display: none;">✓ Food change frequency selected</div>
+            </div>
+            
             <div class="actions" id="actions">
                 <button id="generate-btn">Generate CSV</button>
             </div>
@@ -280,12 +333,28 @@
         const sexSelect = document.getElementById('sex');
         const sexValid = document.getElementById('sex-valid');
         
+        const matedSelect = document.getElementById('mated');
+        const matedValid = document.getElementById('mated-valid');
+        
+        const baseMediaSelect = document.getElementById('base-media');
+        const baseMediaValid = document.getElementById('base-media-valid');
+        
+        const incubatorSelect = document.getElementById('incubator');
+        const incubatorValid = document.getElementById('incubator-valid');
+        
+        const foodChangeSelect = document.getElementById('food-change');
+        const foodChangeValid = document.getElementById('food-change-valid');
+        
         const generateBtn = document.getElementById('generate-btn');
         
         // Question containers
         const qMonitors = document.getElementById('q-monitors');
         const qStartDate = document.getElementById('q-start-date');
         const qSex = document.getElementById('q-sex');
+        const qMated = document.getElementById('q-mated');
+        const qBaseMedia = document.getElementById('q-base-media');
+        const qIncubator = document.getElementById('q-incubator');
+        const qFoodChange = document.getElementById('q-food-change');
         const actions = document.getElementById('actions');
         
         const REGIONS_PER_MONITOR = 32;
@@ -295,6 +364,10 @@
         let validStartDate = false;
         let startDateValue = '';
         let selectedSex = '';
+        let selectedMated = '';
+        let selectedBaseMedia = '';
+        let selectedIncubator = '';
+        let selectedFoodChange = '';
         
         // Set default start date to tomorrow at 08:00:00
         function setDefaultStartDate() {
@@ -357,22 +430,52 @@
         }
         
         function updateVisibility() {
-            // Question 2 appears after Question 1 is valid
+            // Progressive disclosure: each question appears after the previous is complete
+            
             if (parsedMonitors && parsedMonitors.length > 0) {
                 qStartDate.classList.add('visible');
             } else {
                 qStartDate.classList.remove('visible');
             }
             
-            // Question 3 appears after Question 2 is valid
             if (validStartDate) {
                 qSex.classList.add('visible');
             } else {
                 qSex.classList.remove('visible');
             }
             
+            if (selectedSex) {
+                qMated.classList.add('visible');
+            } else {
+                qMated.classList.remove('visible');
+            }
+            
+            if (selectedMated) {
+                qBaseMedia.classList.add('visible');
+            } else {
+                qBaseMedia.classList.remove('visible');
+            }
+            
+            if (selectedBaseMedia) {
+                qIncubator.classList.add('visible');
+            } else {
+                qIncubator.classList.remove('visible');
+            }
+            
+            if (selectedIncubator) {
+                qFoodChange.classList.add('visible');
+            } else {
+                qFoodChange.classList.remove('visible');
+            }
+            
             // Generate button appears after all questions are complete
-            if (parsedMonitors && parsedMonitors.length > 0 && validStartDate && selectedSex) {
+            if (parsedMonitors && parsedMonitors.length > 0 && 
+                validStartDate && 
+                selectedSex && 
+                selectedMated && 
+                selectedBaseMedia && 
+                selectedIncubator && 
+                selectedFoodChange) {
                 actions.classList.add('visible');
             } else {
                 actions.classList.remove('visible');
@@ -432,13 +535,31 @@
         
         function updateSex() {
             selectedSex = sexSelect.value;
-            
-            if (selectedSex) {
-                sexValid.style.display = 'block';
-            } else {
-                sexValid.style.display = 'none';
-            }
-            
+            sexValid.style.display = selectedSex ? 'block' : 'none';
+            updateVisibility();
+        }
+        
+        function updateMated() {
+            selectedMated = matedSelect.value;
+            matedValid.style.display = selectedMated ? 'block' : 'none';
+            updateVisibility();
+        }
+        
+        function updateBaseMedia() {
+            selectedBaseMedia = baseMediaSelect.value;
+            baseMediaValid.style.display = selectedBaseMedia ? 'block' : 'none';
+            updateVisibility();
+        }
+        
+        function updateIncubator() {
+            selectedIncubator = incubatorSelect.value;
+            incubatorValid.style.display = selectedIncubator ? 'block' : 'none';
+            updateVisibility();
+        }
+        
+        function updateFoodChange() {
+            selectedFoodChange = foodChangeSelect.value;
+            foodChangeValid.style.display = selectedFoodChange ? 'block' : 'none';
             updateVisibility();
         }
         
@@ -469,12 +590,13 @@
         }
         
         function generateCSV() {
-            if (parsedMonitors.length === 0 || !validStartDate || !selectedSex) return;
+            if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
+                !selectedMated || !selectedBaseMedia || !selectedIncubator || !selectedFoodChange) return;
             
             const rows = [];
             
             // Header
-            rows.push('file,start_datetime,stop_datetime,region_id,sex');
+            rows.push('file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,food_change');
             
             // Data rows
             for (const monitorNum of parsedMonitors) {
@@ -483,7 +605,7 @@
                 
                 for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
                     const sex = sexAssignments[region - 1];
-                    rows.push(`${fileName},${startDateValue},,${region},${sex}`);
+                    rows.push(`${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedFoodChange}`);
                 }
             }
             
@@ -511,6 +633,10 @@
         monitorsInput.addEventListener('input', updateMonitors);
         startDateInput.addEventListener('input', updateStartDate);
         sexSelect.addEventListener('change', updateSex);
+        matedSelect.addEventListener('change', updateMated);
+        baseMediaSelect.addEventListener('change', updateBaseMedia);
+        incubatorSelect.addEventListener('change', updateIncubator);
+        foodChangeSelect.addEventListener('change', updateFoodChange);
         generateBtn.addEventListener('click', generateCSV);
         
         // Initialize default start date
