@@ -434,6 +434,38 @@
                 </div>
             </div>
             
+            <!-- Question 10: Carrier (if drug selected) -->
+            <div class="question" id="q-carrier">
+                <label for="carrier">What is the carrier for the drug?</label>
+                <div class="hint">Select the solvent used to dissolve the drug</div>
+                <select id="carrier">
+                    <option value="">-- Select an option --</option>
+                    <option value="Water">Water</option>
+                    <option value="Ethanol">Ethanol</option>
+                    <option value="DMSO">DMSO</option>
+                    <option value="__other__">Other (email to add new carrier)</option>
+                </select>
+                <div class="valid" id="carrier-valid" style="display: none;">✓ Carrier selected</div>
+            </div>
+            
+            <!-- Question 11: Temperature -->
+            <div class="question" id="q-temperature">
+                <label for="temperature">What temperatures are used?</label>
+                <div class="hint">Enter temperature(s) in °C, separated by commas (e.g., 25 or 20, 25, 30). If multiple temperatures are entered, they will be randomized across positions.</div>
+                <input type="text" id="temperature" placeholder="e.g., 25 or 20, 25, 30">
+                <div class="error" id="temperature-error">Please enter valid temperature(s) as numbers separated by commas</div>
+                <div class="valid" id="temperature-valid" style="display: none;">✓ Temperature(s) valid</div>
+            </div>
+            
+            <!-- Question 12: Light:Dark cycle -->
+            <div class="question" id="q-ld-cycle">
+                <label for="ld-cycle">What is the Light:Dark cycle?</label>
+                <div class="hint">Enter as L:D ratio (e.g., 12:12, 16:8, 0:24 for constant dark)</div>
+                <input type="text" id="ld-cycle" placeholder="e.g., 12:12">
+                <div class="error" id="ld-cycle-error">Please enter a valid L:D ratio (e.g., 12:12)</div>
+                <div class="valid" id="ld-cycle-valid" style="display: none;">✓ Valid L:D cycle</div>
+            </div>
+            
             <div class="actions" id="actions">
                 <button id="generate-btn">Generate CSV</button>
             </div>
@@ -450,7 +482,7 @@
 
     <script>
         // Known drugs list
-        const KNOWN_DRUGS = ['AKG', 'Rapamycin'];
+        const KNOWN_DRUGS = ['AKG', 'Rapamycin', 'Caffeine'];
         
         // Valid dose units
         const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
@@ -491,6 +523,17 @@
         const treatmentList = document.getElementById('treatment-list');
         const balanceWarning = document.getElementById('balance-warning');
         
+        const carrierSelect = document.getElementById('carrier');
+        const carrierValid = document.getElementById('carrier-valid');
+        
+        const temperatureInput = document.getElementById('temperature');
+        const temperatureError = document.getElementById('temperature-error');
+        const temperatureValid = document.getElementById('temperature-valid');
+        
+        const ldCycleInput = document.getElementById('ld-cycle');
+        const ldCycleError = document.getElementById('ld-cycle-error');
+        const ldCycleValid = document.getElementById('ld-cycle-valid');
+        
         const generateBtn = document.getElementById('generate-btn');
         
         // Question containers
@@ -503,6 +546,9 @@
         const qFoodChange = document.getElementById('q-food-change');
         const qDrug = document.getElementById('q-drug');
         const qDrugDetails = document.getElementById('q-drug-details');
+        const qCarrier = document.getElementById('q-carrier');
+        const qTemperature = document.getElementById('q-temperature');
+        const qLdCycle = document.getElementById('q-ld-cycle');
         const actions = document.getElementById('actions');
         
         const REGIONS_PER_MONITOR = 32;
@@ -519,6 +565,11 @@
         let selectedDrugChoice = '';
         let drugEntries = [];
         let drugIdCounter = 0;
+        let selectedCarrier = '';
+        let parsedTemperatures = [];
+        let validTemperatures = false;
+        let ldCycleValue = '';
+        let validLdCycle = false;
         
         // Set default start date to tomorrow at 08:00:00
         function setDefaultStartDate() {
@@ -584,12 +635,10 @@
             const trimmed = dose.trim();
             if (trimmed === '') return { valid: false };
             
-            // Check if it matches number + valid unit
             for (const unit of VALID_UNITS) {
                 const regex = new RegExp(`^(\\d+\\.?\\d*)\\s*${unit.replace('/', '\\/')}$`, 'i');
                 const match = trimmed.match(regex);
                 if (match) {
-                    // Normalize the unit to correct case
                     const normalizedDose = match[1] + unit;
                     return { valid: true, normalized: normalizedDose };
                 }
@@ -616,7 +665,50 @@
                 return { valid: false, doses: [] };
             }
             
-            return { valid: true, doses: [...new Set(doses)] }; // Remove duplicates
+            return { valid: true, doses: [...new Set(doses)] };
+        }
+        
+        function parseTemperatures(input) {
+            if (!input.trim()) return { valid: false, temps: [] };
+            
+            const parts = input.split(',');
+            const temps = [];
+            
+            for (const part of parts) {
+                const trimmed = part.trim();
+                if (trimmed === '') continue;
+                
+                const num = parseFloat(trimmed);
+                if (isNaN(num)) {
+                    return { valid: false, temps: [] };
+                }
+                temps.push(num + '°C');
+            }
+            
+            if (temps.length === 0) {
+                return { valid: false, temps: [] };
+            }
+            
+            return { valid: true, temps: [...new Set(temps)] };
+        }
+        
+        function validateLdCycle(input) {
+            const trimmed = input.trim();
+            if (trimmed === '') return { valid: false, empty: true };
+            
+            const regex = /^(\d+):(\d+)$/;
+            const match = trimmed.match(regex);
+            
+            if (!match) return { valid: false, empty: false };
+            
+            const light = parseInt(match[1], 10);
+            const dark = parseInt(match[2], 10);
+            
+            if (light + dark !== 24) {
+                return { valid: false, empty: false };
+            }
+            
+            return { valid: true, empty: false, value: `${light}:${dark}` };
         }
         
         function createDrugEntry() {
@@ -646,7 +738,6 @@
             drugEntriesContainer.appendChild(entry);
             drugEntries.push({ id, drug: '', doses: [] });
             
-            // Add event listeners
             const selectEl = document.getElementById(`drug-select-${id}`);
             const dosesEl = document.getElementById(`drug-doses-${id}`);
             const removeBtn = entry.querySelector('.remove-drug-btn');
@@ -667,10 +758,8 @@
             const entry = drugEntries.find(e => e.id === id);
             if (!entry) return;
             
-            // Handle drug selection
             const drugValue = selectEl.value;
             if (drugValue === '__other__') {
-                // Reset to empty and show message
                 selectEl.value = '';
                 alert('Please email Christianluthomas@gmail.com to request adding a new drug to the list.');
                 entry.drug = '';
@@ -678,7 +767,6 @@
                 entry.drug = drugValue;
             }
             
-            // Handle doses
             const dosesResult = parseDoses(dosesEl.value);
             if (dosesEl.value.trim() === '') {
                 doseError.style.display = 'none';
@@ -705,7 +793,6 @@
             }
             drugEntries = drugEntries.filter(e => e.id !== id);
             
-            // Renumber remaining entries
             const entryEls = drugEntriesContainer.querySelectorAll('.drug-entry');
             entryEls.forEach((el, index) => {
                 el.querySelector('h4').textContent = `Drug ${index + 1}`;
@@ -718,12 +805,10 @@
         function getTreatmentGroups() {
             const groups = [];
             
-            // Add control if checked
             if (includeControlCheckbox.checked) {
                 groups.push({ drug: 'Control', dose: '0' });
             }
             
-            // Add drug treatments
             for (const entry of drugEntries) {
                 if (entry.drug && entry.doses.length > 0) {
                     for (const dose of entry.doses) {
@@ -746,7 +831,6 @@
             treatmentPreview.style.display = 'block';
             treatmentList.innerHTML = groups.map(g => `<li>${g.drug} (${g.dose})</li>`).join('');
             
-            // Calculate balance
             const totalPositions = parsedMonitors.length * REGIONS_PER_MONITOR;
             const perGroup = Math.floor(totalPositions / groups.length);
             const remainder = totalPositions % groups.length;
@@ -761,8 +845,6 @@
         }
         
         function updateVisibility() {
-            // Progressive disclosure
-            
             if (parsedMonitors && parsedMonitors.length > 0) {
                 qStartDate.classList.add('visible');
             } else {
@@ -811,7 +893,29 @@
                 qDrugDetails.classList.remove('visible');
             }
             
-            // Generate button logic
+            // Carrier appears after drug details are complete (if drugs selected) or after drug choice (if no drugs)
+            const drugDetailsComplete = selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0;
+            if (selectedDrugChoice === 'yes' && drugDetailsComplete) {
+                qCarrier.classList.add('visible');
+            } else {
+                qCarrier.classList.remove('visible');
+            }
+            
+            // Temperature appears after carrier (if drugs) or after drug choice (if no drugs)
+            if (selectedDrugChoice === 'no' || (selectedDrugChoice === 'yes' && selectedCarrier)) {
+                qTemperature.classList.add('visible');
+            } else {
+                qTemperature.classList.remove('visible');
+            }
+            
+            // L:D cycle appears after temperature
+            if (validTemperatures) {
+                qLdCycle.classList.add('visible');
+            } else {
+                qLdCycle.classList.remove('visible');
+            }
+            
+            // Generate button
             let canGenerate = parsedMonitors && parsedMonitors.length > 0 && 
                 validStartDate && 
                 selectedSex && 
@@ -819,11 +923,13 @@
                 selectedBaseMedia && 
                 selectedIncubator && 
                 selectedFoodChange &&
-                selectedDrugChoice;
+                selectedDrugChoice &&
+                validTemperatures &&
+                validLdCycle;
             
             if (selectedDrugChoice === 'yes') {
                 const groups = getTreatmentGroups();
-                canGenerate = canGenerate && groups.length > 0;
+                canGenerate = canGenerate && groups.length > 0 && selectedCarrier;
             }
             
             if (canGenerate) {
@@ -921,6 +1027,69 @@
             updateVisibility();
         }
         
+        function updateCarrier() {
+            const carrierValue = carrierSelect.value;
+            if (carrierValue === '__other__') {
+                carrierSelect.value = '';
+                alert('Please email Christianluthomas@gmail.com to request adding a new carrier to the list.');
+                selectedCarrier = '';
+            } else {
+                selectedCarrier = carrierValue;
+            }
+            carrierValid.style.display = selectedCarrier ? 'block' : 'none';
+            updateVisibility();
+        }
+        
+        function updateTemperature() {
+            const result = parseTemperatures(temperatureInput.value);
+            
+            if (temperatureInput.value.trim() === '') {
+                temperatureError.style.display = 'none';
+                temperatureValid.style.display = 'none';
+                validTemperatures = false;
+                parsedTemperatures = [];
+            } else if (result.valid) {
+                temperatureError.style.display = 'none';
+                temperatureValid.style.display = 'block';
+                temperatureValid.textContent = result.temps.length === 1 
+                    ? `✓ All positions will be ${result.temps[0]}`
+                    : `✓ Temperatures will be randomized: ${result.temps.join(', ')}`;
+                validTemperatures = true;
+                parsedTemperatures = result.temps;
+            } else {
+                temperatureError.style.display = 'block';
+                temperatureValid.style.display = 'none';
+                validTemperatures = false;
+                parsedTemperatures = [];
+            }
+            
+            updateVisibility();
+        }
+        
+        function updateLdCycle() {
+            const result = validateLdCycle(ldCycleInput.value);
+            
+            if (result.empty) {
+                ldCycleError.style.display = 'none';
+                ldCycleValid.style.display = 'none';
+                validLdCycle = false;
+                ldCycleValue = '';
+            } else if (result.valid) {
+                ldCycleError.style.display = 'none';
+                ldCycleValid.style.display = 'block';
+                validLdCycle = true;
+                ldCycleValue = result.value;
+            } else {
+                ldCycleError.style.display = 'block';
+                ldCycleError.textContent = 'Please enter a valid L:D ratio (must add up to 24 hours, e.g., 12:12)';
+                ldCycleValid.style.display = 'none';
+                validLdCycle = false;
+                ldCycleValue = '';
+            }
+            
+            updateVisibility();
+        }
+        
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -930,52 +1099,56 @@
             return shuffled;
         }
         
-        function generateSexAssignments(count, sexOption) {
-            let assignments = [];
-            
-            if (sexOption === 'Male') {
-                assignments = Array(count).fill('Male');
-            } else if (sexOption === 'Female') {
-                assignments = Array(count).fill('Female');
-            } else if (sexOption === 'Mixed') {
-                const half = Math.floor(count / 2);
-                const males = Array(half).fill('Male');
-                const females = Array(count - half).fill('Female');
-                assignments = shuffleArray([...males, ...females]);
-            }
-            
-            return assignments;
-        }
-        
-        function generateTreatmentAssignments(count, groups) {
-            if (groups.length === 0) {
-                return Array(count).fill({ drug: 'Control', dose: '0' });
-            }
+        function generateBalancedAssignments(count, options) {
+            if (options.length === 0) return [];
+            if (options.length === 1) return Array(count).fill(options[0]);
             
             const assignments = [];
-            const perGroup = Math.floor(count / groups.length);
-            const remainder = count % groups.length;
+            const perOption = Math.floor(count / options.length);
+            const remainder = count % options.length;
             
-            // Create base assignments
-            for (let i = 0; i < groups.length; i++) {
+            for (let i = 0; i < options.length; i++) {
                 const extra = i < remainder ? 1 : 0;
-                for (let j = 0; j < perGroup + extra; j++) {
-                    assignments.push({ ...groups[i] });
+                for (let j = 0; j < perOption + extra; j++) {
+                    assignments.push(options[i]);
                 }
             }
             
             return shuffleArray(assignments);
         }
         
+        function generateSexAssignments(count, sexOption) {
+            if (sexOption === 'Male') {
+                return Array(count).fill('Male');
+            } else if (sexOption === 'Female') {
+                return Array(count).fill('Female');
+            } else if (sexOption === 'Mixed') {
+                return generateBalancedAssignments(count, ['Male', 'Female']);
+            }
+            return [];
+        }
+        
+        function generateTreatmentAssignments(count, groups) {
+            if (groups.length === 0) {
+                return Array(count).fill({ drug: 'Control', dose: '0' });
+            }
+            return generateBalancedAssignments(count, groups);
+        }
+        
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
                 !selectedMated || !selectedBaseMedia || !selectedIncubator || 
-                !selectedFoodChange || !selectedDrugChoice) return;
+                !selectedFoodChange || !selectedDrugChoice || !validTemperatures || !validLdCycle) return;
             
             const rows = [];
             
             // Header
-            rows.push('file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,food_change,drug,dose');
+            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,food_change,drug,dose';
+            if (selectedDrugChoice === 'yes') {
+                header += ',carrier';
+            }
+            header += ',temperature,ld_cycle';
+            rows.push(header);
             
             // Get treatment groups
             let treatmentGroups = [];
@@ -990,11 +1163,19 @@
                 const fileName = `Monitor${monitorNum}.txt`;
                 const sexAssignments = generateSexAssignments(REGIONS_PER_MONITOR, selectedSex);
                 const treatmentAssignments = generateTreatmentAssignments(REGIONS_PER_MONITOR, treatmentGroups);
+                const temperatureAssignments = generateBalancedAssignments(REGIONS_PER_MONITOR, parsedTemperatures);
                 
                 for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
                     const sex = sexAssignments[region - 1];
                     const treatment = treatmentAssignments[region - 1];
-                    rows.push(`${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedFoodChange},${treatment.drug},${treatment.dose}`);
+                    const temp = temperatureAssignments[region - 1];
+                    
+                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
+                    if (selectedDrugChoice === 'yes') {
+                        row += `,${selectedCarrier}`;
+                    }
+                    row += `,${temp},${ldCycleValue}`;
+                    rows.push(row);
                 }
             }
             
@@ -1032,6 +1213,9 @@
             updateTreatmentPreview();
             updateVisibility();
         });
+        carrierSelect.addEventListener('change', updateCarrier);
+        temperatureInput.addEventListener('input', updateTemperature);
+        ldCycleInput.addEventListener('input', updateLdCycle);
         generateBtn.addEventListener('click', generateCSV);
         
         // Initialize
