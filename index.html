@@ -192,6 +192,98 @@
             display: block;
         }
         
+        .drug-entry {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .drug-entry h4 {
+            margin: 0 0 10px 0;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .drug-entry .dose-input {
+            margin-top: 10px;
+        }
+        
+        .drug-entry .dose-input label {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        
+        .add-drug-btn {
+            background: #48bb78;
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .add-drug-btn:hover {
+            background: #38a169;
+        }
+        
+        .remove-drug-btn {
+            background: #e53e3e;
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .remove-drug-btn:hover {
+            background: #c53030;
+        }
+        
+        .drug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checkbox-group {
+            margin-top: 10px;
+        }
+        
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        .treatment-preview {
+            background: #e6fffa;
+            border: 1px solid #38b2ac;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .treatment-preview h4 {
+            margin: 0 0 10px 0;
+            color: #234e52;
+            font-size: 14px;
+        }
+        
+        .treatment-preview ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .treatment-preview li {
+            font-family: monospace;
+            font-size: 13px;
+            color: #234e52;
+        }
+        
         @media (max-width: 768px) {
             .layout {
                 flex-direction: column;
@@ -305,6 +397,43 @@
                 <div class="valid" id="food-change-valid" style="display: none;">✓ Food change frequency selected</div>
             </div>
             
+            <!-- Question 8: Drug -->
+            <div class="question" id="q-drug">
+                <label>Are you adding any drugs to the media?</label>
+                <div class="hint">Select whether you are testing any drug treatments</div>
+                <select id="drug-choice">
+                    <option value="">-- Select an option --</option>
+                    <option value="no">No (Control only)</option>
+                    <option value="yes">Yes</option>
+                </select>
+                <div class="valid" id="drug-choice-valid" style="display: none;">✓ Drug choice selected</div>
+            </div>
+            
+            <!-- Question 9: Drug details (if yes) -->
+            <div class="question" id="q-drug-details">
+                <label>Drug treatments</label>
+                <div class="hint">Add each drug and its doses. Valid units: nM, uM, mM, M, ng/mL, ug/mL, mg/mL, g/mL, ppm, %</div>
+                
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="include-control" checked>
+                        Include Control group (dose = 0)
+                    </label>
+                </div>
+                
+                <div id="drug-entries"></div>
+                
+                <button type="button" class="add-drug-btn" id="add-drug-btn">+ Add Drug</button>
+                
+                <div class="error" id="drug-error" style="display: none;">Please add at least one drug with valid doses</div>
+                
+                <div class="treatment-preview" id="treatment-preview" style="display: none;">
+                    <h4>Treatment groups to be randomized:</h4>
+                    <ul id="treatment-list"></ul>
+                    <div id="balance-warning" style="color: #c53030; margin-top: 10px; font-size: 13px;"></div>
+                </div>
+            </div>
+            
             <div class="actions" id="actions">
                 <button id="generate-btn">Generate CSV</button>
             </div>
@@ -320,6 +449,12 @@
     </div>
 
     <script>
+        // Known drugs list
+        const KNOWN_DRUGS = ['AKG', 'Rapamycin'];
+        
+        // Valid dose units
+        const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
+        
         // Elements
         const monitorsInput = document.getElementById('monitors');
         const monitorsError = document.getElementById('monitors-error');
@@ -345,6 +480,17 @@
         const foodChangeSelect = document.getElementById('food-change');
         const foodChangeValid = document.getElementById('food-change-valid');
         
+        const drugChoiceSelect = document.getElementById('drug-choice');
+        const drugChoiceValid = document.getElementById('drug-choice-valid');
+        
+        const drugEntriesContainer = document.getElementById('drug-entries');
+        const addDrugBtn = document.getElementById('add-drug-btn');
+        const includeControlCheckbox = document.getElementById('include-control');
+        const drugError = document.getElementById('drug-error');
+        const treatmentPreview = document.getElementById('treatment-preview');
+        const treatmentList = document.getElementById('treatment-list');
+        const balanceWarning = document.getElementById('balance-warning');
+        
         const generateBtn = document.getElementById('generate-btn');
         
         // Question containers
@@ -355,6 +501,8 @@
         const qBaseMedia = document.getElementById('q-base-media');
         const qIncubator = document.getElementById('q-incubator');
         const qFoodChange = document.getElementById('q-food-change');
+        const qDrug = document.getElementById('q-drug');
+        const qDrugDetails = document.getElementById('q-drug-details');
         const actions = document.getElementById('actions');
         
         const REGIONS_PER_MONITOR = 32;
@@ -368,6 +516,9 @@
         let selectedBaseMedia = '';
         let selectedIncubator = '';
         let selectedFoodChange = '';
+        let selectedDrugChoice = '';
+        let drugEntries = [];
+        let drugIdCounter = 0;
         
         // Set default start date to tomorrow at 08:00:00
         function setDefaultStartDate() {
@@ -429,8 +580,188 @@
             return { valid: true, empty: false, value: trimmed };
         }
         
+        function validateDose(dose) {
+            const trimmed = dose.trim();
+            if (trimmed === '') return { valid: false };
+            
+            // Check if it matches number + valid unit
+            for (const unit of VALID_UNITS) {
+                const regex = new RegExp(`^(\\d+\\.?\\d*)\\s*${unit.replace('/', '\\/')}$`, 'i');
+                const match = trimmed.match(regex);
+                if (match) {
+                    // Normalize the unit to correct case
+                    const normalizedDose = match[1] + unit;
+                    return { valid: true, normalized: normalizedDose };
+                }
+            }
+            
+            return { valid: false };
+        }
+        
+        function parseDoses(input) {
+            if (!input.trim()) return { valid: false, doses: [] };
+            
+            const parts = input.split(',');
+            const doses = [];
+            
+            for (const part of parts) {
+                const result = validateDose(part);
+                if (!result.valid) {
+                    return { valid: false, doses: [] };
+                }
+                doses.push(result.normalized);
+            }
+            
+            if (doses.length === 0) {
+                return { valid: false, doses: [] };
+            }
+            
+            return { valid: true, doses: [...new Set(doses)] }; // Remove duplicates
+        }
+        
+        function createDrugEntry() {
+            const id = drugIdCounter++;
+            const entry = document.createElement('div');
+            entry.className = 'drug-entry';
+            entry.id = `drug-entry-${id}`;
+            entry.innerHTML = `
+                <div class="drug-header">
+                    <h4>Drug ${drugEntries.length + 1}</h4>
+                    <button type="button" class="remove-drug-btn" data-id="${id}">Remove</button>
+                </div>
+                <label for="drug-select-${id}">Select drug:</label>
+                <select id="drug-select-${id}" data-id="${id}">
+                    <option value="">-- Select a drug --</option>
+                    ${KNOWN_DRUGS.map(d => `<option value="${d}">${d}</option>`).join('')}
+                    <option value="__other__">Other (email to add new drugs)</option>
+                </select>
+                <div class="dose-input">
+                    <label for="drug-doses-${id}">Doses (comma-separated, e.g., 10uM, 50uM, 100mM):</label>
+                    <input type="text" id="drug-doses-${id}" data-id="${id}" placeholder="e.g., 10uM, 50uM, 100uM">
+                    <div class="error" id="dose-error-${id}" style="display: none;">Invalid dose format. Use number + unit (e.g., 10uM, 5mM, 100ng/mL)</div>
+                    <div class="valid" id="dose-valid-${id}" style="display: none;">✓ Valid doses</div>
+                </div>
+            `;
+            
+            drugEntriesContainer.appendChild(entry);
+            drugEntries.push({ id, drug: '', doses: [] });
+            
+            // Add event listeners
+            const selectEl = document.getElementById(`drug-select-${id}`);
+            const dosesEl = document.getElementById(`drug-doses-${id}`);
+            const removeBtn = entry.querySelector('.remove-drug-btn');
+            
+            selectEl.addEventListener('change', () => updateDrugEntry(id));
+            dosesEl.addEventListener('input', () => updateDrugEntry(id));
+            removeBtn.addEventListener('click', () => removeDrugEntry(id));
+            
+            updateTreatmentPreview();
+        }
+        
+        function updateDrugEntry(id) {
+            const selectEl = document.getElementById(`drug-select-${id}`);
+            const dosesEl = document.getElementById(`drug-doses-${id}`);
+            const doseError = document.getElementById(`dose-error-${id}`);
+            const doseValid = document.getElementById(`dose-valid-${id}`);
+            
+            const entry = drugEntries.find(e => e.id === id);
+            if (!entry) return;
+            
+            // Handle drug selection
+            const drugValue = selectEl.value;
+            if (drugValue === '__other__') {
+                // Reset to empty and show message
+                selectEl.value = '';
+                alert('Please email Christianluthomas@gmail.com to request adding a new drug to the list.');
+                entry.drug = '';
+            } else {
+                entry.drug = drugValue;
+            }
+            
+            // Handle doses
+            const dosesResult = parseDoses(dosesEl.value);
+            if (dosesEl.value.trim() === '') {
+                doseError.style.display = 'none';
+                doseValid.style.display = 'none';
+                entry.doses = [];
+            } else if (dosesResult.valid) {
+                doseError.style.display = 'none';
+                doseValid.style.display = 'block';
+                entry.doses = dosesResult.doses;
+            } else {
+                doseError.style.display = 'block';
+                doseValid.style.display = 'none';
+                entry.doses = [];
+            }
+            
+            updateTreatmentPreview();
+            updateVisibility();
+        }
+        
+        function removeDrugEntry(id) {
+            const entryEl = document.getElementById(`drug-entry-${id}`);
+            if (entryEl) {
+                entryEl.remove();
+            }
+            drugEntries = drugEntries.filter(e => e.id !== id);
+            
+            // Renumber remaining entries
+            const entryEls = drugEntriesContainer.querySelectorAll('.drug-entry');
+            entryEls.forEach((el, index) => {
+                el.querySelector('h4').textContent = `Drug ${index + 1}`;
+            });
+            
+            updateTreatmentPreview();
+            updateVisibility();
+        }
+        
+        function getTreatmentGroups() {
+            const groups = [];
+            
+            // Add control if checked
+            if (includeControlCheckbox.checked) {
+                groups.push({ drug: 'Control', dose: '0' });
+            }
+            
+            // Add drug treatments
+            for (const entry of drugEntries) {
+                if (entry.drug && entry.doses.length > 0) {
+                    for (const dose of entry.doses) {
+                        groups.push({ drug: entry.drug, dose: dose });
+                    }
+                }
+            }
+            
+            return groups;
+        }
+        
+        function updateTreatmentPreview() {
+            const groups = getTreatmentGroups();
+            
+            if (groups.length === 0) {
+                treatmentPreview.style.display = 'none';
+                return;
+            }
+            
+            treatmentPreview.style.display = 'block';
+            treatmentList.innerHTML = groups.map(g => `<li>${g.drug} (${g.dose})</li>`).join('');
+            
+            // Calculate balance
+            const totalPositions = parsedMonitors.length * REGIONS_PER_MONITOR;
+            const perGroup = Math.floor(totalPositions / groups.length);
+            const remainder = totalPositions % groups.length;
+            
+            if (remainder === 0) {
+                balanceWarning.textContent = `✓ ${groups.length} groups × ${perGroup} positions each = ${totalPositions} total (perfectly balanced)`;
+                balanceWarning.style.color = '#2f855a';
+            } else {
+                balanceWarning.textContent = `${groups.length} groups across ${totalPositions} positions: ${groups.length - remainder} groups get ${perGroup}, ${remainder} groups get ${perGroup + 1} (randomized)`;
+                balanceWarning.style.color = '#744210';
+            }
+        }
+        
         function updateVisibility() {
-            // Progressive disclosure: each question appears after the previous is complete
+            // Progressive disclosure
             
             if (parsedMonitors && parsedMonitors.length > 0) {
                 qStartDate.classList.add('visible');
@@ -468,14 +799,34 @@
                 qFoodChange.classList.remove('visible');
             }
             
-            // Generate button appears after all questions are complete
-            if (parsedMonitors && parsedMonitors.length > 0 && 
+            if (selectedFoodChange) {
+                qDrug.classList.add('visible');
+            } else {
+                qDrug.classList.remove('visible');
+            }
+            
+            if (selectedDrugChoice === 'yes') {
+                qDrugDetails.classList.add('visible');
+            } else {
+                qDrugDetails.classList.remove('visible');
+            }
+            
+            // Generate button logic
+            let canGenerate = parsedMonitors && parsedMonitors.length > 0 && 
                 validStartDate && 
                 selectedSex && 
                 selectedMated && 
                 selectedBaseMedia && 
                 selectedIncubator && 
-                selectedFoodChange) {
+                selectedFoodChange &&
+                selectedDrugChoice;
+            
+            if (selectedDrugChoice === 'yes') {
+                const groups = getTreatmentGroups();
+                canGenerate = canGenerate && groups.length > 0;
+            }
+            
+            if (canGenerate) {
                 actions.classList.add('visible');
             } else {
                 actions.classList.remove('visible');
@@ -507,6 +858,7 @@
             
             monitorsPreviewContent.innerHTML = previewLines.join('<br>');
             monitorsPreview.style.display = 'block';
+            updateTreatmentPreview();
             updateVisibility();
         }
         
@@ -563,6 +915,12 @@
             updateVisibility();
         }
         
+        function updateDrugChoice() {
+            selectedDrugChoice = drugChoiceSelect.value;
+            drugChoiceValid.style.display = selectedDrugChoice ? 'block' : 'none';
+            updateVisibility();
+        }
+        
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -589,23 +947,54 @@
             return assignments;
         }
         
+        function generateTreatmentAssignments(count, groups) {
+            if (groups.length === 0) {
+                return Array(count).fill({ drug: 'Control', dose: '0' });
+            }
+            
+            const assignments = [];
+            const perGroup = Math.floor(count / groups.length);
+            const remainder = count % groups.length;
+            
+            // Create base assignments
+            for (let i = 0; i < groups.length; i++) {
+                const extra = i < remainder ? 1 : 0;
+                for (let j = 0; j < perGroup + extra; j++) {
+                    assignments.push({ ...groups[i] });
+                }
+            }
+            
+            return shuffleArray(assignments);
+        }
+        
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
-                !selectedMated || !selectedBaseMedia || !selectedIncubator || !selectedFoodChange) return;
+                !selectedMated || !selectedBaseMedia || !selectedIncubator || 
+                !selectedFoodChange || !selectedDrugChoice) return;
             
             const rows = [];
             
             // Header
-            rows.push('file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,food_change');
+            rows.push('file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,food_change,drug,dose');
+            
+            // Get treatment groups
+            let treatmentGroups = [];
+            if (selectedDrugChoice === 'no') {
+                treatmentGroups = [{ drug: 'Control', dose: '0' }];
+            } else {
+                treatmentGroups = getTreatmentGroups();
+            }
             
             // Data rows
             for (const monitorNum of parsedMonitors) {
                 const fileName = `Monitor${monitorNum}.txt`;
                 const sexAssignments = generateSexAssignments(REGIONS_PER_MONITOR, selectedSex);
+                const treatmentAssignments = generateTreatmentAssignments(REGIONS_PER_MONITOR, treatmentGroups);
                 
                 for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
                     const sex = sexAssignments[region - 1];
-                    rows.push(`${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedFoodChange}`);
+                    const treatment = treatmentAssignments[region - 1];
+                    rows.push(`${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedFoodChange},${treatment.drug},${treatment.dose}`);
                 }
             }
             
@@ -637,9 +1026,15 @@
         baseMediaSelect.addEventListener('change', updateBaseMedia);
         incubatorSelect.addEventListener('change', updateIncubator);
         foodChangeSelect.addEventListener('change', updateFoodChange);
+        drugChoiceSelect.addEventListener('change', updateDrugChoice);
+        addDrugBtn.addEventListener('click', createDrugEntry);
+        includeControlCheckbox.addEventListener('change', () => {
+            updateTreatmentPreview();
+            updateVisibility();
+        });
         generateBtn.addEventListener('click', generateCSV);
         
-        // Initialize default start date
+        // Initialize
         setDefaultStartDate();
     </script>
 </body>
