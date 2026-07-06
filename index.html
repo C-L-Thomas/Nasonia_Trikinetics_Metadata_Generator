@@ -640,7 +640,7 @@
                 const match = trimmed.match(regex);
                 if (match) {
                     const normalizedDose = match[1] + unit;
-                    return { valid: true, normalized: normalizedDose };
+                    return { valid: true, normalized: normalizedDose, unit: unit };
                 }
             }
             
@@ -648,24 +648,28 @@
         }
         
         function parseDoses(input) {
-            if (!input.trim()) return { valid: false, doses: [] };
+            if (!input.trim()) return { valid: false, doses: [], unit: null };
             
             const parts = input.split(',');
             const doses = [];
+            let commonUnit = null;
             
             for (const part of parts) {
                 const result = validateDose(part);
                 if (!result.valid) {
-                    return { valid: false, doses: [] };
+                    return { valid: false, doses: [], unit: null };
                 }
                 doses.push(result.normalized);
+                if (commonUnit === null) {
+                    commonUnit = result.unit;
+                }
             }
             
             if (doses.length === 0) {
-                return { valid: false, doses: [] };
+                return { valid: false, doses: [], unit: null };
             }
             
-            return { valid: true, doses: [...new Set(doses)] };
+            return { valid: true, doses: [...new Set(doses)], unit: commonUnit };
         }
         
         function parseTemperatures(input) {
@@ -682,7 +686,7 @@
                 if (isNaN(num)) {
                     return { valid: false, temps: [] };
                 }
-                temps.push(num + '°C');
+                temps.push(num + 'C');
             }
             
             if (temps.length === 0) {
@@ -711,6 +715,15 @@
             return { valid: true, empty: false, value: `${light}:${dark}` };
         }
         
+        function getFirstDoseUnit() {
+            for (const entry of drugEntries) {
+                if (entry.doses.length > 0 && entry.unit) {
+                    return entry.unit;
+                }
+            }
+            return null;
+        }
+        
         function createDrugEntry() {
             const id = drugIdCounter++;
             const entry = document.createElement('div');
@@ -736,7 +749,7 @@
             `;
             
             drugEntriesContainer.appendChild(entry);
-            drugEntries.push({ id, drug: '', doses: [] });
+            drugEntries.push({ id, drug: '', doses: [], unit: null });
             
             const selectEl = document.getElementById(`drug-select-${id}`);
             const dosesEl = document.getElementById(`drug-doses-${id}`);
@@ -772,14 +785,17 @@
                 doseError.style.display = 'none';
                 doseValid.style.display = 'none';
                 entry.doses = [];
+                entry.unit = null;
             } else if (dosesResult.valid) {
                 doseError.style.display = 'none';
                 doseValid.style.display = 'block';
                 entry.doses = dosesResult.doses;
+                entry.unit = dosesResult.unit;
             } else {
                 doseError.style.display = 'block';
                 doseValid.style.display = 'none';
                 entry.doses = [];
+                entry.unit = null;
             }
             
             updateTreatmentPreview();
@@ -804,9 +820,11 @@
         
         function getTreatmentGroups() {
             const groups = [];
+            const firstUnit = getFirstDoseUnit();
             
             if (includeControlCheckbox.checked) {
-                groups.push({ drug: 'Control', dose: '0' });
+                const controlDose = firstUnit ? '0' + firstUnit : '0';
+                groups.push({ drug: 'Control', dose: controlDose });
             }
             
             for (const entry of drugEntries) {
@@ -893,7 +911,6 @@
                 qDrugDetails.classList.remove('visible');
             }
             
-            // Carrier appears after drug details are complete (if drugs selected) or after drug choice (if no drugs)
             const drugDetailsComplete = selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0;
             if (selectedDrugChoice === 'yes' && drugDetailsComplete) {
                 qCarrier.classList.add('visible');
@@ -901,21 +918,18 @@
                 qCarrier.classList.remove('visible');
             }
             
-            // Temperature appears after carrier (if drugs) or after drug choice (if no drugs)
             if (selectedDrugChoice === 'no' || (selectedDrugChoice === 'yes' && selectedCarrier)) {
                 qTemperature.classList.add('visible');
             } else {
                 qTemperature.classList.remove('visible');
             }
             
-            // L:D cycle appears after temperature
             if (validTemperatures) {
                 qLdCycle.classList.add('visible');
             } else {
                 qLdCycle.classList.remove('visible');
             }
             
-            // Generate button
             let canGenerate = parsedMonitors && parsedMonitors.length > 0 && 
                 validStartDate && 
                 selectedSex && 
@@ -1223,4 +1237,3 @@
     </script>
 </body>
 </html>
-
