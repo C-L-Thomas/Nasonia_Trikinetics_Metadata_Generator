@@ -4,19 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nasonia Trikinetics Metadata Generator</title>
+    <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 900px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
-            background: #f5f5f5;
-            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            color: #1a202c;
             line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Header section */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .header .logo {
+            width: 120px;
+            height: auto;
+        }
+        
+        .header-text {
+            text-align: left;
+        }
+        
+        .header h1 {
+            color: #1e3a5f;
+            margin: 0 0 6px 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .header .subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .header .lab-name {
+            color: #d97706;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 8px 0 0 0;
         }
         
         .layout {
@@ -31,210 +83,335 @@
         }
         
         .sidebar {
-            width: 250px;
+            width: 280px;
             flex-shrink: 0;
         }
         
         .sidebar-box {
-            background: #fefcbf;
-            border-left: 4px solid #d69e2e;
-            padding: 20px;
-            border-radius: 0 8px 8px 0;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-left: 4px solid #d97706;
+            padding: 24px;
+            border-radius: 0 12px 12px 0;
             position: sticky;
             top: 20px;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.15);
         }
         
         .sidebar-box h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: #744210;
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #92400e;
         }
         
         .sidebar-box p {
-            font-size: 14px;
-            color: #744210;
-            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #a16207;
+            margin: 0 0 18px 0;
+            line-height: 1.5;
         }
         
         .sidebar-box a {
-            display: inline-block;
-            background: #d69e2e;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
             color: white;
             text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 6px;
+            padding: 12px 20px;
+            border-radius: 8px;
             font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
         }
         
         .sidebar-box a:hover {
-            background: #b7791f;
-        }
-        
-        h1 {
-            color: #2c5282;
-            margin-bottom: 10px;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
         }
         
         .intro {
-            background: #ebf8ff;
-            border-left: 4px solid #2c5282;
-            padding: 15px 20px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left: 4px solid #2563eb;
+            padding: 20px 24px;
             margin-bottom: 30px;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0 12px 12px 0;
+            font-size: 14px;
+            color: #1e40af;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* Progress indicator */
+        .progress-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        
+        .progress-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 8px;
+            text-align: right;
         }
         
         .question {
             background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
             margin-bottom: 20px;
             display: none;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .question:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
         
         .question.visible {
             display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 12px;
         }
         
         .question label {
-            display: block;
+            display: flex;
+            align-items: center;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #2d3748;
+            color: #1e293b;
+            font-size: 15px;
         }
         
         .question .hint {
-            font-size: 14px;
-            color: #718096;
-            margin-bottom: 12px;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+            padding-left: 40px;
+            line-height: 1.5;
         }
         
         input[type="text"],
         select {
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-family: inherit;
             border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            transition: border-color 0.2s;
-            background: white;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+        
+        input[type="text"]:hover,
+        select:hover {
+            border-color: #cbd5e1;
         }
         
         input[type="text"]:focus,
         select:focus {
             outline: none;
-            border-color: #2c5282;
+            border-color: #d97706;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
         }
         
         .error {
-            color: #c53030;
-            font-size: 14px;
-            margin-top: 8px;
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 10px;
             display: none;
+            padding: 10px 14px;
+            background: #fef2f2;
+            border-radius: 8px;
+            border-left: 3px solid #dc2626;
         }
         
         .valid {
-            color: #2f855a;
-            font-size: 14px;
-            margin-top: 8px;
+            color: #16a34a;
+            font-size: 13px;
+            margin-top: 10px;
             display: none;
+            padding: 10px 14px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            border-left: 3px solid #16a34a;
         }
         
         .preview {
-            background: #f7fafc;
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
-            font-family: monospace;
-            font-size: 14px;
-            max-height: 200px;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 180px;
             overflow-y: auto;
         }
         
         .preview-label {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #718096;
-            margin-bottom: 8px;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
         }
         
         button {
-            background: #2c5282;
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
             color: white;
             border: none;
-            padding: 14px 28px;
-            font-size: 16px;
+            padding: 16px 32px;
+            font-size: 15px;
             font-weight: 600;
-            border-radius: 6px;
+            font-family: inherit;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
         }
         
         button:hover {
-            background: #1a365d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
         }
         
         button:disabled {
-            background: #a0aec0;
+            background: #94a3b8;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .actions {
             margin-top: 30px;
             display: none;
+            text-align: center;
         }
         
         .actions.visible {
             display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .generate-btn {
+            padding: 18px 48px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        }
+        
+        .generate-btn:hover {
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
         }
         
         .drug-entry {
-            background: #f7fafc;
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 16px;
         }
         
         .drug-entry h4 {
-            margin: 0 0 10px 0;
-            color: #2d3748;
+            margin: 0 0 12px 0;
+            color: #1e293b;
             font-size: 14px;
+            font-weight: 600;
         }
         
         .drug-entry .dose-input {
-            margin-top: 10px;
+            margin-top: 12px;
         }
         
         .drug-entry .dose-input label {
-            font-weight: normal;
-            font-size: 14px;
+            font-weight: 500;
+            font-size: 13px;
+            color: #475569;
         }
         
         .add-drug-btn {
-            background: #48bb78;
-            margin-top: 15px;
-            padding: 10px 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            margin-top: 16px;
+            padding: 12px 24px;
             font-size: 14px;
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
         }
         
         .add-drug-btn:hover {
-            background: #38a169;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
         
         .remove-drug-btn {
-            background: #e53e3e;
-            padding: 6px 12px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 8px 14px;
             font-size: 12px;
             margin-left: 10px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
         }
         
         .remove-drug-btn:hover {
-            background: #c53030;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
         
         .drug-header {
@@ -244,33 +421,38 @@
         }
         
         .checkbox-group {
-            margin-top: 10px;
+            margin-top: 12px;
         }
         
         .checkbox-group label {
             display: inline-flex;
             align-items: center;
-            font-weight: normal;
+            font-weight: 500;
             cursor: pointer;
+            font-size: 14px;
+            color: #475569;
         }
         
         .checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: #d97706;
         }
         
         .treatment-preview {
-            background: #e6fffa;
-            border: 1px solid #38b2ac;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 1px solid #6ee7b7;
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 18px;
         }
         
         .treatment-preview h4 {
-            margin: 0 0 10px 0;
-            color: #234e52;
-            font-size: 14px;
+            margin: 0 0 12px 0;
+            color: #065f46;
+            font-size: 13px;
+            font-weight: 600;
         }
         
         .treatment-preview ul {
@@ -279,9 +461,28 @@
         }
         
         .treatment-preview li {
-            font-family: monospace;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            color: #047857;
+            margin-bottom: 4px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 24px;
+            color: #64748b;
             font-size: 13px;
-            color: #234e52;
+        }
+        
+        .footer a {
+            color: #d97706;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
         }
         
         @media (max-width: 768px) {
@@ -297,21 +498,64 @@
             .sidebar-box {
                 position: static;
             }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-text {
+                text-align: center;
+            }
+            
+            .question {
+                padding: 20px;
+            }
+            
+            .question .hint {
+                padding-left: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Nasonia Trikinetics Metadata Generator</h1>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <img src="[raw.githubusercontent.com](https://raw.githubusercontent.com/C-L-Thomas/Nasonia_Trikinetics_Metadata_Generator/main/logo.png)" alt="Social Epigenetics Lab" class="logo">
+            <div class="header-text">
+                <h1>Nasonia Trikinetics Metadata Generator</h1>
+                <p class="subtitle">Generate properly formatted metadata files for DAM system experiments</p>
+                <p class="lab-name">Social Epigenetics Lab</p>
+            </div>
+        </div>
+    </div>
     
     <div class="layout">
         <div class="main-content">
+            <!-- Progress indicator -->
+            <div class="progress-container">
+                <div class="progress-label">Your progress</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">0 of 12 steps completed</div>
+            </div>
+            
             <div class="intro">
-                Welcome to the Nasonia Trikinetics metadata generator. This tool will help you create properly formatted metadata files for your DAM system experiments.
+                <strong>Welcome!</strong> This tool will guide you through creating a metadata CSV file for your Nasonia experiments. Complete each step below — questions will appear as you progress.
             </div>
             
             <!-- Question 1: Monitor numbers -->
             <div class="question visible" id="q-monitors">
-                <label for="monitors">Please list the monitor numbers being used</label>
+                <label for="monitors">
+                    <span class="question-number">1</span>
+                    Please list the monitor numbers being used
+                </label>
                 <div class="hint">Enter numbers separated by commas (e.g., 4, 12, 16, 23)</div>
                 <input type="text" id="monitors" placeholder="e.g., 74, 75, 76, 77">
                 <div class="error" id="monitors-error">Please enter valid monitor numbers separated by commas</div>
@@ -324,7 +568,10 @@
             
             <!-- Question 2: Start date -->
             <div class="question" id="q-start-date">
-                <label for="start-date">What is your start date?</label>
+                <label for="start-date">
+                    <span class="question-number">2</span>
+                    What is your start date?
+                </label>
                 <div class="hint">Format: yyyy-mm-dd hh:mm:ss (e.g., 2026-07-03 08:00:00)<br>Standard procedure is to start at 08:00:00 the day after placing the Nasonia in the tubes.</div>
                 <input type="text" id="start-date" placeholder="e.g., 2026-07-03 08:00:00">
                 <div class="error" id="start-date-error">Please enter a valid date in yyyy-mm-dd hh:mm:ss format</div>
@@ -333,20 +580,26 @@
             
             <!-- Question 3: Sex -->
             <div class="question" id="q-sex">
-                <label for="sex">What sex wasp are you using?</label>
+                <label for="sex">
+                    <span class="question-number">3</span>
+                    What sex wasp are you using?
+                </label>
                 <div class="hint">Select the sex of the wasps in your experiment</div>
                 <select id="sex">
                     <option value="">-- Select an option --</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
-                    <option value="Mixed">Mixed</option>
+                    <option value="Mixed">Mixed (randomized)</option>
                 </select>
                 <div class="valid" id="sex-valid" style="display: none;">✓ Sex selected</div>
             </div>
             
             <!-- Question 4: Mated -->
             <div class="question" id="q-mated">
-                <label for="mated">Are your wasps mated?</label>
+                <label for="mated">
+                    <span class="question-number">4</span>
+                    Are your wasps mated?
+                </label>
                 <div class="hint">Select the mating status of your wasps</div>
                 <select id="mated">
                     <option value="">-- Select an option --</option>
@@ -359,7 +612,10 @@
             
             <!-- Question 5: Base media -->
             <div class="question" id="q-base-media">
-                <label for="base-media">What is your base media?</label>
+                <label for="base-media">
+                    <span class="question-number">5</span>
+                    What is your base media?
+                </label>
                 <div class="hint">Select the food media used in your experiment</div>
                 <select id="base-media">
                     <option value="">-- Select an option --</option>
@@ -371,7 +627,10 @@
             
             <!-- Question 6: Incubator -->
             <div class="question" id="q-incubator">
-                <label for="incubator">Which incubator are your wasps housed in?</label>
+                <label for="incubator">
+                    <span class="question-number">6</span>
+                    Which incubator are your wasps housed in?
+                </label>
                 <div class="hint">Select the incubator location</div>
                 <select id="incubator">
                     <option value="">-- Select an option --</option>
@@ -385,7 +644,10 @@
             
             <!-- Question 7: Food change -->
             <div class="question" id="q-food-change">
-                <label for="food-change">Are you doing a food change?</label>
+                <label for="food-change">
+                    <span class="question-number">7</span>
+                    Are you doing a food change?
+                </label>
                 <div class="hint">Select the frequency of food changes</div>
                 <select id="food-change">
                     <option value="">-- Select an option --</option>
@@ -399,7 +661,10 @@
             
             <!-- Question 8: Drug -->
             <div class="question" id="q-drug">
-                <label>Are you adding any drugs to the media?</label>
+                <label>
+                    <span class="question-number">8</span>
+                    Are you adding any drugs to the media?
+                </label>
                 <div class="hint">Select whether you are testing any drug treatments</div>
                 <select id="drug-choice">
                     <option value="">-- Select an option --</option>
@@ -411,7 +676,10 @@
             
             <!-- Question 9: Drug details (if yes) -->
             <div class="question" id="q-drug-details">
-                <label>Drug treatments</label>
+                <label>
+                    <span class="question-number">9</span>
+                    Drug treatments
+                </label>
                 <div class="hint">Add each drug and its doses. Valid units: nM, uM, mM, M, ng/mL, ug/mL, mg/mL, g/mL, ppm, %</div>
                 
                 <div class="checkbox-group">
@@ -430,13 +698,16 @@
                 <div class="treatment-preview" id="treatment-preview" style="display: none;">
                     <h4>Treatment groups to be randomized:</h4>
                     <ul id="treatment-list"></ul>
-                    <div id="balance-warning" style="color: #c53030; margin-top: 10px; font-size: 13px;"></div>
+                    <div id="balance-warning" style="color: #047857; margin-top: 10px; font-size: 12px;"></div>
                 </div>
             </div>
             
             <!-- Question 10: Carrier (if drug selected) -->
             <div class="question" id="q-carrier">
-                <label for="carrier">What is the carrier for the drug?</label>
+                <label for="carrier">
+                    <span class="question-number">10</span>
+                    What is the carrier for the drug?
+                </label>
                 <div class="hint">Select the solvent used to dissolve the drug</div>
                 <select id="carrier">
                     <option value="">-- Select an option --</option>
@@ -450,7 +721,10 @@
             
             <!-- Question 11: Temperature -->
             <div class="question" id="q-temperature">
-                <label for="temperature">What temperatures are used?</label>
+                <label for="temperature">
+                    <span class="question-number">11</span>
+                    What temperatures are used?
+                </label>
                 <div class="hint">Enter temperature(s) in °C, separated by commas (e.g., 25 or 20, 25, 30). If multiple temperatures are entered, they will be randomized across positions.</div>
                 <input type="text" id="temperature" placeholder="e.g., 25 or 20, 25, 30">
                 <div class="error" id="temperature-error">Please enter valid temperature(s) as numbers separated by commas</div>
@@ -459,7 +733,10 @@
             
             <!-- Question 12: Light:Dark cycle -->
             <div class="question" id="q-ld-cycle">
-                <label for="ld-cycle">What is the Light:Dark cycle?</label>
+                <label for="ld-cycle">
+                    <span class="question-number">12</span>
+                    What is the Light:Dark cycle?
+                </label>
                 <div class="hint">Enter as L:D ratio (e.g., 12:12, 16:8, 0:24 for constant dark)</div>
                 <input type="text" id="ld-cycle" placeholder="e.g., 12:12">
                 <div class="error" id="ld-cycle-error">Please enter a valid L:D ratio (e.g., 12:12)</div>
@@ -467,17 +744,24 @@
             </div>
             
             <div class="actions" id="actions">
-                <button id="generate-btn">Generate CSV</button>
+                <button id="generate-btn" class="generate-btn">📥 Generate CSV</button>
             </div>
         </div>
         
         <div class="sidebar">
             <div class="sidebar-box">
-                <h3>Need additional factors?</h3>
-                <p>If you need to add extra variables to the metadata generator, get in touch.</p>
-                <a href="mailto:Christianluthomas@gmail.com?subject=Nasonia%20Metadata%20Generator%20-%20Additional%20Factors">Email to request</a>
+                <h3>💡 Need additional factors?</h3>
+                <p>If you need to add extra variables or new options to the metadata generator, get in touch.</p>
+                <a href="mailto:Christianluthomas@gmail.com?subject=Nasonia%20Metadata%20Generator%20-%20Additional%20Factors">
+                    ✉️ Email to request
+                </a>
             </div>
         </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>Built for the Social Epigenetics Lab • <a href="mailto:Christianluthomas@gmail.com">Report an issue</a></p>
     </div>
 
     <script>
@@ -486,6 +770,9 @@
         
         // Valid dose units
         const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
+        
+        // Total steps for progress tracking
+        const TOTAL_STEPS = 12;
         
         // Elements
         const monitorsInput = document.getElementById('monitors');
@@ -536,6 +823,9 @@
         
         const generateBtn = document.getElementById('generate-btn');
         
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        
         // Question containers
         const qMonitors = document.getElementById('q-monitors');
         const qStartDate = document.getElementById('q-start-date');
@@ -570,6 +860,29 @@
         let validTemperatures = false;
         let ldCycleValue = '';
         let validLdCycle = false;
+        
+        // Update progress bar
+        function updateProgress() {
+            let completed = 0;
+            
+            if (parsedMonitors && parsedMonitors.length > 0) completed++;
+            if (validStartDate) completed++;
+            if (selectedSex) completed++;
+            if (selectedMated) completed++;
+            if (selectedBaseMedia) completed++;
+            if (selectedIncubator) completed++;
+            if (selectedFoodChange) completed++;
+            if (selectedDrugChoice) completed++;
+            if (selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0) completed++;
+            if (selectedDrugChoice === 'yes' && selectedCarrier) completed++;
+            if (selectedDrugChoice === 'no') completed += 2; // Skip drug details and carrier
+            if (validTemperatures) completed++;
+            if (validLdCycle) completed++;
+            
+            const percentage = Math.round((completed / TOTAL_STEPS) * 100);
+            progressFill.style.width = percentage + '%';
+            progressText.textContent = `${completed} of ${TOTAL_STEPS} steps completed`;
+        }
         
         // Set default start date to tomorrow at 08:00:00
         function setDefaultStartDate() {
@@ -855,10 +1168,10 @@
             
             if (remainder === 0) {
                 balanceWarning.textContent = `✓ ${groups.length} groups × ${perGroup} positions each = ${totalPositions} total (perfectly balanced)`;
-                balanceWarning.style.color = '#2f855a';
+                balanceWarning.style.color = '#047857';
             } else {
                 balanceWarning.textContent = `${groups.length} groups across ${totalPositions} positions: ${groups.length - remainder} groups get ${perGroup}, ${remainder} groups get ${perGroup + 1} (randomized)`;
-                balanceWarning.style.color = '#744210';
+                balanceWarning.style.color = '#92400e';
             }
         }
         
@@ -951,6 +1264,8 @@
             } else {
                 actions.classList.remove('visible');
             }
+            
+            updateProgress();
         }
         
         function updateMonitors() {
@@ -1234,6 +1549,7 @@
         
         // Initialize
         setDefaultStartDate();
+        updateProgress();
     </script>
 </body>
 </html>
