@@ -642,30 +642,30 @@
                 <div class="valid" id="incubator-valid" style="display: none;">✓ Incubator selected</div>
             </div>
 
-            <!-- Water Source -->
-<div class="question" id="q-water-source">
-    <label for="water-source">
-        <span class="question-number">7</span>
-        What water source was used?
-    </label>
-    <div class="hint">Select the source of water used to prepare the media</div>
+            <!-- Question 7: Food change -->
+            <div class="question" id="q-water-source">
+                <label for="water-source">
+                    <span class="question-number">7</span>
+                    What water source was used?
+                </label>
+                <div class="hint">Select the source of water used to prepare the media</div>
 
-    <select id="water-source">
-        <option value="">-- Select an option --</option>
-        <option value="Greyline">Greyline</option>
-        <option value="Ultrapure">Ultrapure</option>
-        <option value="Tap">Tap</option>
-        <option value="Bottled">Bottled</option>
-    </select>
+                <select id="water-source">
+                    <option value="">-- Select an option --</option>
+                    <option value="Greyline">Greyline</option>
+                    <option value="Ultrapure">Ultrapure</option>
+                    <option value="Tap">Tap</option>
+                    <option value="Bottled">Bottled</option>
+                </select>
 
-    <div class="valid" id="water-source-valid" style="display:none;">
-        ✓ Water source selected
-    </div>
-</div>
+                <div class="valid" id="water-source-valid" style="display:none;">
+                    ✓ Water source selected
+                </div>
+            </div>
 
-            <!-- User -->
-<div class="question" id="q-user">
-    <label for="user-name">
+           <!-- Question 8: Food change -->
+            <div class="question" id="q-user">
+                <label for="user-name">
         <span class="question-number">8</span>
         User
     </label>
@@ -680,7 +680,7 @@
     </div>
 </div>
             
-            <!-- Question 7: Food change -->
+            <!-- Question 9: Food change -->
             <div class="question" id="q-food-change">
                 <label for="food-change">
                     <span class="question-number">7</span>
@@ -697,7 +697,7 @@
                 <div class="valid" id="food-change-valid" style="display: none;">✓ Food change frequency selected</div>
             </div>
             
-            <!-- Question 8: Drug -->
+            <!-- Question 10: Drug -->
             <div class="question" id="q-drug">
                 <label>
                     <span class="question-number">8</span>
@@ -712,7 +712,7 @@
                 <div class="valid" id="drug-choice-valid" style="display: none;">✓ Drug choice selected</div>
             </div>
             
-            <!-- Question 9: Drug details (if yes) -->
+            <!-- Question 11: Drug details (if yes) -->
             <div class="question" id="q-drug-details">
                 <label>
                     <span class="question-number">9</span>
@@ -740,7 +740,7 @@
                 </div>
             </div>
             
-            <!-- Question 10: Carrier (if drug selected) -->
+            <!-- Question 12: Carrier (if drug selected) -->
             <div class="question" id="q-carrier">
                 <label for="carrier">
                     <span class="question-number">10</span>
@@ -757,7 +757,7 @@
                 <div class="valid" id="carrier-valid" style="display: none;">✓ Carrier selected</div>
             </div>
             
-            <!-- Question 11: Temperature -->
+            <!-- Question 13: Temperature -->
             <div class="question" id="q-temperature">
                 <label for="temperature">
                     <span class="question-number">11</span>
@@ -769,7 +769,7 @@
                 <div class="valid" id="temperature-valid" style="display: none;">✓ Temperature(s) valid</div>
             </div>
             
-            <!-- Question 12: Light:Dark cycle -->
+            <!-- Question 14: Light:Dark cycle -->
             <div class="question" id="q-ld-cycle">
                 <label for="ld-cycle">
                     <span class="question-number">12</span>
@@ -810,7 +810,7 @@
         const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
         
         // Total steps for progress tracking
-        const TOTAL_STEPS = 12;
+        const TOTAL_STEPS = 14;
         
         // Elements
         const monitorsInput = document.getElementById('monitors');
@@ -833,6 +833,12 @@
         
         const incubatorSelect = document.getElementById('incubator');
         const incubatorValid = document.getElementById('incubator-valid');
+
+        const waterSourceSelect = document.getElementById('water-source');
+        const waterSourceValid = document.getElementById('water-source-valid');
+        
+        const userInput = document.getElementById('user-name');
+        const userValid = document.getElementById('user-valid');
         
         const foodChangeSelect = document.getElementById('food-change');
         const foodChangeValid = document.getElementById('food-change-valid');
@@ -889,6 +895,8 @@
         let selectedMated = '';
         let selectedBaseMedia = '';
         let selectedIncubator = '';
+        let selectedWaterSource = '';
+        let userName = '';
         let selectedFoodChange = '';
         let selectedDrugChoice = '';
         let drugEntries = [];
@@ -909,6 +917,8 @@
             if (selectedMated) completed++;
             if (selectedBaseMedia) completed++;
             if (selectedIncubator) completed++;
+            if (selectedWaterSource) completed++;
+            if (userName) completed++;
             if (selectedFoodChange) completed++;
             if (selectedDrugChoice) completed++;
             if (selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0) completed++;
@@ -1249,6 +1259,24 @@
             } else {
                 qFoodChange.classList.remove('visible');
             }
+
+            if (selectedIncubator) {
+                qWaterSource.classList.add('visible');
+            } else {
+                qWaterSource.classList.remove('visible');
+            }
+            
+            if (selectedWaterSource) {
+                qUser.classList.add('visible');
+            } else {
+                qUser.classList.remove('visible');
+            }
+            
+            if (userName) {
+                qFoodChange.classList.add('visible');
+            } else {
+                qFoodChange.classList.remove('visible');
+            }
             
             if (selectedFoodChange) {
                 qDrug.classList.add('visible');
@@ -1286,7 +1314,9 @@
                 selectedSex && 
                 selectedMated && 
                 selectedBaseMedia && 
-                selectedIncubator && 
+                selectedIncubator &&
+                selectedWaterSource &&
+                userName &&
                 selectedFoodChange &&
                 selectedDrugChoice &&
                 validTemperatures &&
@@ -1379,6 +1409,18 @@
         function updateIncubator() {
             selectedIncubator = incubatorSelect.value;
             incubatorValid.style.display = selectedIncubator ? 'block' : 'none';
+            updateVisibility();
+        }
+
+        function updateWaterSource() {
+            selectedWaterSource = waterSourceSelect.value;
+            waterSourceValid.style.display = selectedWaterSource ? 'block' : 'none';
+            updateVisibility();
+        }
+        
+        function updateUser() {
+            userName = userInput.value.trim();
+            userValid.style.display = userName ? 'block' : 'none';
             updateVisibility();
         }
         
@@ -1510,7 +1552,7 @@
             const rows = [];
             
             // Header
-            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,food_change,drug,dose';
+            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,water_source,user,food_change,drug,dose';
             if (selectedDrugChoice === 'yes') {
                 header += ',carrier';
             }
@@ -1537,7 +1579,8 @@
                     const treatment = treatmentAssignments[region - 1];
                     const temp = temperatureAssignments[region - 1];
                     
-                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
+                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},
+                    ${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
                     if (selectedDrugChoice === 'yes') {
                         row += `,${selectedCarrier}`;
                     }
@@ -1573,6 +1616,8 @@
         matedSelect.addEventListener('change', updateMated);
         baseMediaSelect.addEventListener('change', updateBaseMedia);
         incubatorSelect.addEventListener('change', updateIncubator);
+        waterSourceSelect.addEventListener('change', updateWaterSource);
+        userInput.addEventListener('input', updateUser);
         foodChangeSelect.addEventListener('change', updateFoodChange);
         drugChoiceSelect.addEventListener('change', updateDrugChoice);
         addDrugBtn.addEventListener('click', createDrugEntry);
