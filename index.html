@@ -526,7 +526,7 @@
     <!-- Header -->
     <div class="header">
         <div class="header-content">
-            <img src="[raw.githubusercontent.com](https://raw.githubusercontent.com/C-L-Thomas/Nasonia_Trikinetics_Metadata_Generator/main/logo.png)" alt="Social Epigenetics Lab" class="logo">
+            <img src="https://raw.githubusercontent.com/C-L-Thomas/Nasonia_Trikinetics_Metadata_Generator/main/logo.png" alt="Social Epigenetics Lab" class="logo">
             <div class="header-text">
                 <h1>Nasonia Trikinetics Metadata Generator</h1>
                 <p class="subtitle">Generate properly formatted metadata files for DAM system experiments</p>
@@ -1549,7 +1549,7 @@
         
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
-                !selectedMated || !selectedBaseMedia || !selectedIncubator || 
+                !selectedMated || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName ||
                 !selectedFoodChange || !selectedDrugChoice || !validTemperatures || !validLdCycle) return;
             
             const rows = [];
@@ -1582,8 +1582,7 @@
                     const treatment = treatmentAssignments[region - 1];
                     const temp = temperatureAssignments[region - 1];
                     
-                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},
-                    ${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
+                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
                     if (selectedDrugChoice === 'yes') {
                         row += `,${selectedCarrier}`;
                     }
