@@ -641,6 +641,44 @@
                 </select>
                 <div class="valid" id="incubator-valid" style="display: none;">✓ Incubator selected</div>
             </div>
+
+            <!-- Water Source -->
+<div class="question" id="q-water-source">
+    <label for="water-source">
+        <span class="question-number">7</span>
+        What water source was used?
+    </label>
+    <div class="hint">Select the source of water used to prepare the media</div>
+
+    <select id="water-source">
+        <option value="">-- Select an option --</option>
+        <option value="Greyline">Greyline</option>
+        <option value="Ultrapure">Ultrapure</option>
+        <option value="Tap">Tap</option>
+        <option value="Bottled">Bottled</option>
+    </select>
+
+    <div class="valid" id="water-source-valid" style="display:none;">
+        ✓ Water source selected
+    </div>
+</div>
+
+            <!-- User -->
+<div class="question" id="q-user">
+    <label for="user-name">
+        <span class="question-number">8</span>
+        User
+    </label>
+    <div class="hint">Enter the name of the person running the experiment</div>
+
+    <input type="text"
+           id="user-name"
+           placeholder="e.g., Jane Smith">
+
+    <div class="valid" id="user-valid" style="display:none;">
+        ✓ User entered
+    </div>
+</div>
             
             <!-- Question 7: Food change -->
             <div class="question" id="q-food-change">
