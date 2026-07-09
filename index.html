@@ -871,12 +871,15 @@
         const progressText = document.getElementById('progress-text');
         
         // Question containers
+// Question containers
         const qMonitors = document.getElementById('q-monitors');
         const qStartDate = document.getElementById('q-start-date');
         const qSex = document.getElementById('q-sex');
         const qMated = document.getElementById('q-mated');
         const qBaseMedia = document.getElementById('q-base-media');
         const qIncubator = document.getElementById('q-incubator');
+        const qWaterSource = document.getElementById('q-water-source');
+        const qUser = document.getElementById('q-user');
         const qFoodChange = document.getElementById('q-food-change');
         const qDrug = document.getElementById('q-drug');
         const qDrugDetails = document.getElementById('q-drug-details');
@@ -1255,9 +1258,9 @@
             }
             
             if (selectedIncubator) {
-                qFoodChange.classList.add('visible');
+                qWaterSource.classList.add('visible');
             } else {
-                qFoodChange.classList.remove('visible');
+                qWaterSource.classList.remove('visible');
             }
 
             if (selectedIncubator) {
