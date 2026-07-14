@@ -610,10 +610,30 @@
                 <div class="valid" id="mated-valid" style="display: none;">✓ Mating status selected</div>
             </div>
             
-            <!-- Question 5: Base media -->
+            <!-- Question 5: Host pupae age -->
+            <div class="question" id="q-host-pupae-age">
+                <label for="host-pupae-age-known">
+                    <span class="question-number">5</span>
+                    How old were the host pupae at the time of parasitism?
+                </label>
+                <div class="hint">Enter the age of the host pupae (in days) when they were parasitised by <em>Nasonia</em>, or select Unknown if this information was not recorded.</div>
+                <select id="host-pupae-age-known">
+                    <option value="">-- Select an option --</option>
+                    <option value="Unknown">Unknown</option>
+                    <option value="Known">Known</option>
+                </select>
+                <div id="host-pupae-age-input-wrap" style="display: none; margin-top: 14px;">
+                    <label for="host-pupae-age-days" style="font-size: 13px; font-weight: 500; color: #475569;">Age (days)</label>
+                    <input type="number" id="host-pupae-age-days" min="0" step="0.1" placeholder="e.g., 2">
+                </div>
+                <div class="error" id="host-pupae-age-error">Please enter a valid age in days</div>
+                <div class="valid" id="host-pupae-age-valid" style="display: none;">✓ Host pupae age recorded</div>
+            </div>
+
+            <!-- Question 6: Base media -->
             <div class="question" id="q-base-media">
                 <label for="base-media">
-                    <span class="question-number">5</span>
+                    <span class="question-number">6</span>
                     What is your base media?
                 </label>
                 <div class="hint">Select the food media used in your experiment</div>
@@ -625,10 +645,10 @@
                 <div class="valid" id="base-media-valid" style="display: none;">✓ Base media selected</div>
             </div>
             
-            <!-- Question 6: Incubator -->
+            <!-- Question 7: Incubator -->
             <div class="question" id="q-incubator">
                 <label for="incubator">
-                    <span class="question-number">6</span>
+                    <span class="question-number">7</span>
                     Which incubator are your wasps housed in?
                 </label>
                 <div class="hint">Select the incubator location</div>
@@ -642,10 +662,10 @@
                 <div class="valid" id="incubator-valid" style="display: none;">✓ Incubator selected</div>
             </div>
 
-            <!-- Question 7: Water Source -->
+            <!-- Question 8: Water Source -->
             <div class="question" id="q-water-source">
                 <label for="water-source">
-                    <span class="question-number">7</span>
+                    <span class="question-number">8</span>
                     What water source was used?
                 </label>
                 <div class="hint">Select the source of water used to prepare the media</div>
@@ -663,10 +683,10 @@
                 </div>
             </div>
 
-           <!-- Question 8: User Name -->
+           <!-- Question 9: User Name -->
             <div class="question" id="q-user">
                 <label for="user-name">
-        <span class="question-number">8</span>
+        <span class="question-number">9</span>
         User
     </label>
     <div class="hint">Enter the name of the person running the experiment</div>
@@ -680,10 +700,10 @@
     </div>
 </div>
             
-            <!-- Question 9: Food change -->
+            <!-- Question 10: Food change -->
             <div class="question" id="q-food-change">
                 <label for="food-change">
-                    <span class="question-number">7</span>
+                    <span class="question-number">10</span>
                     Are you doing a food change?
                 </label>
                 <div class="hint">Select the frequency of food changes</div>
@@ -697,10 +717,10 @@
                 <div class="valid" id="food-change-valid" style="display: none;">✓ Food change frequency selected</div>
             </div>
             
-            <!-- Question 10: Drug -->
+            <!-- Question 11: Drug -->
             <div class="question" id="q-drug">
                 <label>
-                    <span class="question-number">8</span>
+                    <span class="question-number">11</span>
                     Are you adding any drugs to the media?
                 </label>
                 <div class="hint">Select whether you are testing any drug treatments</div>
@@ -712,10 +732,10 @@
                 <div class="valid" id="drug-choice-valid" style="display: none;">✓ Drug choice selected</div>
             </div>
             
-            <!-- Question 11: Drug details (if yes) -->
+            <!-- Question 12: Drug details (if yes) -->
             <div class="question" id="q-drug-details">
                 <label>
-                    <span class="question-number">9</span>
+                    <span class="question-number">12</span>
                     Drug treatments
                 </label>
                 <div class="hint">Add each drug and its doses. Valid units: nM, uM, mM, M, ng/mL, ug/mL, mg/mL, g/mL, ppm, %</div>
@@ -740,10 +760,10 @@
                 </div>
             </div>
             
-            <!-- Question 12: Carrier (if drug selected) -->
+            <!-- Question 13: Carrier (if drug selected) -->
             <div class="question" id="q-carrier">
                 <label for="carrier">
-                    <span class="question-number">10</span>
+                    <span class="question-number">13</span>
                     What is the carrier for the drug?
                 </label>
                 <div class="hint">Select the solvent used to dissolve the drug</div>
@@ -757,10 +777,10 @@
                 <div class="valid" id="carrier-valid" style="display: none;">✓ Carrier selected</div>
             </div>
             
-            <!-- Question 13: Temperature -->
+            <!-- Question 14: Temperature -->
             <div class="question" id="q-temperature">
                 <label for="temperature">
-                    <span class="question-number">11</span>
+                    <span class="question-number">14</span>
                     What temperatures are used?
                 </label>
                 <div class="hint">Enter temperature(s) in °C, separated by commas (e.g., 25 or 20, 25, 30). If multiple temperatures are entered, they will be randomized across positions.</div>
@@ -769,10 +789,10 @@
                 <div class="valid" id="temperature-valid" style="display: none;">✓ Temperature(s) valid</div>
             </div>
             
-            <!-- Question 14: Light:Dark cycle -->
+            <!-- Question 15: Light:Dark cycle -->
             <div class="question" id="q-ld-cycle">
                 <label for="ld-cycle">
-                    <span class="question-number">12</span>
+                    <span class="question-number">15</span>
                     What is the Light:Dark cycle?
                 </label>
                 <div class="hint">Enter as L:D ratio (e.g., 12:12, 16:8, 0:24 for constant dark)</div>
@@ -810,7 +830,7 @@
         const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
         
         // Total steps for progress tracking
-        const TOTAL_STEPS = 14;
+        const TOTAL_STEPS = 15;
         
         // Elements
         const monitorsInput = document.getElementById('monitors');
@@ -827,6 +847,12 @@
         
         const matedSelect = document.getElementById('mated');
         const matedValid = document.getElementById('mated-valid');
+
+        const hostPupaeAgeKnownSelect = document.getElementById('host-pupae-age-known');
+        const hostPupaeAgeInputWrap = document.getElementById('host-pupae-age-input-wrap');
+        const hostPupaeAgeDaysInput = document.getElementById('host-pupae-age-days');
+        const hostPupaeAgeError = document.getElementById('host-pupae-age-error');
+        const hostPupaeAgeValid = document.getElementById('host-pupae-age-valid');
         
         const baseMediaSelect = document.getElementById('base-media');
         const baseMediaValid = document.getElementById('base-media-valid');
@@ -876,6 +902,7 @@
         const qStartDate = document.getElementById('q-start-date');
         const qSex = document.getElementById('q-sex');
         const qMated = document.getElementById('q-mated');
+        const qHostPupaeAge = document.getElementById('q-host-pupae-age');
         const qBaseMedia = document.getElementById('q-base-media');
         const qIncubator = document.getElementById('q-incubator');
         const qWaterSource = document.getElementById('q-water-source');
@@ -896,6 +923,7 @@
         let startDateValue = '';
         let selectedSex = '';
         let selectedMated = '';
+        let hostPupaeAgeValue = '';
         let selectedBaseMedia = '';
         let selectedIncubator = '';
         let selectedWaterSource = '';
@@ -918,6 +946,7 @@
             if (validStartDate) completed++;
             if (selectedSex) completed++;
             if (selectedMated) completed++;
+            if (hostPupaeAgeValue) completed++;
             if (selectedBaseMedia) completed++;
             if (selectedIncubator) completed++;
             if (selectedWaterSource) completed++;
@@ -1246,6 +1275,12 @@
             }
             
             if (selectedMated) {
+                qHostPupaeAge.classList.add('visible');
+            } else {
+                qHostPupaeAge.classList.remove('visible');
+            }
+
+            if (hostPupaeAgeValue) {
                 qBaseMedia.classList.add('visible');
             } else {
                 qBaseMedia.classList.remove('visible');
@@ -1316,6 +1351,7 @@
                 validStartDate && 
                 selectedSex && 
                 selectedMated && 
+                hostPupaeAgeValue &&
                 selectedBaseMedia && 
                 selectedIncubator &&
                 selectedWaterSource &&
@@ -1400,6 +1436,36 @@
         function updateMated() {
             selectedMated = matedSelect.value;
             matedValid.style.display = selectedMated ? 'block' : 'none';
+            updateVisibility();
+        }
+
+        function updateHostPupaeAge() {
+            const choice = hostPupaeAgeKnownSelect.value;
+            hostPupaeAgeError.style.display = 'none';
+            hostPupaeAgeValid.style.display = 'none';
+
+            if (choice === 'Unknown') {
+                hostPupaeAgeInputWrap.style.display = 'none';
+                hostPupaeAgeDaysInput.value = '';
+                hostPupaeAgeValue = 'Unknown';
+                hostPupaeAgeValid.style.display = 'block';
+            } else if (choice === 'Known') {
+                hostPupaeAgeInputWrap.style.display = 'block';
+                const age = hostPupaeAgeDaysInput.value.trim();
+                const numericAge = Number(age);
+                if (age !== '' && Number.isFinite(numericAge) && numericAge >= 0) {
+                    hostPupaeAgeValue = age;
+                    hostPupaeAgeValid.style.display = 'block';
+                } else {
+                    hostPupaeAgeValue = '';
+                    if (age !== '') hostPupaeAgeError.style.display = 'block';
+                }
+            } else {
+                hostPupaeAgeInputWrap.style.display = 'none';
+                hostPupaeAgeDaysInput.value = '';
+                hostPupaeAgeValue = '';
+            }
+
             updateVisibility();
         }
         
@@ -1549,17 +1615,18 @@
         
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
-                !selectedMated || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName ||
+                !selectedMated || !hostPupaeAgeValue || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName ||
                 !selectedFoodChange || !selectedDrugChoice || !validTemperatures || !validLdCycle) return;
             
             const rows = [];
+            const datasetId = `DS-${crypto.randomUUID()}`;
             
             // Header
-            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,water_source,user,food_change,drug,dose';
+            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,host_pupae_age,base_media,incubator,water_source,user,food_change,drug,dose';
             if (selectedDrugChoice === 'yes') {
                 header += ',carrier';
             }
-            header += ',temperature,ld_cycle';
+            header += ',temperature,ld_cycle,dataset_id';
             rows.push(header);
             
             // Get treatment groups
@@ -1582,11 +1649,11 @@
                     const treatment = treatmentAssignments[region - 1];
                     const temp = temperatureAssignments[region - 1];
                     
-                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
+                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${hostPupaeAgeValue},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
                     if (selectedDrugChoice === 'yes') {
                         row += `,${selectedCarrier}`;
                     }
-                    row += `,${temp},${ldCycleValue}`;
+                    row += `,${temp},${ldCycleValue},${datasetId}`;
                     rows.push(row);
                 }
             }
@@ -1616,6 +1683,8 @@
         startDateInput.addEventListener('input', updateStartDate);
         sexSelect.addEventListener('change', updateSex);
         matedSelect.addEventListener('change', updateMated);
+        hostPupaeAgeKnownSelect.addEventListener('change', updateHostPupaeAge);
+        hostPupaeAgeDaysInput.addEventListener('input', updateHostPupaeAge);
         baseMediaSelect.addEventListener('change', updateBaseMedia);
         incubatorSelect.addEventListener('change', updateIncubator);
         waterSourceSelect.addEventListener('change', updateWaterSource);
