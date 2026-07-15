@@ -743,7 +743,14 @@
                 <div class="checkbox-group">
                     <label>
                         <input type="checkbox" id="include-control" checked>
-                        Include Control group (dose = 0)
+                        Include untreated Control group (no drug and no carrier)
+                    </label>
+                </div>
+
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="include-carrier-control">
+                        Include carrier-only Control group (carrier but no drug)
                     </label>
                 </div>
                 
@@ -875,6 +882,7 @@
         const drugEntriesContainer = document.getElementById('drug-entries');
         const addDrugBtn = document.getElementById('add-drug-btn');
         const includeControlCheckbox = document.getElementById('include-control');
+        const includeCarrierControlCheckbox = document.getElementById('include-carrier-control');
         const drugError = document.getElementById('drug-error');
         const treatmentPreview = document.getElementById('treatment-preview');
         const treatmentList = document.getElementById('treatment-list');
@@ -1214,16 +1222,24 @@
         function getTreatmentGroups() {
             const groups = [];
             const firstUnit = getFirstDoseUnit();
+            const controlDose = firstUnit ? '0' + firstUnit : '0';
             
+            // Untreated control: no drug and no carrier.
             if (includeControlCheckbox.checked) {
-                const controlDose = firstUnit ? '0' + firstUnit : '0';
-                groups.push({ drug: 'Control', dose: controlDose });
+                groups.push({ drug: 'Control', dose: controlDose, carrier: 'None' });
+            }
+
+            // Carrier-only control: selected carrier, but no active drug.
+            // This group becomes available once a carrier has been selected.
+            if (includeCarrierControlCheckbox.checked && selectedCarrier) {
+                groups.push({ drug: 'Carrier_Control', dose: controlDose, carrier: selectedCarrier });
             }
             
+            // Active drug groups use the selected carrier.
             for (const entry of drugEntries) {
                 if (entry.drug && entry.doses.length > 0) {
                     for (const dose of entry.doses) {
-                        groups.push({ drug: entry.drug, dose: dose });
+                        groups.push({ drug: entry.drug, dose: dose, carrier: selectedCarrier });
                     }
                 }
             }
@@ -1240,7 +1256,10 @@
             }
             
             treatmentPreview.style.display = 'block';
-            treatmentList.innerHTML = groups.map(g => `<li>${g.drug} (${g.dose})</li>`).join('');
+            treatmentList.innerHTML = groups.map(g => {
+                const carrierText = g.carrier ? `; carrier: ${g.carrier}` : '';
+                return `<li>${g.drug} (${g.dose}${carrierText})</li>`;
+            }).join('');
             
             const totalPositions = parsedMonitors.length * REGIONS_PER_MONITOR;
             const perGroup = Math.floor(totalPositions / groups.length);
@@ -1608,7 +1627,7 @@
         
         function generateTreatmentAssignments(count, groups) {
             if (groups.length === 0) {
-                return Array(count).fill({ drug: 'Control', dose: '0' });
+                return Array(count).fill({ drug: 'Control', dose: '0', carrier: 'None' });
             }
             return generateBalancedAssignments(count, groups);
         }
@@ -1632,7 +1651,7 @@
             // Get treatment groups
             let treatmentGroups = [];
             if (selectedDrugChoice === 'no') {
-                treatmentGroups = [{ drug: 'Control', dose: '0' }];
+                treatmentGroups = [{ drug: 'Control', dose: '0', carrier: 'None' }];
             } else {
                 treatmentGroups = getTreatmentGroups();
             }
@@ -1651,7 +1670,7 @@
                     
                     let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${hostPupaeAgeValue},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
                     if (selectedDrugChoice === 'yes') {
-                        row += `,${selectedCarrier}`;
+                        row += `,${treatment.carrier || selectedCarrier}`;
                     }
                     row += `,${temp},${ldCycleValue},${datasetId}`;
                     rows.push(row);
@@ -1693,6 +1712,10 @@
         drugChoiceSelect.addEventListener('change', updateDrugChoice);
         addDrugBtn.addEventListener('click', createDrugEntry);
         includeControlCheckbox.addEventListener('change', () => {
+            updateTreatmentPreview();
+            updateVisibility();
+        });
+        includeCarrierControlCheckbox.addEventListener('change', () => {
             updateTreatmentPreview();
             updateVisibility();
         });
