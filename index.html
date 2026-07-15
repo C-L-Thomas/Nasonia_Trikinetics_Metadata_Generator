@@ -699,11 +699,28 @@
         ✓ User entered
     </div>
 </div>
+
+            <!-- Question 10: Career stage -->
+            <div class="question" id="q-career-stage">
+                <label for="career-stage">
+                    <span class="question-number">10</span>
+                    What is the user's career stage?
+                </label>
+                <div class="hint">Select the career stage of the person running the experiment</div>
+                <select id="career-stage">
+                    <option value="">-- Select an option --</option>
+                    <option value="Undergraduate">Undergraduate</option>
+                    <option value="Masters">Masters</option>
+                    <option value="PhD">PhD</option>
+                    <option value="Postdoc">Postdoc</option>
+                </select>
+                <div class="valid" id="career-stage-valid" style="display: none;">✓ Career stage selected</div>
+            </div>
             
-            <!-- Question 10: Food change -->
+            <!-- Question 11: Food change -->
             <div class="question" id="q-food-change">
                 <label for="food-change">
-                    <span class="question-number">10</span>
+                    <span class="question-number">11</span>
                     Are you doing a food change?
                 </label>
                 <div class="hint">Select the frequency of food changes</div>
@@ -717,10 +734,10 @@
                 <div class="valid" id="food-change-valid" style="display: none;">✓ Food change frequency selected</div>
             </div>
             
-            <!-- Question 11: Drug -->
+            <!-- Question 12: Drug -->
             <div class="question" id="q-drug">
                 <label>
-                    <span class="question-number">11</span>
+                    <span class="question-number">12</span>
                     Are you adding any drugs to the media?
                 </label>
                 <div class="hint">Select whether you are testing any drug treatments</div>
@@ -732,10 +749,10 @@
                 <div class="valid" id="drug-choice-valid" style="display: none;">✓ Drug choice selected</div>
             </div>
             
-            <!-- Question 12: Drug details (if yes) -->
+            <!-- Question 13: Drug details (if yes) -->
             <div class="question" id="q-drug-details">
                 <label>
-                    <span class="question-number">12</span>
+                    <span class="question-number">13</span>
                     Drug treatments
                 </label>
                 <div class="hint">Add each drug and its doses. Valid units: nM, uM, mM, M, ng/mL, ug/mL, mg/mL, g/mL, ppm, %</div>
@@ -767,10 +784,10 @@
                 </div>
             </div>
             
-            <!-- Question 13: Carrier (if drug selected) -->
+            <!-- Question 14: Carrier (if drug selected) -->
             <div class="question" id="q-carrier">
                 <label for="carrier">
-                    <span class="question-number">13</span>
+                    <span class="question-number">14</span>
                     What is the carrier for the drug?
                 </label>
                 <div class="hint">Select the solvent used to dissolve the drug</div>
@@ -784,10 +801,10 @@
                 <div class="valid" id="carrier-valid" style="display: none;">✓ Carrier selected</div>
             </div>
             
-            <!-- Question 14: Temperature -->
+            <!-- Question 15: Temperature -->
             <div class="question" id="q-temperature">
                 <label for="temperature">
-                    <span class="question-number">14</span>
+                    <span class="question-number">15</span>
                     What temperatures are used?
                 </label>
                 <div class="hint">Enter temperature(s) in °C, separated by commas (e.g., 25 or 20, 25, 30). If multiple temperatures are entered, they will be randomized across positions.</div>
@@ -796,10 +813,10 @@
                 <div class="valid" id="temperature-valid" style="display: none;">✓ Temperature(s) valid</div>
             </div>
             
-            <!-- Question 15: Light:Dark cycle -->
+            <!-- Question 16: Light:Dark cycle -->
             <div class="question" id="q-ld-cycle">
                 <label for="ld-cycle">
-                    <span class="question-number">15</span>
+                    <span class="question-number">16</span>
                     What is the Light:Dark cycle?
                 </label>
                 <div class="hint">Enter as L:D ratio (e.g., 12:12, 16:8, 0:24 for constant dark)</div>
@@ -837,7 +854,7 @@
         const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
         
         // Total steps for progress tracking
-        const TOTAL_STEPS = 15;
+        const TOTAL_STEPS = 16;
         
         // Elements
         const monitorsInput = document.getElementById('monitors');
@@ -872,6 +889,9 @@
         
         const userInput = document.getElementById('user-name');
         const userValid = document.getElementById('user-valid');
+
+        const careerStageSelect = document.getElementById('career-stage');
+        const careerStageValid = document.getElementById('career-stage-valid');
         
         const foodChangeSelect = document.getElementById('food-change');
         const foodChangeValid = document.getElementById('food-change-valid');
@@ -915,6 +935,7 @@
         const qIncubator = document.getElementById('q-incubator');
         const qWaterSource = document.getElementById('q-water-source');
         const qUser = document.getElementById('q-user');
+        const qCareerStage = document.getElementById('q-career-stage');
         const qFoodChange = document.getElementById('q-food-change');
         const qDrug = document.getElementById('q-drug');
         const qDrugDetails = document.getElementById('q-drug-details');
@@ -936,6 +957,7 @@
         let selectedIncubator = '';
         let selectedWaterSource = '';
         let userName = '';
+        let selectedCareerStage = '';
         let selectedFoodChange = '';
         let selectedDrugChoice = '';
         let drugEntries = [];
@@ -959,6 +981,7 @@
             if (selectedIncubator) completed++;
             if (selectedWaterSource) completed++;
             if (userName) completed++;
+            if (selectedCareerStage) completed++;
             if (selectedFoodChange) completed++;
             if (selectedDrugChoice) completed++;
             if (selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0) completed++;
@@ -1330,6 +1353,12 @@
             }
             
             if (userName) {
+                qCareerStage.classList.add('visible');
+            } else {
+                qCareerStage.classList.remove('visible');
+            }
+
+            if (selectedCareerStage) {
                 qFoodChange.classList.add('visible');
             } else {
                 qFoodChange.classList.remove('visible');
@@ -1375,6 +1404,7 @@
                 selectedIncubator &&
                 selectedWaterSource &&
                 userName &&
+                selectedCareerStage &&
                 selectedFoodChange &&
                 selectedDrugChoice &&
                 validTemperatures &&
@@ -1511,6 +1541,12 @@
             userValid.style.display = userName ? 'block' : 'none';
             updateVisibility();
         }
+
+        function updateCareerStage() {
+            selectedCareerStage = careerStageSelect.value;
+            careerStageValid.style.display = selectedCareerStage ? 'block' : 'none';
+            updateVisibility();
+        }
         
         function updateFoodChange() {
             selectedFoodChange = foodChangeSelect.value;
@@ -1634,14 +1670,14 @@
         
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
-                !selectedMated || !hostPupaeAgeValue || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName ||
+                !selectedMated || !hostPupaeAgeValue || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName || !selectedCareerStage ||
                 !selectedFoodChange || !selectedDrugChoice || !validTemperatures || !validLdCycle) return;
             
             const rows = [];
             const datasetId = `DS-${crypto.randomUUID()}`;
             
             // Header
-            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,host_pupae_age,base_media,incubator,water_source,user,food_change,drug,dose';
+            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,host_pupae_age,base_media,incubator,water_source,user,career_stage,food_change,drug,dose';
             if (selectedDrugChoice === 'yes') {
                 header += ',carrier';
             }
@@ -1668,7 +1704,7 @@
                     const treatment = treatmentAssignments[region - 1];
                     const temp = temperatureAssignments[region - 1];
                     
-                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${hostPupaeAgeValue},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
+                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${hostPupaeAgeValue},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedCareerStage},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
                     if (selectedDrugChoice === 'yes') {
                         row += `,${treatment.carrier || selectedCarrier}`;
                     }
@@ -1708,6 +1744,7 @@
         incubatorSelect.addEventListener('change', updateIncubator);
         waterSourceSelect.addEventListener('change', updateWaterSource);
         userInput.addEventListener('input', updateUser);
+        careerStageSelect.addEventListener('change', updateCareerStage);
         foodChangeSelect.addEventListener('change', updateFoodChange);
         drugChoiceSelect.addEventListener('change', updateDrugChoice);
         addDrugBtn.addEventListener('click', createDrugEntry);
