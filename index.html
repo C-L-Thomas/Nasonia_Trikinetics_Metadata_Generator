@@ -801,10 +801,47 @@
                 <div class="valid" id="carrier-valid" style="display: none;">✓ Carrier selected</div>
             </div>
             
-            <!-- Question 15: Temperature -->
+            <!-- Question 15: Physical treatment -->
+            <div class="question" id="q-physical-treatment">
+                <label for="physical-treatment">
+                    <span class="question-number">15</span>
+                    Was there any physical treatment?
+                </label>
+                <div class="hint">Select Yes if any positions received a physical treatment</div>
+                <select id="physical-treatment">
+                    <option value="">-- Select an option --</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="valid" id="physical-treatment-valid" style="display: none;">✓ Physical treatment response selected</div>
+
+                <div id="physical-treatment-type-wrap" style="display: none; margin-top: 16px;">
+                    <label for="physical-treatment-type">Type of physical treatment</label>
+                    <select id="physical-treatment-type">
+                        <option value="">-- Select an option --</option>
+                        <option value="Night Shaking">Night Shaking</option>
+                        <option value="Night Red Light">Night Red Light</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="valid" id="physical-treatment-type-valid" style="display: none;">✓ Physical treatment type selected</div>
+                </div>
+
+                <div id="physical-treatment-control-wrap" style="display: none; margin-top: 16px;">
+                    <label for="physical-treatment-control">Is there a control group for the physical treatment?</label>
+                    <div class="hint" style="padding-left: 0;">If Yes, control and treatment positions will be balanced and randomized. If No, all positions will receive the selected physical treatment.</div>
+                    <select id="physical-treatment-control">
+                        <option value="">-- Select an option --</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                    <div class="valid" id="physical-treatment-control-valid" style="display: none;">✓ Physical treatment control response selected</div>
+                </div>
+            </div>
+
+            <!-- Question 16: Temperature -->
             <div class="question" id="q-temperature">
                 <label for="temperature">
-                    <span class="question-number">15</span>
+                    <span class="question-number">16</span>
                     What temperatures are used?
                 </label>
                 <div class="hint">Enter temperature(s) in °C, separated by commas (e.g., 25 or 20, 25, 30). If multiple temperatures are entered, they will be randomized across positions.</div>
@@ -813,10 +850,10 @@
                 <div class="valid" id="temperature-valid" style="display: none;">✓ Temperature(s) valid</div>
             </div>
             
-            <!-- Question 16: Light:Dark cycle -->
+            <!-- Question 17: Light:Dark cycle -->
             <div class="question" id="q-ld-cycle">
                 <label for="ld-cycle">
-                    <span class="question-number">16</span>
+                    <span class="question-number">17</span>
                     What is the Light:Dark cycle?
                 </label>
                 <div class="hint">Enter as L:D ratio (e.g., 12:12, 16:8, 0:24 for constant dark)</div>
@@ -854,7 +891,7 @@
         const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
         
         // Total steps for progress tracking
-        const TOTAL_STEPS = 16;
+        const TOTAL_STEPS = 17;
         
         // Elements
         const monitorsInput = document.getElementById('monitors');
@@ -892,6 +929,15 @@
 
         const careerStageSelect = document.getElementById('career-stage');
         const careerStageValid = document.getElementById('career-stage-valid');
+
+        const physicalTreatmentSelect = document.getElementById('physical-treatment');
+        const physicalTreatmentValid = document.getElementById('physical-treatment-valid');
+        const physicalTreatmentTypeWrap = document.getElementById('physical-treatment-type-wrap');
+        const physicalTreatmentTypeSelect = document.getElementById('physical-treatment-type');
+        const physicalTreatmentTypeValid = document.getElementById('physical-treatment-type-valid');
+        const physicalTreatmentControlWrap = document.getElementById('physical-treatment-control-wrap');
+        const physicalTreatmentControlSelect = document.getElementById('physical-treatment-control');
+        const physicalTreatmentControlValid = document.getElementById('physical-treatment-control-valid');
         
         const foodChangeSelect = document.getElementById('food-change');
         const foodChangeValid = document.getElementById('food-change-valid');
@@ -936,6 +982,7 @@
         const qWaterSource = document.getElementById('q-water-source');
         const qUser = document.getElementById('q-user');
         const qCareerStage = document.getElementById('q-career-stage');
+        const qPhysicalTreatment = document.getElementById('q-physical-treatment');
         const qFoodChange = document.getElementById('q-food-change');
         const qDrug = document.getElementById('q-drug');
         const qDrugDetails = document.getElementById('q-drug-details');
@@ -958,6 +1005,9 @@
         let selectedWaterSource = '';
         let userName = '';
         let selectedCareerStage = '';
+        let selectedPhysicalTreatment = '';
+        let selectedPhysicalTreatmentType = '';
+        let selectedPhysicalTreatmentControl = '';
         let selectedFoodChange = '';
         let selectedDrugChoice = '';
         let drugEntries = [];
@@ -982,6 +1032,7 @@
             if (selectedWaterSource) completed++;
             if (userName) completed++;
             if (selectedCareerStage) completed++;
+            if (selectedPhysicalTreatment === 'No' || (selectedPhysicalTreatment === 'Yes' && selectedPhysicalTreatmentType && selectedPhysicalTreatmentControl)) completed++;
             if (selectedFoodChange) completed++;
             if (selectedDrugChoice) completed++;
             if (selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0) completed++;
@@ -1383,7 +1434,17 @@
                 qCarrier.classList.remove('visible');
             }
             
-            if (selectedDrugChoice === 'no' || (selectedDrugChoice === 'yes' && selectedCarrier)) {
+            const drugSectionComplete = selectedDrugChoice === 'no' ||
+                (selectedDrugChoice === 'yes' && selectedCarrier);
+            if (drugSectionComplete) {
+                qPhysicalTreatment.classList.add('visible');
+            } else {
+                qPhysicalTreatment.classList.remove('visible');
+            }
+
+            const physicalTreatmentComplete = selectedPhysicalTreatment === 'No' ||
+                (selectedPhysicalTreatment === 'Yes' && selectedPhysicalTreatmentType && selectedPhysicalTreatmentControl);
+            if (physicalTreatmentComplete) {
                 qTemperature.classList.add('visible');
             } else {
                 qTemperature.classList.remove('visible');
@@ -1407,6 +1468,7 @@
                 selectedCareerStage &&
                 selectedFoodChange &&
                 selectedDrugChoice &&
+                physicalTreatmentComplete &&
                 validTemperatures &&
                 validLdCycle;
             
@@ -1547,7 +1609,40 @@
             careerStageValid.style.display = selectedCareerStage ? 'block' : 'none';
             updateVisibility();
         }
-        
+
+        function updatePhysicalTreatment() {
+            selectedPhysicalTreatment = physicalTreatmentSelect.value;
+            physicalTreatmentValid.style.display = selectedPhysicalTreatment ? 'block' : 'none';
+
+            if (selectedPhysicalTreatment === 'Yes') {
+                physicalTreatmentTypeWrap.style.display = 'block';
+                physicalTreatmentControlWrap.style.display = 'block';
+            } else {
+                physicalTreatmentTypeWrap.style.display = 'none';
+                physicalTreatmentControlWrap.style.display = 'none';
+                physicalTreatmentTypeSelect.value = '';
+                physicalTreatmentControlSelect.value = '';
+                selectedPhysicalTreatmentType = '';
+                selectedPhysicalTreatmentControl = '';
+                physicalTreatmentTypeValid.style.display = 'none';
+                physicalTreatmentControlValid.style.display = 'none';
+            }
+
+            updateVisibility();
+        }
+
+        function updatePhysicalTreatmentType() {
+            selectedPhysicalTreatmentType = physicalTreatmentTypeSelect.value;
+            physicalTreatmentTypeValid.style.display = selectedPhysicalTreatmentType ? 'block' : 'none';
+            updateVisibility();
+        }
+
+        function updatePhysicalTreatmentControl() {
+            selectedPhysicalTreatmentControl = physicalTreatmentControlSelect.value;
+            physicalTreatmentControlValid.style.display = selectedPhysicalTreatmentControl ? 'block' : 'none';
+            updateVisibility();
+        }
+
         function updateFoodChange() {
             selectedFoodChange = foodChangeSelect.value;
             foodChangeValid.style.display = selectedFoodChange ? 'block' : 'none';
@@ -1668,10 +1763,24 @@
             return generateBalancedAssignments(count, groups);
         }
         
+        function generatePhysicalTreatmentAssignments(count) {
+            if (selectedPhysicalTreatment === 'No') {
+                return Array(count).fill('Control');
+            }
+
+            if (selectedPhysicalTreatmentControl === 'Yes') {
+                return generateBalancedAssignments(count, ['Control', selectedPhysicalTreatmentType]);
+            }
+
+            return Array(count).fill(selectedPhysicalTreatmentType);
+        }
+        
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
                 !selectedMated || !hostPupaeAgeValue || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName || !selectedCareerStage ||
-                !selectedFoodChange || !selectedDrugChoice || !validTemperatures || !validLdCycle) return;
+                !selectedFoodChange || !selectedDrugChoice ||
+                !(selectedPhysicalTreatment === 'No' || (selectedPhysicalTreatment === 'Yes' && selectedPhysicalTreatmentType && selectedPhysicalTreatmentControl)) ||
+                !validTemperatures || !validLdCycle) return;
             
             const rows = [];
             const datasetId = `DS-${crypto.randomUUID()}`;
@@ -1681,7 +1790,7 @@
             if (selectedDrugChoice === 'yes') {
                 header += ',carrier';
             }
-            header += ',temperature,ld_cycle,dataset_id';
+            header += ',physical_treatment,temperature,ld_cycle,dataset_id';
             rows.push(header);
             
             // Get treatment groups
@@ -1697,18 +1806,20 @@
                 const fileName = `Monitor${monitorNum}.txt`;
                 const sexAssignments = generateSexAssignments(REGIONS_PER_MONITOR, selectedSex);
                 const treatmentAssignments = generateTreatmentAssignments(REGIONS_PER_MONITOR, treatmentGroups);
+                const physicalTreatmentAssignments = generatePhysicalTreatmentAssignments(REGIONS_PER_MONITOR);
                 const temperatureAssignments = generateBalancedAssignments(REGIONS_PER_MONITOR, parsedTemperatures);
                 
                 for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
                     const sex = sexAssignments[region - 1];
                     const treatment = treatmentAssignments[region - 1];
+                    const physicalTreatment = physicalTreatmentAssignments[region - 1];
                     const temp = temperatureAssignments[region - 1];
                     
                     let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${hostPupaeAgeValue},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedCareerStage},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
                     if (selectedDrugChoice === 'yes') {
                         row += `,${treatment.carrier || selectedCarrier}`;
                     }
-                    row += `,${temp},${ldCycleValue},${datasetId}`;
+                    row += `,${physicalTreatment},${temp},${ldCycleValue},${datasetId}`;
                     rows.push(row);
                 }
             }
@@ -1745,6 +1856,9 @@
         waterSourceSelect.addEventListener('change', updateWaterSource);
         userInput.addEventListener('input', updateUser);
         careerStageSelect.addEventListener('change', updateCareerStage);
+        physicalTreatmentSelect.addEventListener('change', updatePhysicalTreatment);
+        physicalTreatmentTypeSelect.addEventListener('change', updatePhysicalTreatmentType);
+        physicalTreatmentControlSelect.addEventListener('change', updatePhysicalTreatmentControl);
         foodChangeSelect.addEventListener('change', updateFoodChange);
         drugChoiceSelect.addEventListener('change', updateDrugChoice);
         addDrugBtn.addEventListener('click', createDrugEntry);
