@@ -658,6 +658,7 @@
                     <option value="Incubator_2">Incubator_2</option>
                     <option value="Incubator_3">Incubator_3</option>
                     <option value="Incubator_4">Incubator_4</option>
+                    <option value="Unknown">Unknown</option>
                 </select>
                 <div class="valid" id="incubator-valid" style="display: none;">✓ Incubator selected</div>
             </div>
@@ -1775,6 +1776,29 @@
             return Array(count).fill(selectedPhysicalTreatmentType);
         }
         
+        function generateDatasetId() {
+            // Prefer the browser's native UUID generator, with a fallback for
+            // browsers or local-file contexts where crypto.randomUUID is unavailable.
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return `DS-${window.crypto.randomUUID()}`;
+            }
+
+            const bytes = new Uint8Array(16);
+            if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+                window.crypto.getRandomValues(bytes);
+            } else {
+                for (let i = 0; i < bytes.length; i++) {
+                    bytes[i] = Math.floor(Math.random() * 256);
+                }
+            }
+
+            bytes[6] = (bytes[6] & 0x0f) | 0x40;
+            bytes[8] = (bytes[8] & 0x3f) | 0x80;
+            const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0'));
+            const uuid = `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
+            return `DS-${uuid}`;
+        }
+
         function generateCSV() {
             if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
                 !selectedMated || !hostPupaeAgeValue || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName || !selectedCareerStage ||
@@ -1783,7 +1807,7 @@
                 !validTemperatures || !validLdCycle) return;
             
             const rows = [];
-            const datasetId = `DS-${crypto.randomUUID()}`;
+            const datasetId = generateDatasetId();
             
             // Header
             let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,host_pupae_age,base_media,incubator,water_source,user,career_stage,food_change,drug,dose';
