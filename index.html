@@ -1,1496 +1,907 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Nasonia Trikinetics Control Metadata Generator</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      max-width: 1050px;
-      margin: auto;
-      padding: 36px 20px;
-      background: linear-gradient(135deg, #f5f7fa, #e4e8ec);
-      color: #1e293b;
-      min-height: 100vh;
-    }
-
-    .header,
-    .card,
-    .progress {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 4px 20px #00000012;
-    }
-
-    .header {
-      padding: 28px;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .header h1 {
-      margin: 0;
-      color: #1e3a5f;
-      font-size: 25px;
-    }
-
-    .header p {
-      margin: 7px 0 0;
-      color: #64748b;
-    }
-
-    .lab {
-      color: #d97706 !important;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .progress {
-      padding: 18px 22px;
-      margin-bottom: 22px;
-    }
-
-    .bar {
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .fill {
-      height: 100%;
-      width: 0;
-      background: linear-gradient(90deg, #d97706, #f59e0b);
-      transition: 0.25s;
-    }
-
-    .progress-text {
-      text-align: right;
-      color: #64748b;
-      font-size: 12px;
-      margin-top: 7px;
-    }
-
-    .card {
-      display: none;
-      padding: 26px;
-      margin-bottom: 20px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .card.visible {
-      display: block;
-    }
-
-    .title {
-      font-weight: 700;
-      font-size: 16px;
-      margin-bottom: 6px;
-    }
-
-    .num {
-      display: inline-grid;
-      place-items: center;
-      background: #d97706;
-      color: #fff;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
-    .hint {
-      color: #64748b;
-      font-size: 13px;
-      margin: 0 0 16px 40px;
-    }
-
-    label.field {
-      display: block;
-      font-weight: 600;
-      font-size: 14px;
-      margin: 14px 0 6px;
-    }
-
-    input[type="text"],
-    select {
-      width: 100%;
-      padding: 12px 14px;
-      border: 2px solid #e2e8f0;
-      border-radius: 9px;
-      background: #f8fafc;
-      font: inherit;
-    }
-
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: #d97706;
-      background: #fff;
-    }
-
-    .error {
-      display: none;
-      color: #b91c1c;
-      font-size: 13px;
-      margin-top: 7px;
-    }
-
-    .valid {
-      color: #047857;
-      font-size: 13px;
-      margin-top: 7px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-
-    .control-intro {
-      background: #eff6ff;
-      border-left: 4px solid #2563eb;
-      padding: 15px;
-      border-radius: 0 9px 9px 0;
-      color: #1e40af;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
-
-    .control-row {
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 16px;
-      margin: 12px 0;
-      background: #fafafa;
-    }
-
-    .control-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-    }
-
-    .control-name {
-      font-weight: 700;
-    }
-
-    .default {
-      color: #047857;
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    .edit-toggle {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .editor {
-      display: none;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .editor.open {
-      display: block;
-    }
-
-    .conditional {
-      display: none;
-      margin-top: 12px;
-    }
-
-    .conditional.open {
-      display: block;
-    }
-
-    .food-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
-    .food-note {
-      color: #64748b;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
-    .btn {
-      width: 100%;
-      border: 0;
-      border-radius: 10px;
-      padding: 15px;
-      margin-top: 20px;
-      background: linear-gradient(135deg, #d97706, #b45309);
-      color: white;
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .btn:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-
-    .summary {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      border-radius: 10px;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 13px;
-    }
-
-    .summary strong {
-      color: #047857;
-    }
-
-    .footer {
-      text-align: center;
-      color: #64748b;
-      font-size: 12px;
-      padding: 24px;
-    }
-
-    @media (max-width: 760px) {
-      .grid,
-      .food-grid {
-        grid-template-columns: 1fr;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nasonia Trikinetics Control Metadata Generator</title>
+    <style>
+      * {
+        box-sizing: border-box;
       }
-
-      .control-head {
-        align-items: flex-start;
-        flex-direction: column;
+      body {
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        max-width: 1050px;
+        margin: auto;
+        padding: 36px 20px;
+        background: linear-gradient(135deg, #f5f7fa, #e4e8ec);
+        color: #1e293b;
+        min-height: 100vh;
       }
-
+      .header,
+      .card,
+      .progress {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px #00000012;
+      }
+      .header {
+        padding: 28px;
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .header-logo {
+        display: block;
+        width: min(100%, 220px);
+        height: auto;
+        margin: 0 auto 18px;
+      }
+      .header h1 {
+        margin: 0;
+        color: #1e3a5f;
+        font-size: 25px;
+      }
+      .header p {
+        margin: 7px 0 0;
+        color: #64748b;
+      }
+      .lab {
+        color: #d97706 !important;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .progress {
+        padding: 18px 22px;
+        margin-bottom: 22px;
+      }
+      .bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #d97706, #f59e0b);
+        transition: 0.25s;
+      }
+      .progress-text {
+        text-align: right;
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 7px;
+      }
+      .card {
+        display: none;
+        padding: 26px;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+      }
+      .card.visible {
+        display: block;
+      }
+      .title {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+      .num {
+        display: inline-grid;
+        place-items: center;
+        background: #d97706;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
       .hint {
-        margin-left: 0;
+        color: #64748b;
+        font-size: 13px;
+        margin: 0 0 16px 40px;
       }
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="header">
-    <h1>Nasonia Trikinetics Metadata Generator</h1>
-    <p>Build a control experiment quickly, then change only the factors that differ</p>
-    <p class="lab">Social Epigenetics Lab</p>
-  </div>
-
-  <div class="progress">
-    <div class="bar">
-      <div class="fill" id="fill"></div>
-    </div>
-
-    <div class="progress-text" id="progressText">
-      0 of 6 sections completed
-    </div>
-  </div>
-
-  <!-- Question 1 -->
-  <section class="card visible" id="q1">
-    <div class="title">
-      <span class="num">1</span>
-      Please list the monitor numbers being used
-    </div>
-
-    <p class="hint">
-      Enter numbers separated by commas, for example: 74, 75, 76, 77
-    </p>
-
-    <input
-      type="text"
-      id="monitors"
-      placeholder="e.g. 74, 75, 76, 77"
-    >
-
-    <div class="error" id="monitorError">
-      Please enter valid monitor numbers separated by commas.
-    </div>
-
-    <div class="valid" id="monitorValid"></div>
-  </section>
-
-  <!-- Question 2 -->
-  <section class="card" id="q2">
-    <div class="title">
-      <span class="num">2</span>
-      What is your start date?
-    </div>
-
-    <p class="hint">
-      Format: yyyy-mm-dd hh:mm:ss. Standard procedure is 08:00:00
-      the day after placing the Nasonia in tubes.
-    </p>
-
-    <input
-      type="text"
-      id="startDate"
-      placeholder="2026-08-04 08:00:00"
-    >
-
-    <div class="error" id="dateError">
-      Please enter a valid date in yyyy-mm-dd hh:mm:ss format.
-    </div>
-
-    <div class="valid" id="dateValid"></div>
-  </section>
-
-  <!-- Question 3 -->
-  <section class="card" id="q3">
-    <div class="title">
-      <span class="num">3</span>
-      User information
-    </div>
-
-    <p class="hint">
-      These details apply to every wasp in this metadata file.
-    </p>
-
-    <div class="grid">
-      <div>
-        <label class="field" for="userName">User</label>
-
-        <input
-          type="text"
-          id="userName"
-          placeholder="e.g. Jane Smith"
-        >
-      </div>
-
-      <div>
-        <label class="field" for="career">Career stage</label>
-
-        <select id="career">
-          <option value="">-- Select --</option>
-          <option>Undergraduate</option>
-          <option>Masters</option>
-          <option>PhD</option>
-          <option>Postdoc</option>
-        </select>
-      </div>
-    </div>
-  </section>
-
-  <!-- Question 4 -->
-  <section class="card" id="q4">
-    <div class="title">
-      <span class="num">4</span>
-      Experiment Focus
-    </div>
-
-    <p class="hint">
-      Select the main focus of this experiment.
-    </p>
-
-    <label class="field" for="experimentFocus">
-      Experiment focus
-    </label>
-
-    <select id="experimentFocus">
-      <option value="">-- Select --</option>
-      <option>Nutrition</option>
-      <option>Drug Exposure</option>
-      <option>Light Cycle</option>
-      <option>Physical Intervention</option>
-      <option>Genetic Line</option>
-      <option>Other</option>
-    </select>
-  </section>
-
-  <!-- Question 5 -->
-  <section class="card" id="q5">
-    <div class="title">
-      <span class="num">5</span>
-      Experimental Conditions
-    </div>
-
-    <div class="control-intro">
-      The values below will be used automatically. Tick
-      <strong>Change</strong> only for factors that differ from the
-      standard control.
-    </div>
-
-    <div class="control-row">
-      <div class="control-name">Genetic line</div>
-
-      <label class="field" for="geneticLineChoice">
-        Select genetic line
-      </label>
-
-      <select id="geneticLineChoice">
-        <option value="Leicester" selected>Leicester</option>
-        <option value="Alternative">Alternative line(s)</option>
-      </select>
-
-      <div class="conditional" id="geneticLineDetails">
-        <label class="field" for="geneticLines">
-          Alternative genetic line(s)
-        </label>
-
-        <input
-          type="text"
-          id="geneticLines"
-          placeholder="e.g. AsymC, LabII"
-        >
-
-        <div class="food-note">
-          Enter multiple lines separated by commas. They will be balanced
-          and randomised across monitor positions.
-        </div>
-
-        <div class="error" id="geneticLineError">
-          Enter at least one genetic line.
-        </div>
-      </div>
-    </div>
-
-    <div id="controls"></div>
-
-    <div class="summary" id="summary"></div>
-  </section>
-
-  <!-- Question 6 -->
-  <section class="card" id="q6">
-    <div class="title">
-      <span class="num">6</span>
-      Incubator
-    </div>
-
-    <p class="hint">
-      This incubator will apply to every wasp in this metadata file.
-    </p>
-
-    <label class="field" for="incubator">
-      Which incubator?
-    </label>
-
-    <select id="incubator">
-      <option value="">-- Select --</option>
-      <option>Incubator_1</option>
-      <option>Incubator_2</option>
-      <option>Incubator_3</option>
-      <option>Incubator_4</option>
-      <option>Unknown</option>
-    </select>
-
-    <button class="btn" id="generate" disabled>
-      Generate metadata CSV
-    </button>
-  </section>
-
-  <div class="footer">
-    Built for the Social Epigenetics Lab
-  </div>
-
-  <script>
-    const REGIONS = 32;
-
-    const configs = [
-      {
-        id: "sex",
-        label: "Sex",
-        def: "Male",
-        type: "select",
-        options: ["Male", "Female", "Mixed"]
-      },
-      {
-        id: "mated",
-        label: "Mated",
-        def: "Unknown",
-        type: "select",
-        options: ["Yes", "No", "Unknown"]
-      },
-      {
-        id: "baseMedia",
-        label: "Food composition",
-        def: "Nasonia_food",
-        type: "select",
-        options: ["Nasonia_food", "Drosophila_SYA", "Custom"]
-      },
-      {
-        id: "water",
-        label: "Water source",
-        def: "Greyline",
-        type: "select",
-        options: ["Greyline", "Ultrapure", "Tap", "Bottled"]
-      },
-      {
-        id: "foodChange",
-        label: "Food change",
-        def: "No",
-        type: "select",
-        options: ["No", "Daily", "Weekly", "Bi-Weekly"]
-      },
-      {
-        id: "drugChoice",
-        label: "Drug treatment",
-        def: "No",
-        type: "select",
-        options: ["No", "Yes"]
-      },
-      {
-        id: "physical",
-        label: "Physical treatment",
-        def: "No",
-        type: "select",
-        options: ["No", "Yes"]
-      },
-      {
-        id: "temperature",
-        label: "Temperature (°C)",
-        def: "25",
-        type: "text",
-        placeholder: "e.g. 25 or 20, 25, 30"
-      },
-      {
-        id: "ldCycle",
-        label: "Light:dark cycle",
-        def: "12:12",
-        type: "text",
-        placeholder: "e.g. 12:12"
+      label.field {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin: 14px 0 6px;
       }
-    ];
-
-    const values = Object.fromEntries(
-      configs.map(config => [config.id, config.def])
-    );
-
-    const controls = document.getElementById("controls");
-
-    function optionsHtml(config) {
-      return config.options.map(option => {
-        const selected = option === config.def ? "selected" : "";
-
-        return `
-          <option value="${option}" ${selected}>
-            ${option}
-          </option>
-        `;
-      }).join("");
-    }
-
-    configs.forEach(config => {
-      const row = document.createElement("div");
-      row.className = "control-row";
-
-      row.innerHTML = `
-        <div class="control-head">
-          <div>
-            <div class="control-name">${config.label}</div>
-
-            <div class="default">
-              Default: ${config.def.replaceAll("_", " ")}
-            </div>
-          </div>
-
-          <label class="edit-toggle">
-            <input type="checkbox" id="toggle-${config.id}">
-            Change
-          </label>
-        </div>
-
-        <div class="editor" id="edit-${config.id}">
-          ${
-            config.type === "select"
-              ? `<select id="${config.id}">
-                  ${optionsHtml(config)}
-                </select>`
-              : `<input
-                  type="text"
-                  id="${config.id}"
-                  value="${config.def}"
-                  placeholder="${config.placeholder}"
-                >`
-          }
-
-          <div class="error" id="error-${config.id}"></div>
-        </div>
-      `;
-
-      controls.appendChild(row);
-
-      const toggle = row.querySelector(`#toggle-${config.id}`);
-      const editor = row.querySelector(`#edit-${config.id}`);
-      const input = row.querySelector(`#${config.id}`);
-
-      toggle.addEventListener("change", () => {
-        editor.classList.toggle("open", toggle.checked);
-
-        if (!toggle.checked) {
-          input.value = config.def;
-          values[config.id] = config.def;
-
-          if (
-            config.id === "baseMedia" &&
-            document.getElementById("sucroseConcentration")
-          ) {
-            applyFoodPreset("Nasonia_food");
-          }
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        font: inherit;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #d97706;
+        background: #fff;
+      }
+      .error {
+        display: none;
+        color: #b91c1c;
+        font-size: 13px;
+        margin-top: 7px;
+      }
+      .valid {
+        color: #047857;
+        font-size: 13px;
+        margin-top: 7px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+      .control-intro {
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        padding: 15px;
+        border-radius: 0 9px 9px 0;
+        color: #1e40af;
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+      .control-row {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 12px 0;
+        background: #fafafa;
+      }
+      .control-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+      }
+      .control-name {
+        font-weight: 700;
+      }
+      .default {
+        color: #047857;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .edit-toggle {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .editor {
+        display: none;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e2e8f0;
+      }
+      .editor.open {
+        display: block;
+      }
+      .unresolved {
+        background: #fff7ed;
+        border-color: #fdba74;
+      }
+      .unresolved .default {
+        color: #9a3412;
+      }
+      .conditional {
+        display: none;
+        margin-top: 12px;
+      }
+      .conditional.open {
+        display: block;
+      }
+      .food-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+      }
+      .food-note {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+      .btn {
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        padding: 15px;
+        background: linear-gradient(135deg, #d97706, #b45309);
+        color: white;
+        font-weight: 700;
+        font-size: 15px;
+        cursor: pointer;
+      }
+      .btn:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+      .summary {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+        font-size: 13px;
+      }
+      .summary strong {
+        color: #047857;
+      }
+      .footer {
+        text-align: center;
+        color: #64748b;
+        font-size: 12px;
+        padding: 24px;
+      }
+      @media (max-width: 760px) {
+        .grid,
+        .food-grid {
+          grid-template-columns: 1fr;
         }
+        .control-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .hint {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img
+        class="header-logo"
+        src="https://raw.githubusercontent.com/C-L-Thomas/Nasonia_Trikinetics_Metadata_Generator/main/main/logo.png"
+        alt="Social Epigenetics Lab logo"
+      />
+      <h1>Nasonia Trikinetics Metadata Generator</h1>
+      <p>
+        Build a control experiment quickly, then change only the factors that
+        differ
+      </p>
+      <p class="lab">Social Epigenetics Lab</p>
+    </div>
+    <div class="progress">
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="progress-text" id="progressText">
+        0 of 6 sections completed
+      </div>
+    </div>
 
-        validateAll();
-      });
+    <section class="card visible" id="q1">
+      <div class="title">
+        <span class="num">1</span>Please list the monitor numbers being used
+      </div>
+      <p class="hint">
+        Enter numbers separated by commas (e.g. 74, 75, 76, 77)
+      </p>
+      <input type="text" id="monitors" placeholder="e.g. 74, 75, 76, 77" />
+      <div class="error" id="monitorError">
+        Please enter valid monitor numbers separated by commas.
+      </div>
+      <div class="valid" id="monitorValid"></div>
+    </section>
 
-      input.addEventListener("input", () => {
-        values[config.id] = input.value.trim();
-        validateAll();
-      });
+    <section class="card" id="q2">
+      <div class="title">
+        <span class="num">2</span>What is your start date?
+      </div>
+      <p class="hint">
+        Format: yyyy-mm-dd hh:mm:ss. Standard procedure is 08:00:00 the day
+        after placing the Nasonia in tubes.
+      </p>
+      <input type="text" id="startDate" placeholder="2026-08-04 08:00:00" />
+      <div class="error" id="dateError">
+        Please enter a valid date in yyyy-mm-dd hh:mm:ss format.
+      </div>
+      <div class="valid" id="dateValid"></div>
+    </section>
 
-      input.addEventListener("change", () => {
-        values[config.id] = input.value;
-        validateAll();
-      });
-    });
-
-    /*
-     * Drug-treatment fields
-     */
-    const drugRow = document.getElementById("edit-drugChoice");
-
-    drugRow.insertAdjacentHTML(
-      "beforeend",
-      `
-        <div class="conditional" id="drugDetails">
-          <label class="field" for="drug">Drug</label>
-
-          <select id="drug">
+    <section class="card" id="q3">
+      <div class="title"><span class="num">3</span>User information</div>
+      <p class="hint">
+        These details apply to every wasp in this metadata file.
+      </p>
+      <div class="grid">
+        <div>
+          <label class="field" for="userName">User</label
+          ><input type="text" id="userName" placeholder="e.g. Jane Smith" />
+        </div>
+        <div>
+          <label class="field" for="career">Career stage</label
+          ><select id="career">
             <option value="">-- Select --</option>
-            <option>AKG</option>
-            <option>Caffeine</option>
-            <option>Rapamycin</option>
-            <option>Resveratrol</option>
-            <option>Nicotinamide Mononucleotide</option>
+            <option>Undergraduate</option>
+            <option>Masters</option>
+            <option>PhD</option>
+            <option>Postdoc</option>
           </select>
+        </div>
+      </div>
+    </section>
 
-          <label class="field" for="dose">
-            Dose(s), comma-separated
-          </label>
+    <section class="card" id="q4">
+      <div class="title"><span class="num">4</span>Experiment Focus</div>
+      <p class="hint">Select the main focus of this experiment.</p>
+      <label class="field" for="experimentFocus">Experiment focus</label>
+      <select id="experimentFocus">
+        <option value="">-- Select --</option>
+        <option>Nutrition</option>
+        <option>Drug Exposure</option>
+        <option>Light Cycle</option>
+        <option>Physical Intervention</option>
+        <option>Genetic Line</option>
+        <option>Other</option>
+      </select>
+    </section>
 
-          <input
+    <section class="card" id="q5">
+      <div class="title"><span class="num">5</span>Experimental Conditions</div>
+      <div class="control-intro">
+        The values below will be used automatically. Tick
+        <strong>Change</strong> only for factors that differ from the standard
+        control.
+      </div>
+      <div class="control-row">
+        <div class="control-name">Genetic line</div>
+        <label class="field" for="geneticLineChoice">Select genetic line</label
+        ><select id="geneticLineChoice">
+          <option value="Leicester" selected>Leicester</option>
+          <option value="Alternative">Alternative line(s)</option>
+        </select>
+        <div class="conditional" id="geneticLineDetails">
+          <label class="field" for="geneticLines"
+            >Alternative genetic line(s)</label
+          ><input
             type="text"
-            id="dose"
-            placeholder="e.g. 100uM, 5mM"
-          >
-
-          <label class="field" for="carrier">Carrier</label>
-
-          <select id="carrier">
-            <option value="">-- Select --</option>
-            <option>Water</option>
-            <option>Ethanol</option>
-            <option>DMSO</option>
-          </select>
+            id="geneticLines"
+            placeholder="e.g. AsymC, LabII"
+          />
+          <div class="food-note">
+            Enter multiple lines separated by commas. They will be balanced and
+            randomised across monitor positions.
+          </div>
+          <div class="error" id="geneticLineError">
+            Enter at least one genetic line.
+          </div>
         </div>
-      `
-    );
+      </div>
+      <div id="controls"></div>
+      <div class="summary" id="summary"></div>
+    </section>
 
-    /*
-     * Physical-treatment fields
-     */
-    const physicalRow = document.getElementById("edit-physical");
+    <section class="card" id="q6">
+      <div class="title"><span class="num">6</span>Incubator</div>
+      <p class="hint">
+        This incubator will apply to every wasp in this metadata file.
+      </p>
+      <label class="field" for="incubator">Which incubator?</label
+      ><select id="incubator">
+        <option value="">-- Select --</option>
+        <option>Incubator_1</option>
+        <option>Incubator_2</option>
+        <option>Incubator_3</option>
+        <option>Incubator_4</option>
+        <option>Unknown</option>
+      </select>
+      <button class="btn" id="generate" disabled>Generate metadata CSV</button>
+    </section>
+    <div class="footer">Built for the Social Epigenetics Lab</div>
 
-    physicalRow.insertAdjacentHTML(
-      "beforeend",
-      `
-        <div class="conditional" id="physicalDetails">
-          <label class="field" for="physicalType">
-            Physical treatment type
-          </label>
-
-          <select id="physicalType">
-            <option value="">-- Select --</option>
-            <option>Night Shaking</option>
-            <option>Night Red Light</option>
-            <option>Other</option>
-          </select>
-
-          <label class="field" for="physicalControl">
-            Include a balanced control group?
-          </label>
-
-          <select id="physicalControl">
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        </div>
-      `
-    );
-
-    /*
-     * Food composition
-     */
-    const FOOD_FIELDS = [
-      ["sucrose", "Sucrose", "% w/v"],
-      ["agar", "Agar", "% w/v"],
-      ["cornmeal", "Yellow cornmeal", "% w/v"],
-      ["brewersYeast", "Brewer's yeast", "% w/v"],
-      ["propionicAcid", "Propionic acid", "% v/v"],
-      ["nipagen", "Nipagen (active)", "% w/v"],
-      ["ethanol", "Ethanol-based Nipagen stock", "% v/v"]
-    ];
-
-    const FOOD_PRESETS = {
-      Nasonia_food: {
-        sucrose: "30",
-        agar: "1.5",
-        cornmeal: "0",
-        brewersYeast: "0",
-        propionicAcid: "0",
-        nipagen: "0",
-        ethanol: "0"
-      },
-
-      Drosophila_SYA: {
-        sucrose: "4",
-        agar: "1",
-        cornmeal: "6.65",
-        brewersYeast: "2",
-        propionicAcid: "0.4",
-        nipagen: "0.1316",
-        ethanol: "0.658"
-      }
-    };
-
-    const foodRow = document.getElementById("edit-baseMedia");
-
-    foodRow.insertAdjacentHTML(
-      "beforeend",
-      `
-        <div class="food-grid">
-          ${FOOD_FIELDS.map(([id, label, unit]) => `
-            <div>
-              <label class="field" for="${id}Concentration">
-                ${label} concentration(s), ${unit}
-              </label>
-
-              <input
-                type="text"
-                id="${id}Concentration"
-                value="${FOOD_PRESETS.Nasonia_food[id]}"
-                placeholder="Enter one or more values"
-              >
-            </div>
-          `).join("")}
-        </div>
-
-        <div class="food-note">
-          Enter comma-separated values to create multiple food groups.
-          The ethanol value for Drosophila SYA records the volume of the
-          ethanol-based Nipagen stock added (65.8 ml in a 10 L final
-          volume), not a measured pure-ethanol concentration.
-        </div>
-
-        <div class="error" id="error-food"></div>
-      `
-    );
-
-    function applyFoodPreset(name) {
-      const preset = FOOD_PRESETS[name];
-
-      if (!preset) {
-        return;
-      }
-
-      FOOD_FIELDS.forEach(([id]) => {
-        document.getElementById(`${id}Concentration`).value =
-          preset[id];
-      });
-
-      document.getElementById("baseMedia").value = name;
-      values.baseMedia = name;
-    }
-
-    document.getElementById("baseMedia").addEventListener(
-      "change",
-      () => {
-        applyFoodPreset(
-          document.getElementById("baseMedia").value
-        );
-
-        validateAll();
-      }
-    );
-
-    /*
-     * Validation and helper functions
-     */
-    function parseMonitors() {
-      const text = document.getElementById("monitors").value.trim();
-
-      if (!text) {
-        return [];
-      }
-
-      const monitorValues = text
-        .split(",")
-        .map(value => value.trim());
-
-      if (
-        monitorValues.some(value => !/^\d+$/.test(value))
-      ) {
-        return null;
-      }
-
-      return [
-        ...new Set(
-          monitorValues.map(Number)
-        )
+    <script>
+      const REGIONS = 32;
+      const configs = [
+        {
+          id: "sex",
+          label: "Sex",
+          def: "Male",
+          type: "select",
+          options: ["Male", "Female", "Mixed"],
+        },
+        {
+          id: "mated",
+          label: "Mated",
+          def: "Unknown",
+          type: "select",
+          options: ["Yes", "No", "Unknown"],
+        },
+        {
+          id: "baseMedia",
+          label: "Food composition",
+          def: "Nasonia_food",
+          type: "select",
+          options: ["Nasonia_food", "Drosophila_SYA", "Custom"],
+        },
+        {
+          id: "water",
+          label: "Water source",
+          def: "Greyline",
+          type: "select",
+          options: ["Greyline", "Ultrapure", "Tap", "Bottled"],
+        },
+        {
+          id: "foodChange",
+          label: "Food change",
+          def: "No",
+          type: "select",
+          options: ["No", "Daily", "Weekly", "Bi-Weekly"],
+        },
+        {
+          id: "drugChoice",
+          label: "Drug treatment",
+          def: "No",
+          type: "select",
+          options: ["No", "Yes"],
+        },
+        {
+          id: "physical",
+          label: "Physical treatment",
+          def: "No",
+          type: "select",
+          options: ["No", "Yes"],
+        },
+        {
+          id: "temperature",
+          label: "Temperature (°C)",
+          def: "25",
+          type: "text",
+          placeholder: "e.g. 25 or 20, 25, 30",
+        },
+        {
+          id: "ldCycle",
+          label: "Light:dark cycle",
+          def: "12:12",
+          type: "text",
+          placeholder: "e.g. 12:12",
+        },
       ];
-    }
+      const values = Object.fromEntries(configs.map((c) => [c.id, c.def]));
+      const controls = document.getElementById("controls");
 
-    function validDate(value) {
-      const match = value.match(
-        /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
-      );
-
-      if (!match) {
-        return false;
+      function optionsHtml(c) {
+        return c.options
+          .map(
+            (x) =>
+              `<option value="${x}" ${x === c.def ? "selected" : ""}>${x}</option>`,
+          )
+          .join("");
       }
-
-      const [, year, month, day, hour, minute, second] =
-        match.map(Number);
-
-      const date = new Date(
-        year,
-        month - 1,
-        day,
-        hour,
-        minute,
-        second
-      );
-
-      return (
-        date.getFullYear() === year &&
-        date.getMonth() === month - 1 &&
-        date.getDate() === day &&
-        hour < 24 &&
-        minute < 60 &&
-        second < 60
-      );
-    }
-
-    function validTemperatures(value) {
-      return value.split(",").every(item => {
-        const trimmed = item.trim();
-
-        return trimmed !== "" && !isNaN(Number(trimmed));
-      });
-    }
-
-    function concentrations(id) {
-      return document
-        .getElementById(id)
-        .value
-        .split(",")
-        .map(value => value.trim())
-        .filter(Boolean);
-    }
-
-    function validConcentrations(id) {
-      const entries = concentrations(id);
-
-      return (
-        entries.length > 0 &&
-        entries.every(value => {
-          return !isNaN(Number(value)) && Number(value) >= 0;
-        })
-      );
-    }
-
-    function syncFoodName() {
-      const matchingPreset = Object.entries(
-        FOOD_PRESETS
-      ).find(([, preset]) => {
-        return FOOD_FIELDS.every(([id]) => {
-          const currentValue = document
-            .getElementById(`${id}Concentration`)
-            .value
-            .trim();
-
-          return currentValue === preset[id];
+      configs.forEach((c) => {
+        const row = document.createElement("div");
+        row.className = "control-row" + (c.unresolved ? " unresolved" : "");
+        row.innerHTML = `<div class="control-head"><div><div class="control-name">${c.label}</div><div class="default">Default: ${c.def.replaceAll("_", " ")}${c.unresolved ? " — we will finalise this later" : ""}</div></div><label class="edit-toggle"><input type="checkbox" id="toggle-${c.id}"> Change</label></div><div class="editor" id="edit-${c.id}">${c.type === "select" ? `<select id="${c.id}">${optionsHtml(c)}</select>` : `<input type="text" id="${c.id}" value="${c.def}" placeholder="${c.placeholder}">`}<div class="error" id="error-${c.id}"></div></div>`;
+        controls.appendChild(row);
+        const toggle = row.querySelector(`#toggle-${c.id}`),
+          editor = row.querySelector(`#edit-${c.id}`),
+          input = row.querySelector(`#${c.id}`);
+        toggle.addEventListener("change", () => {
+          editor.classList.toggle("open", toggle.checked);
+          if (!toggle.checked) {
+            input.value = c.def;
+            values[c.id] = c.def;
+            if (
+              c.id === "baseMedia" &&
+              document.getElementById("sucroseConcentration")
+            )
+              applyFoodPreset("Nasonia_food");
+          }
+          validateAll();
+        });
+        input.addEventListener("input", () => {
+          values[c.id] = input.value.trim();
+          validateAll();
+        });
+        input.addEventListener("change", () => {
+          values[c.id] = input.value;
+          validateAll();
         });
       });
 
-      const foodSelect = document.getElementById("baseMedia");
-
-      foodSelect.value = matchingPreset
-        ? matchingPreset[0]
-        : "Custom";
-
-      values.baseMedia = foodSelect.value;
-    }
-
-    function validLightDarkCycle(value) {
-      const match = value.match(/^(\d{1,2}):(\d{1,2})$/);
-
-      return (
-        Boolean(match) &&
-        Number(match[1]) + Number(match[2]) === 24
+      const drugRow = document.getElementById("edit-drugChoice");
+      drugRow.insertAdjacentHTML(
+        "beforeend",
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select></div>`,
       );
-    }
-
-    function csv(value) {
-      const text = String(value ?? "");
-
-      if (/[",\n]/.test(text)) {
-        return `"${text.replaceAll('"', '""')}"`;
-      }
-
-      return text;
-    }
-
-    /*
-     * Produce an approximately balanced, randomised assignment.
-     */
-    function balanced(numberRequired, options) {
-      const assignments = Array.from(
-        { length: numberRequired },
-        (_, index) => options[index % options.length]
+      const physicalRow = document.getElementById("edit-physical");
+      physicalRow.insertAdjacentHTML(
+        "beforeend",
+        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option>Night Shaking</option><option>Night Red Light</option><option>Other</option></select><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
       );
 
-      for (
-        let index = assignments.length - 1;
-        index > 0;
-        index--
-      ) {
-        const randomIndex = Math.floor(
-          Math.random() * (index + 1)
+      const FOOD_FIELDS = [
+        ["sucrose", "Sucrose", "% w/v"],
+        ["agar", "Agar", "% w/v"],
+        ["cornmeal", "Yellow cornmeal", "% w/v"],
+        ["brewersYeast", "Brewer's yeast", "% w/v"],
+        ["propionicAcid", "Propionic acid", "% v/v"],
+        ["nipagen", "Nipagen (active)", "% w/v"],
+        ["ethanol", "Ethanol-based Nipagen stock", "% v/v"],
+      ];
+      const FOOD_PRESETS = {
+        Nasonia_food: {
+          sucrose: "30",
+          agar: "1.5",
+          cornmeal: "0",
+          brewersYeast: "0",
+          propionicAcid: "0",
+          nipagen: "0",
+          ethanol: "0",
+        },
+        Drosophila_SYA: {
+          sucrose: "4",
+          agar: "1",
+          cornmeal: "6.65",
+          brewersYeast: "2",
+          propionicAcid: "0.4",
+          nipagen: "0.1316",
+          ethanol: "0.658",
+        },
+      };
+      const foodRow = document.getElementById("edit-baseMedia");
+      foodRow.insertAdjacentHTML(
+        "beforeend",
+        `<div class="food-grid">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note">Enter comma-separated values to create multiple food groups. The ethanol value for Drosophila SYA records the volume of ethanol-based Nipagen stock added (65.8 ml in a 10 L final volume), not a measured pure-ethanol concentration.</div><div class="error" id="error-food"></div>`,
+      );
+      function applyFoodPreset(name) {
+        const preset = FOOD_PRESETS[name];
+        if (!preset) return;
+        FOOD_FIELDS.forEach(
+          ([id]) =>
+            (document.getElementById(`${id}Concentration`).value = preset[id]),
         );
-
-        [
-          assignments[index],
-          assignments[randomIndex]
-        ] = [
-          assignments[randomIndex],
-          assignments[index]
-        ];
+        document.getElementById("baseMedia").value = name;
+        values.baseMedia = name;
       }
-
-      return assignments;
-    }
-
-    function validateAll() {
-      /*
-       * Section 1: monitors
-       */
-      const monitors = parseMonitors();
-
-      const monitorOK =
-        Array.isArray(monitors) &&
-        monitors.length > 0;
-
-      document
-        .getElementById("q2")
-        .classList.toggle("visible", monitorOK);
-
-      document.getElementById("monitorError").style.display =
-        monitors === null ? "block" : "none";
-
-      document.getElementById("monitorValid").textContent =
-        monitorOK
-          ? `✓ ${monitors.length} monitor(s); ${
-              monitors.length * REGIONS
-            } rows will be generated`
-          : "";
-
-      /*
-       * Section 2: start date
-       */
-      const startDate = document
-        .getElementById("startDate")
-        .value
-        .trim();
-
-      const dateOK =
-        monitorOK &&
-        validDate(startDate);
-
-      document.getElementById("dateError").style.display =
-        startDate && !validDate(startDate)
-          ? "block"
-          : "none";
-
-      document.getElementById("dateValid").textContent =
-        dateOK ? "✓ Valid date format" : "";
-
-      document
-        .getElementById("q3")
-        .classList.toggle("visible", dateOK);
-
-      /*
-       * Genetic line
-       */
-      const alternativeLines =
-        document.getElementById("geneticLineChoice").value ===
-        "Alternative";
-
-      const geneticLineEntries = document
-        .getElementById("geneticLines")
-        .value
-        .split(",")
-        .map(value => value.trim())
-        .filter(Boolean);
-
-      const geneticLineOK =
-        !alternativeLines ||
-        geneticLineEntries.length > 0;
-
-      document
-        .getElementById("geneticLineDetails")
-        .classList.toggle("open", alternativeLines);
-
-      document.getElementById("geneticLineError").style.display =
-        alternativeLines && !geneticLineOK
-          ? "block"
-          : "none";
-
-      /*
-       * Section 3: user information
-       */
-      const userInformationOK =
-        dateOK &&
-        document.getElementById("userName").value.trim() &&
-        document.getElementById("career").value;
-
-      document
-        .getElementById("q4")
-        .classList.toggle(
-          "visible",
-          Boolean(userInformationOK)
-        );
-
-      /*
-       * Section 4: experiment focus
-       */
-      const experimentFocusOK =
-        userInformationOK &&
-        document.getElementById("experimentFocus").value;
-
-      document
-        .getElementById("q5")
-        .classList.toggle(
-          "visible",
-          Boolean(experimentFocusOK)
-        );
-
-      /*
-       * Conditional treatment fields
-       */
-      document
-        .getElementById("drugDetails")
-        .classList.toggle(
-          "open",
-          values.drugChoice === "Yes"
-        );
-
-      document
-        .getElementById("physicalDetails")
-        .classList.toggle(
-          "open",
-          values.physical === "Yes"
-        );
-
-      /*
-       * Food validation
-       */
-      const foodOK = FOOD_FIELDS.every(([id]) => {
-        return validConcentrations(`${id}Concentration`);
+      document.getElementById("baseMedia").addEventListener("change", () => {
+        applyFoodPreset(document.getElementById("baseMedia").value);
+        validateAll();
       });
 
-      /*
-       * Experimental-condition validation
-       */
-      let conditionsOK =
-        validTemperatures(values.temperature) &&
-        validLightDarkCycle(values.ldCycle) &&
-        foodOK;
-
-      if (values.drugChoice === "Yes") {
-        conditionsOK =
-          conditionsOK &&
-          document.getElementById("drug").value &&
-          document.getElementById("dose").value.trim() &&
-          document.getElementById("carrier").value;
+      function parseMonitors() {
+        const s = document.getElementById("monitors").value.trim();
+        if (!s) return [];
+        const a = s.split(",").map((x) => x.trim());
+        if (a.some((x) => !/^\d+$/.test(x))) return null;
+        return [...new Set(a.map(Number))];
+      }
+      function validDate(s) {
+        const m = s.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+        if (!m) return false;
+        const [, y, mo, d, h, mi, se] = m.map(Number);
+        const dt = new Date(y, mo - 1, d, h, mi, se);
+        return (
+          dt.getFullYear() === y &&
+          dt.getMonth() === mo - 1 &&
+          dt.getDate() === d &&
+          h < 24 &&
+          mi < 60 &&
+          se < 60
+        );
+      }
+      function validTemps(s) {
+        return s
+          .split(",")
+          .every((x) => x.trim() !== "" && !isNaN(Number(x.trim())));
+      }
+      function concentrations(id) {
+        return document
+          .getElementById(id)
+          .value.split(",")
+          .map((x) => x.trim())
+          .filter(Boolean);
+      }
+      function validConcentrations(id) {
+        const a = concentrations(id);
+        return (
+          a.length > 0 && a.every((x) => !isNaN(Number(x)) && Number(x) >= 0)
+        );
+      }
+      function syncFoodName() {
+        const match = Object.entries(FOOD_PRESETS).find(([, preset]) =>
+          FOOD_FIELDS.every(
+            ([id]) =>
+              document.getElementById(`${id}Concentration`).value.trim() ===
+              preset[id],
+          ),
+        );
+        document.getElementById("baseMedia").value = match
+          ? match[0]
+          : "Custom";
+        values.baseMedia = document.getElementById("baseMedia").value;
+      }
+      function validLD(s) {
+        const m = s.match(/^(\d{1,2}):(\d{1,2})$/);
+        return !!m && Number(m[1]) + Number(m[2]) === 24;
+      }
+      function csv(v) {
+        const s = String(v ?? "");
+        return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
+      }
+      function balanced(n, opts) {
+        const a = Array.from({ length: n }, (_, i) => opts[i % opts.length]);
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
       }
 
-      if (values.physical === "Yes") {
-        conditionsOK =
-          conditionsOK &&
-          document.getElementById("physicalType").value;
-      }
-
-      const temperatureError =
-        document.getElementById("error-temperature");
-
-      temperatureError.textContent =
-        validTemperatures(values.temperature)
+      function validateAll() {
+        const mons = parseMonitors(),
+          monitorOK = Array.isArray(mons) && mons.length > 0;
+        document.getElementById("q2").classList.toggle("visible", monitorOK);
+        document.getElementById("monitorError").style.display =
+          mons === null ? "block" : "none";
+        document.getElementById("monitorValid").textContent = monitorOK
+          ? `✓ ${mons.length} monitor(s); ${mons.length * REGIONS} rows will be generated`
+          : "";
+        const date = document.getElementById("startDate").value.trim(),
+          dateOK = monitorOK && validDate(date);
+        document.getElementById("dateError").style.display =
+          date && !validDate(date) ? "block" : "none";
+        document.getElementById("dateValid").textContent = dateOK
+          ? "✓ Valid date format"
+          : "";
+        document.getElementById("q3").classList.toggle("visible", dateOK);
+        const alternativeLines =
+            document.getElementById("geneticLineChoice").value ===
+            "Alternative",
+          lineOK =
+            !alternativeLines ||
+            document
+              .getElementById("geneticLines")
+              .value.split(",")
+              .some((x) => x.trim());
+        document
+          .getElementById("geneticLineDetails")
+          .classList.toggle("open", alternativeLines);
+        document.getElementById("geneticLineError").style.display =
+          alternativeLines && !lineOK ? "block" : "none";
+        const preOK =
+          dateOK &&
+          document.getElementById("userName").value.trim() &&
+          document.getElementById("career").value;
+        document.getElementById("q4").classList.toggle("visible", !!preOK);
+        const focusOK =
+          preOK && document.getElementById("experimentFocus").value;
+        document.getElementById("q5").classList.toggle("visible", !!focusOK);
+        document
+          .getElementById("drugDetails")
+          .classList.toggle("open", values.drugChoice === "Yes");
+        document
+          .getElementById("physicalDetails")
+          .classList.toggle("open", values.physical === "Yes");
+        const foodOK = FOOD_FIELDS.every(([id]) =>
+          validConcentrations(`${id}Concentration`),
+        );
+        let conditionsOK =
+          validTemps(values.temperature) && validLD(values.ldCycle) && foodOK;
+        if (values.drugChoice === "Yes")
+          conditionsOK =
+            conditionsOK &&
+            document.getElementById("drug").value &&
+            document.getElementById("dose").value.trim() &&
+            document.getElementById("carrier").value;
+        if (values.physical === "Yes")
+          conditionsOK =
+            conditionsOK && document.getElementById("physicalType").value;
+        document.getElementById("error-temperature").textContent = validTemps(
+          values.temperature,
+        )
           ? ""
           : "Enter one or more numeric temperatures separated by commas.";
-
-      temperatureError.style.display =
-        validTemperatures(values.temperature)
+        document.getElementById("error-temperature").style.display = validTemps(
+          values.temperature,
+        )
           ? "none"
           : "block";
-
-      const lightDarkError =
-        document.getElementById("error-ldCycle");
-
-      lightDarkError.textContent =
-        validLightDarkCycle(values.ldCycle)
+        document.getElementById("error-ldCycle").textContent = validLD(
+          values.ldCycle,
+        )
           ? ""
           : "Light and dark hours must use L:D format and total 24.";
-
-      lightDarkError.style.display =
-        validLightDarkCycle(values.ldCycle)
+        document.getElementById("error-ldCycle").style.display = validLD(
+          values.ldCycle,
+        )
           ? "none"
           : "block";
-
-      const foodError =
-        document.getElementById("error-food");
-
-      foodError.textContent =
-        foodOK
+        document.getElementById("error-food").textContent = foodOK
           ? ""
           : "Enter one or more non-negative numeric concentrations, separated by commas.";
+        document.getElementById("error-food").style.display = foodOK
+          ? "none"
+          : "block";
+        const conditionsComplete = focusOK && lineOK && conditionsOK;
+        document
+          .getElementById("q6")
+          .classList.toggle("visible", !!conditionsComplete);
+        const incubatorOK =
+          conditionsComplete && document.getElementById("incubator").value;
+        document.getElementById("generate").disabled = !incubatorOK;
+        const completed = [
+          monitorOK,
+          dateOK,
+          preOK,
+          focusOK,
+          conditionsComplete,
+          incubatorOK,
+        ].filter(Boolean).length;
+        document.getElementById("fill").style.width =
+          `${(completed / 6) * 100}%`;
+        document.getElementById("progressText").textContent =
+          `${completed} of 6 sections completed`;
+        document.getElementById("summary").innerHTML =
+          "<strong>Metadata values:</strong> " +
+          configs
+            .map((c) => `${c.label}: ${values[c.id].replaceAll("_", " ")}`)
+            .join(" · ") +
+          FOOD_FIELDS.map(
+            ([id, label, unit]) =>
+              ` · ${label}: ${concentrations(`${id}Concentration`).join(", ")} ${unit}`,
+          ).join("");
+      }
 
-      foodError.style.display =
-        foodOK ? "none" : "block";
-
-      /*
-       * Section 5 and 6 visibility
-       */
-      const conditionsComplete =
-        experimentFocusOK &&
-        geneticLineOK &&
-        conditionsOK;
-
-      document
-        .getElementById("q6")
-        .classList.toggle(
-          "visible",
-          Boolean(conditionsComplete)
+      function tomorrow() {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        const p = (n) => String(n).padStart(2, "0");
+        document.getElementById("startDate").value =
+          `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} 08:00:00`;
+      }
+      function generate() {
+        const mons = parseMonitors(),
+          temps = values.temperature.split(",").map((x) => x.trim()),
+          sexes = values.sex === "Mixed" ? ["Male", "Female"] : [values.sex],
+          geneticLines =
+            document.getElementById("geneticLineChoice").value === "Leicester"
+              ? ["Leicester"]
+              : document
+                  .getElementById("geneticLines")
+                  .value.split(",")
+                  .map((x) => x.trim())
+                  .filter(Boolean);
+        const drugYes = values.drugChoice === "Yes",
+          physYes = values.physical === "Yes";
+        const ingredientValues = Object.fromEntries(
+          FOOD_FIELDS.map(([id]) => [id, concentrations(`${id}Concentration`)]),
         );
-
-      const incubatorOK =
-        conditionsComplete &&
-        document.getElementById("incubator").value;
-
-      document.getElementById("generate").disabled =
-        !incubatorOK;
-
-      /*
-       * Progress bar
-       */
-      const completed = [
-        monitorOK,
-        dateOK,
-        userInformationOK,
-        experimentFocusOK,
-        conditionsComplete,
-        incubatorOK
-      ].filter(Boolean).length;
-
-      document.getElementById("fill").style.width =
-        `${(completed / 6) * 100}%`;
-
-      document.getElementById("progressText").textContent =
-        `${completed} of 6 sections completed`;
-
-      /*
-       * Metadata summary
-       */
-      document.getElementById("summary").innerHTML =
-        "<strong>Metadata values:</strong> " +
-        configs.map(config => {
-          return (
-            `${config.label}: ` +
-            values[config.id].replaceAll("_", " ")
-          );
-        }).join(" · ") +
-        FOOD_FIELDS.map(([id, label, unit]) => {
-          return (
-            ` · ${label}: ` +
-            `${concentrations(`${id}Concentration`).join(", ")} ` +
-            unit
-          );
-        }).join("");
-    }
-
-    /*
-     * Set tomorrow at 08:00 as the default date.
-     */
-    function setTomorrowAsDefault() {
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-
-      const pad = number =>
-        String(number).padStart(2, "0");
-
-      document.getElementById("startDate").value =
-        `${date.getFullYear()}-` +
-        `${pad(date.getMonth() + 1)}-` +
-        `${pad(date.getDate())} 08:00:00`;
-    }
-
-    /*
-     * Generate the CSV.
-     */
-    function generate() {
-      const monitors = parseMonitors();
-
-      const temperatures = values.temperature
-        .split(",")
-        .map(value => value.trim());
-
-      const sexes =
-        values.sex === "Mixed"
-          ? ["Male", "Female"]
-          : [values.sex];
-
-      const geneticLines =
-        document.getElementById("geneticLineChoice").value ===
-        "Leicester"
-          ? ["Leicester"]
-          : document
-              .getElementById("geneticLines")
-              .value
-              .split(",")
-              .map(value => value.trim())
-              .filter(Boolean);
-
-      const drugTreatment =
-        values.drugChoice === "Yes";
-
-      const physicalTreatment =
-        values.physical === "Yes";
-
-      /*
-       * Read all food concentrations.
-       */
-      const ingredientValues = Object.fromEntries(
-        FOOD_FIELDS.map(([id]) => {
-          return [
-            id,
-            concentrations(`${id}Concentration`)
-          ];
-        })
-      );
-
-      /*
-       * Create every combination of the food concentrations.
-       *
-       * For example, sucrose values 10, 20 and 30 with one
-       * agar value will create three food groups.
-       */
-      const foodGroups = FOOD_FIELDS.reduce(
-        (groups, [id]) => {
-          return groups.flatMap(group => {
-            return ingredientValues[id].map(value => {
-              return {
-                ...group,
-                [id]: value
-              };
-            });
-          });
-        },
-        [{}]
-      );
-
-      const header = [
-        "file",
-        "start_datetime",
-        "stop_datetime",
-        "region_id",
-        "experiment_focus",
-        "sex",
-        "mated",
-        "genetic_line",
-        "food_formulation",
-        "sucrose_pct_wv",
-        "agar_pct_wv",
-        "cornmeal_pct_wv",
-        "brewers_yeast_pct_wv",
-        "propionic_acid_pct_vv",
-        "nipagen_pct_wv",
-        "ethanol_stock_pct_vv",
+        const foods = FOOD_FIELDS.reduce(
+          (groups, [id]) =>
+            groups.flatMap((g) =>
+              ingredientValues[id].map((value) => ({ ...g, [id]: value })),
+            ),
+          [{}],
+        );
+        const header = [
+          "file",
+          "start_datetime",
+          "stop_datetime",
+          "region_id",
+          "experiment_focus",
+          "sex",
+          "mated",
+          "genetic_line",
+          "food_formulation",
+          "sucrose_pct_wv",
+          "agar_pct_wv",
+          "cornmeal_pct_wv",
+          "brewers_yeast_pct_wv",
+          "propionic_acid_pct_vv",
+          "nipagen_pct_wv",
+          "ethanol_stock_pct_vv",
+          "incubator",
+          "water_source",
+          "user",
+          "career_stage",
+          "food_change",
+          "drug",
+          "dose",
+          "carrier",
+          "physical_treatment",
+          "temperature",
+          "ld_cycle",
+          "dataset_id",
+        ];
+        const rows = [header.join(",")];
+        const dataset =
+          "NAS_" +
+          new Date()
+            .toISOString()
+            .replace(/[-:TZ.]/g, "")
+            .slice(0, 14);
+        mons.forEach((m) => {
+          const sexA = balanced(REGIONS, sexes),
+            lineA = balanced(REGIONS, geneticLines),
+            tempA = balanced(REGIONS, temps),
+            foodA = balanced(REGIONS, foods);
+          for (let r = 1; r <= REGIONS; r++) {
+            const f = foodA[r - 1];
+            rows.push(
+              [
+                `Monitor${m}.txt`,
+                document.getElementById("startDate").value,
+                "",
+                r,
+                document.getElementById("experimentFocus").value,
+                sexA[r - 1],
+                values.mated,
+                lineA[r - 1],
+                values.baseMedia,
+                f.sucrose,
+                f.agar,
+                f.cornmeal,
+                f.brewersYeast,
+                f.propionicAcid,
+                f.nipagen,
+                f.ethanol,
+                document.getElementById("incubator").value,
+                values.water,
+                document.getElementById("userName").value.trim(),
+                document.getElementById("career").value,
+                values.foodChange,
+                drugYes ? document.getElementById("drug").value : "Control",
+                drugYes ? document.getElementById("dose").value.trim() : "0",
+                drugYes ? document.getElementById("carrier").value : "None",
+                physYes ? document.getElementById("physicalType").value : "No",
+                tempA[r - 1],
+                values.ldCycle,
+                dataset,
+              ]
+                .map(csv)
+                .join(","),
+            );
+          }
+        });
+        const blob = new Blob([rows.join("\n")], {
+            type: "text/csv;charset=utf-8",
+          }),
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "metadata.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+      [
+        "monitors",
+        "startDate",
         "incubator",
-        "water_source",
-        "user",
-        "career_stage",
-        "food_change",
+        "userName",
+        "career",
+        "experimentFocus",
+        "geneticLineChoice",
+        "geneticLines",
         "drug",
         "dose",
         "carrier",
-        "physical_treatment",
-        "temperature",
-        "ld_cycle",
-        "dataset_id"
-      ];
-
-      const rows = [header.join(",")];
-
-      const datasetID =
-        "NAS_" +
-        new Date()
-          .toISOString()
-          .replace(/[-:TZ.]/g, "")
-          .slice(0, 14);
-
-      monitors.forEach(monitor => {
-        const sexAssignments =
-          balanced(REGIONS, sexes);
-
-        const lineAssignments =
-          balanced(REGIONS, geneticLines);
-
-        const temperatureAssignments =
-          balanced(REGIONS, temperatures);
-
-        const foodAssignments =
-          balanced(REGIONS, foodGroups);
-
-        for (
-          let region = 1;
-          region <= REGIONS;
-          region++
-        ) {
-          const food = foodAssignments[region - 1];
-
-          const row = [
-            `Monitor${monitor}.txt`,
-            document.getElementById("startDate").value,
-            "",
-            region,
-            document.getElementById("experimentFocus").value,
-            sexAssignments[region - 1],
-            values.mated,
-            lineAssignments[region - 1],
-            values.baseMedia,
-            food.sucrose,
-            food.agar,
-            food.cornmeal,
-            food.brewersYeast,
-            food.propionicAcid,
-            food.nipagen,
-            food.ethanol,
-            document.getElementById("incubator").value,
-            values.water,
-            document.getElementById("userName").value.trim(),
-            document.getElementById("career").value,
-            values.foodChange,
-            drugTreatment
-              ? document.getElementById("drug").value
-              : "Control",
-            drugTreatment
-              ? document.getElementById("dose").value.trim()
-              : "0",
-            drugTreatment
-              ? document.getElementById("carrier").value
-              : "None",
-            physicalTreatment
-              ? document.getElementById("physicalType").value
-              : "No",
-            temperatureAssignments[region - 1],
-            values.ldCycle,
-            datasetID
-          ];
-
-          rows.push(
-            row.map(csv).join(",")
-          );
-        }
+        "physicalType",
+        "physicalControl",
+        ...FOOD_FIELDS.map(([id]) => `${id}Concentration`),
+      ].forEach((id) => {
+        const e = document.getElementById(id);
+        e.addEventListener("input", () => {
+          if (id.endsWith("Concentration")) syncFoodName();
+          validateAll();
+        });
+        e.addEventListener("change", () => {
+          if (id.endsWith("Concentration")) syncFoodName();
+          validateAll();
+        });
       });
-
-      const blob = new Blob(
-        [rows.join("\n")],
-        {
-          type: "text/csv;charset=utf-8"
-        }
-      );
-
-      const downloadLink =
-        document.createElement("a");
-
-      downloadLink.href =
-        URL.createObjectURL(blob);
-
-      downloadLink.download =
-        "metadata.csv";
-
-      downloadLink.click();
-
-      URL.revokeObjectURL(
-        downloadLink.href
-      );
-    }
-
-    /*
-     * Add listeners to the main form fields.
-     */
-    const formFieldIDs = [
-      "monitors",
-      "startDate",
-      "incubator",
-      "userName",
-      "career",
-      "experimentFocus",
-      "geneticLineChoice",
-      "geneticLines",
-      "drug",
-      "dose",
-      "carrier",
-      "physicalType",
-      "physicalControl",
-      ...FOOD_FIELDS.map(([id]) => {
-        return `${id}Concentration`;
-      })
-    ];
-
-    formFieldIDs.forEach(id => {
-      const element =
-        document.getElementById(id);
-
-      element.addEventListener("input", () => {
-        if (id.endsWith("Concentration")) {
-          syncFoodName();
-        }
-
-        validateAll();
-      });
-
-      element.addEventListener("change", () => {
-        if (id.endsWith("Concentration")) {
-          syncFoodName();
-        }
-
-        validateAll();
-      });
-    });
-
-    document
-      .getElementById("generate")
-      .addEventListener("click", generate);
-
-    setTomorrowAsDefault();
-    validateAll();
-  </script>
-</body>
+      document.getElementById("generate").addEventListener("click", generate);
+      tomorrow();
+      validateAll();
+    </script>
+  </body>
 </html>
