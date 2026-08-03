@@ -1,1847 +1,1496 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nasonia Trikinetics Metadata Generator</title>
-    <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
-    <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-            color: #1a202c;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        /* Header section */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-        
-        .header .logo {
-            width: 120px;
-            height: auto;
-        }
-        
-        .header-text {
-            text-align: left;
-        }
-        
-        .header h1 {
-            color: #1e3a5f;
-            margin: 0 0 6px 0;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        
-        .header .subtitle {
-            color: #64748b;
-            font-size: 14px;
-            margin: 0;
-        }
-        
-        .header .lab-name {
-            color: #d97706;
-            font-size: 13px;
-            font-weight: 600;
-            margin: 8px 0 0 0;
-        }
-        
-        .layout {
-            display: flex;
-            gap: 30px;
-            align-items: flex-start;
-        }
-        
-        .main-content {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .sidebar {
-            width: 280px;
-            flex-shrink: 0;
-        }
-        
-        .sidebar-box {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-            border-left: 4px solid #d97706;
-            padding: 24px;
-            border-radius: 0 12px 12px 0;
-            position: sticky;
-            top: 20px;
-            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.15);
-        }
-        
-        .sidebar-box h3 {
-            margin: 0 0 12px 0;
-            font-size: 15px;
-            font-weight: 600;
-            color: #92400e;
-        }
-        
-        .sidebar-box p {
-            font-size: 13px;
-            color: #a16207;
-            margin: 0 0 18px 0;
-            line-height: 1.5;
-        }
-        
-        .sidebar-box a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-            color: white;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
-        }
-        
-        .sidebar-box a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
-        }
-        
-        .intro {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border-left: 4px solid #2563eb;
-            padding: 20px 24px;
-            margin-bottom: 30px;
-            border-radius: 0 12px 12px 0;
-            font-size: 14px;
-            color: #1e40af;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
-        }
-        
-        /* Progress indicator */
-        .progress-container {
-            background: white;
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-        }
-        
-        .progress-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #64748b;
-            margin-bottom: 10px;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
-            border-radius: 4px;
-            transition: width 0.4s ease;
-            width: 0%;
-        }
-        
-        .progress-text {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 8px;
-            text-align: right;
-        }
-        
-        .question {
-            background: white;
-            padding: 28px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            margin-bottom: 20px;
-            display: none;
-            border: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
-        }
-        
-        .question:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-        
-        .question.visible {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .question-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-            color: white;
-            border-radius: 50%;
-            font-size: 13px;
-            font-weight: 600;
-            margin-right: 12px;
-        }
-        
-        .question label {
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1e293b;
-            font-size: 15px;
-        }
-        
-        .question .hint {
-            font-size: 13px;
-            color: #64748b;
-            margin-bottom: 16px;
-            padding-left: 40px;
-            line-height: 1.5;
-        }
-        
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
-            font-family: inherit;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            background: #f8fafc;
-        }
-        
-        input[type="text"]:hover,
-        select:hover {
-            border-color: #cbd5e1;
-        }
-        
-        input[type="text"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #d97706;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
-        }
-        
-        .error {
-            color: #dc2626;
-            font-size: 13px;
-            margin-top: 10px;
-            display: none;
-            padding: 10px 14px;
-            background: #fef2f2;
-            border-radius: 8px;
-            border-left: 3px solid #dc2626;
-        }
-        
-        .valid {
-            color: #16a34a;
-            font-size: 13px;
-            margin-top: 10px;
-            display: none;
-            padding: 10px 14px;
-            background: #f0fdf4;
-            border-radius: 8px;
-            border-left: 3px solid #16a34a;
-        }
-        
-        .preview {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 16px;
-            margin-top: 16px;
-            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
-            font-size: 13px;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-        
-        .preview-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #64748b;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .actions {
-            margin-top: 30px;
-            display: none;
-            text-align: center;
-        }
-        
-        .actions.visible {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .generate-btn {
-            padding: 18px 48px;
-            font-size: 16px;
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
-        }
-        
-        .generate-btn:hover {
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
-        }
-        
-        .drug-entry {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 16px;
-        }
-        
-        .drug-entry h4 {
-            margin: 0 0 12px 0;
-            color: #1e293b;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .drug-entry .dose-input {
-            margin-top: 12px;
-        }
-        
-        .drug-entry .dose-input label {
-            font-weight: 500;
-            font-size: 13px;
-            color: #475569;
-        }
-        
-        .add-drug-btn {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            margin-top: 16px;
-            padding: 12px 24px;
-            font-size: 14px;
-            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
-        }
-        
-        .add-drug-btn:hover {
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-        }
-        
-        .remove-drug-btn {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            padding: 8px 14px;
-            font-size: 12px;
-            margin-left: 10px;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-        }
-        
-        .remove-drug-btn:hover {
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-        }
-        
-        .drug-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .checkbox-group {
-            margin-top: 12px;
-        }
-        
-        .checkbox-group label {
-            display: inline-flex;
-            align-items: center;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 14px;
-            color: #475569;
-        }
-        
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 10px;
-            accent-color: #d97706;
-        }
-        
-        .treatment-preview {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            border: 1px solid #6ee7b7;
-            border-radius: 10px;
-            padding: 18px;
-            margin-top: 18px;
-        }
-        
-        .treatment-preview h4 {
-            margin: 0 0 12px 0;
-            color: #065f46;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        
-        .treatment-preview ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-        
-        .treatment-preview li {
-            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
-            font-size: 12px;
-            color: #047857;
-            margin-bottom: 4px;
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 24px;
-            color: #64748b;
-            font-size: 13px;
-        }
-        
-        .footer a {
-            color: #d97706;
-            text-decoration: none;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 768px) {
-            .layout {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                order: -1;
-            }
-            
-            .sidebar-box {
-                position: static;
-            }
-            
-            .header h1 {
-                font-size: 20px;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .header-text {
-                text-align: center;
-            }
-            
-            .question {
-                padding: 20px;
-            }
-            
-            .question .hint {
-                padding-left: 0;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Nasonia Trikinetics Control Metadata Generator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 1050px;
+      margin: auto;
+      padding: 36px 20px;
+      background: linear-gradient(135deg, #f5f7fa, #e4e8ec);
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    .header,
+    .card,
+    .progress {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px #00000012;
+    }
+
+    .header {
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: #1e3a5f;
+      font-size: 25px;
+    }
+
+    .header p {
+      margin: 7px 0 0;
+      color: #64748b;
+    }
+
+    .lab {
+      color: #d97706 !important;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .progress {
+      padding: 18px 22px;
+      margin-bottom: 22px;
+    }
+
+    .bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #d97706, #f59e0b);
+      transition: 0.25s;
+    }
+
+    .progress-text {
+      text-align: right;
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .card {
+      display: none;
+      padding: 26px;
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .card.visible {
+      display: block;
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      background: #d97706;
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .hint {
+      color: #64748b;
+      font-size: 13px;
+      margin: 0 0 16px 40px;
+    }
+
+    label.field {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin: 14px 0 6px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 9px;
+      background: #f8fafc;
+      font: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #d97706;
+      background: #fff;
+    }
+
+    .error {
+      display: none;
+      color: #b91c1c;
+      font-size: 13px;
+      margin-top: 7px;
+    }
+
+    .valid {
+      color: #047857;
+      font-size: 13px;
+      margin-top: 7px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .control-intro {
+      background: #eff6ff;
+      border-left: 4px solid #2563eb;
+      padding: 15px;
+      border-radius: 0 9px 9px 0;
+      color: #1e40af;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    .control-row {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0;
+      background: #fafafa;
+    }
+
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .control-name {
+      font-weight: 700;
+    }
+
+    .default {
+      color: #047857;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .edit-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .editor {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .editor.open {
+      display: block;
+    }
+
+    .conditional {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .conditional.open {
+      display: block;
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .food-note {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #d97706, #b45309);
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .summary {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 13px;
+    }
+
+    .summary strong {
+      color: #047857;
+    }
+
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      padding: 24px;
+    }
+
+    @media (max-width: 760px) {
+      .grid,
+      .food-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hint {
+        margin-left: 0;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-content">
-            <img src="https://raw.githubusercontent.com/C-L-Thomas/Nasonia_Trikinetics_Metadata_Generator/main/logo.png" alt="Social Epigenetics Lab" class="logo">
-            <div class="header-text">
-                <h1>Nasonia Trikinetics Metadata Generator</h1>
-                <p class="subtitle">Generate properly formatted metadata files for DAM system experiments</p>
-                <p class="lab-name">Social Epigenetics Lab</p>
-            </div>
-        </div>
+
+  <div class="header">
+    <h1>Nasonia Trikinetics Metadata Generator</h1>
+    <p>Build a control experiment quickly, then change only the factors that differ</p>
+    <p class="lab">Social Epigenetics Lab</p>
+  </div>
+
+  <div class="progress">
+    <div class="bar">
+      <div class="fill" id="fill"></div>
     </div>
-    
-    <div class="layout">
-        <div class="main-content">
-            <!-- Progress indicator -->
-            <div class="progress-container">
-                <div class="progress-label">Your progress</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="progress-text" id="progress-text">0 of 16 steps completed</div>
-            </div>
-            
-            <div class="intro">
-                <strong>Welcome!</strong> This tool will guide you through creating a metadata CSV file for your Nasonia experiments. Complete each step below — questions will appear as you progress.
-            </div>
-            
-            <!-- Question 1: Monitor numbers -->
-            <div class="question visible" id="q-monitors">
-                <label for="monitors">
-                    <span class="question-number">1</span>
-                    Please list the monitor numbers being used
-                </label>
-                <div class="hint">Enter numbers separated by commas (e.g., 4, 12, 16, 23)</div>
-                <input type="text" id="monitors" placeholder="e.g., 74, 75, 76, 77">
-                <div class="error" id="monitors-error">Please enter valid monitor numbers separated by commas</div>
-                
-                <div class="preview" id="monitors-preview" style="display: none;">
-                    <div class="preview-label">Preview: file column values</div>
-                    <div id="monitors-preview-content"></div>
-                </div>
-            </div>
-            
-            <!-- Question 2: Start date -->
-            <div class="question" id="q-start-date">
-                <label for="start-date">
-                    <span class="question-number">2</span>
-                    What is your start date?
-                </label>
-                <div class="hint">Format: yyyy-mm-dd hh:mm:ss (e.g., 2026-07-03 08:00:00)<br>Standard procedure is to start at 08:00:00 the day after placing the Nasonia in the tubes.</div>
-                <input type="text" id="start-date" placeholder="e.g., 2026-07-03 08:00:00">
-                <div class="error" id="start-date-error">Please enter a valid date in yyyy-mm-dd hh:mm:ss format</div>
-                <div class="valid" id="start-date-valid">✓ Valid date format</div>
-            </div>
-            
-            <!-- Question 3: Sex -->
-            <div class="question" id="q-sex">
-                <label for="sex">
-                    <span class="question-number">3</span>
-                    What sex wasp are you using?
-                </label>
-                <div class="hint">Select the sex of the wasps in your experiment</div>
-                <select id="sex">
-                    <option value="">-- Select an option --</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Mixed">Mixed (randomized)</option>
-                </select>
-                <div class="valid" id="sex-valid" style="display: none;">✓ Sex selected</div>
-            </div>
-            
-            <!-- Question 4: Mated -->
-            <div class="question" id="q-mated">
-                <label for="mated">
-                    <span class="question-number">4</span>
-                    Are your wasps mated?
-                </label>
-                <div class="hint">Select the mating status of your wasps</div>
-                <select id="mated">
-                    <option value="">-- Select an option --</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Unknown">Unknown</option>
-                </select>
-                <div class="valid" id="mated-valid" style="display: none;">✓ Mating status selected</div>
-            </div>
-            
-            <!-- Question 5: Base media -->
-            <div class="question" id="q-base-media">
-                <label for="base-media">
-                    <span class="question-number">5</span>
-                    What is your base media?
-                </label>
-                <div class="hint">Select the food media used in your experiment</div>
-                <select id="base-media">
-                    <option value="">-- Select an option --</option>
-                    <option value="Nasonia_Sucrose">Nasonia_Sucrose</option>
-                    <option value="Drosophila_SYA">Drosophila_SYA</option>
-                    <option value="Mixed">Mixed</option>
-                </select>
-                <div class="valid" id="base-media-valid" style="display: none;">✓ Base media selected</div>
-            </div>
-            
-            <!-- Question 6: Incubator -->
-            <div class="question" id="q-incubator">
-                <label for="incubator">
-                    <span class="question-number">6</span>
-                    Which incubator are your wasps housed in?
-                </label>
-                <div class="hint">Select the incubator location</div>
-                <select id="incubator">
-                    <option value="">-- Select an option --</option>
-                    <option value="Incubator_1">Incubator_1</option>
-                    <option value="Incubator_2">Incubator_2</option>
-                    <option value="Incubator_3">Incubator_3</option>
-                    <option value="Incubator_4">Incubator_4</option>
-                    <option value="Unknown">Unknown</option>
-                </select>
-                <div class="valid" id="incubator-valid" style="display: none;">✓ Incubator selected</div>
-            </div>
 
-            <!-- Question 7: Water Source -->
-            <div class="question" id="q-water-source">
-                <label for="water-source">
-                    <span class="question-number">7</span>
-                    What water source was used?
-                </label>
-                <div class="hint">Select the source of water used to prepare the media</div>
+    <div class="progress-text" id="progressText">
+      0 of 6 sections completed
+    </div>
+  </div>
 
-                <select id="water-source">
-                    <option value="">-- Select an option --</option>
-                    <option value="Greyline">Greyline</option>
-                    <option value="Ultrapure">Ultrapure</option>
-                    <option value="Tap">Tap</option>
-                    <option value="Bottled">Bottled</option>
-                </select>
+  <!-- Question 1 -->
+  <section class="card visible" id="q1">
+    <div class="title">
+      <span class="num">1</span>
+      Please list the monitor numbers being used
+    </div>
 
-                <div class="valid" id="water-source-valid" style="display:none;">
-                    ✓ Water source selected
-                </div>
-            </div>
+    <p class="hint">
+      Enter numbers separated by commas, for example: 74, 75, 76, 77
+    </p>
 
-           <!-- Question 8: User Name -->
-            <div class="question" id="q-user">
-                <label for="user-name">
-        <span class="question-number">8</span>
-        User
+    <input
+      type="text"
+      id="monitors"
+      placeholder="e.g. 74, 75, 76, 77"
+    >
+
+    <div class="error" id="monitorError">
+      Please enter valid monitor numbers separated by commas.
+    </div>
+
+    <div class="valid" id="monitorValid"></div>
+  </section>
+
+  <!-- Question 2 -->
+  <section class="card" id="q2">
+    <div class="title">
+      <span class="num">2</span>
+      What is your start date?
+    </div>
+
+    <p class="hint">
+      Format: yyyy-mm-dd hh:mm:ss. Standard procedure is 08:00:00
+      the day after placing the Nasonia in tubes.
+    </p>
+
+    <input
+      type="text"
+      id="startDate"
+      placeholder="2026-08-04 08:00:00"
+    >
+
+    <div class="error" id="dateError">
+      Please enter a valid date in yyyy-mm-dd hh:mm:ss format.
+    </div>
+
+    <div class="valid" id="dateValid"></div>
+  </section>
+
+  <!-- Question 3 -->
+  <section class="card" id="q3">
+    <div class="title">
+      <span class="num">3</span>
+      User information
+    </div>
+
+    <p class="hint">
+      These details apply to every wasp in this metadata file.
+    </p>
+
+    <div class="grid">
+      <div>
+        <label class="field" for="userName">User</label>
+
+        <input
+          type="text"
+          id="userName"
+          placeholder="e.g. Jane Smith"
+        >
+      </div>
+
+      <div>
+        <label class="field" for="career">Career stage</label>
+
+        <select id="career">
+          <option value="">-- Select --</option>
+          <option>Undergraduate</option>
+          <option>Masters</option>
+          <option>PhD</option>
+          <option>Postdoc</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Question 4 -->
+  <section class="card" id="q4">
+    <div class="title">
+      <span class="num">4</span>
+      Experiment Focus
+    </div>
+
+    <p class="hint">
+      Select the main focus of this experiment.
+    </p>
+
+    <label class="field" for="experimentFocus">
+      Experiment focus
     </label>
-    <div class="hint">Enter the name of the person running the experiment</div>
 
-    <input type="text"
-           id="user-name"
-           placeholder="e.g., Jane Smith">
+    <select id="experimentFocus">
+      <option value="">-- Select --</option>
+      <option>Nutrition</option>
+      <option>Drug Exposure</option>
+      <option>Light Cycle</option>
+      <option>Physical Intervention</option>
+      <option>Genetic Line</option>
+      <option>Other</option>
+    </select>
+  </section>
 
-    <div class="valid" id="user-valid" style="display:none;">
-        ✓ User entered
+  <!-- Question 5 -->
+  <section class="card" id="q5">
+    <div class="title">
+      <span class="num">5</span>
+      Experimental Conditions
     </div>
-</div>
 
-            <!-- Question 9: Career stage -->
-            <div class="question" id="q-career-stage">
-                <label for="career-stage">
-                    <span class="question-number">9</span>
-                    What is the user's career stage?
-                </label>
-                <div class="hint">Select the career stage of the person running the experiment</div>
-                <select id="career-stage">
-                    <option value="">-- Select an option --</option>
-                    <option value="Undergraduate">Undergraduate</option>
-                    <option value="Masters">Masters</option>
-                    <option value="PhD">PhD</option>
-                    <option value="Postdoc">Postdoc</option>
-                </select>
-                <div class="valid" id="career-stage-valid" style="display: none;">✓ Career stage selected</div>
-            </div>
-            
-            <!-- Question 10: Food change -->
-            <div class="question" id="q-food-change">
-                <label for="food-change">
-                    <span class="question-number">10</span>
-                    Are you doing a food change?
-                </label>
-                <div class="hint">Select the frequency of food changes</div>
-                <select id="food-change">
-                    <option value="">-- Select an option --</option>
-                    <option value="No">No</option>
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Bi-Weekly">Bi-Weekly</option>
-                </select>
-                <div class="valid" id="food-change-valid" style="display: none;">✓ Food change frequency selected</div>
-            </div>
-            
-            <!-- Question 11: Drug -->
-            <div class="question" id="q-drug">
-                <label>
-                    <span class="question-number">11</span>
-                    Are you adding any drugs to the media?
-                </label>
-                <div class="hint">Select whether you are testing any drug treatments</div>
-                <select id="drug-choice">
-                    <option value="">-- Select an option --</option>
-                    <option value="no">No (Control only)</option>
-                    <option value="yes">Yes</option>
-                </select>
-                <div class="valid" id="drug-choice-valid" style="display: none;">✓ Drug choice selected</div>
-            </div>
-            
-            <!-- Question 12: Drug details (if yes) -->
-            <div class="question" id="q-drug-details">
-                <label>
-                    <span class="question-number">12</span>
-                    Drug treatments
-                </label>
-                <div class="hint">Add each drug and its doses. Valid units: nM, uM, mM, M, ng/mL, ug/mL, mg/mL, g/mL, ppm, %</div>
-                
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="include-control" checked>
-                        Include untreated Control group (no drug and no carrier)
-                    </label>
-                </div>
+    <div class="control-intro">
+      The values below will be used automatically. Tick
+      <strong>Change</strong> only for factors that differ from the
+      standard control.
+    </div>
 
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="include-carrier-control">
-                        Include carrier-only Control group (carrier but no drug)
-                    </label>
-                </div>
-                
-                <div id="drug-entries"></div>
-                
-                <button type="button" class="add-drug-btn" id="add-drug-btn">+ Add Drug</button>
-                
-                <div class="error" id="drug-error" style="display: none;">Please add at least one drug with valid doses</div>
-                
-                <div class="treatment-preview" id="treatment-preview" style="display: none;">
-                    <h4>Treatment groups to be randomized:</h4>
-                    <ul id="treatment-list"></ul>
-                    <div id="balance-warning" style="color: #047857; margin-top: 10px; font-size: 12px;"></div>
-                </div>
-            </div>
-            
-            <!-- Question 13: Carrier (if drug selected) -->
-            <div class="question" id="q-carrier">
-                <label for="carrier">
-                    <span class="question-number">13</span>
-                    What is the carrier for the drug?
-                </label>
-                <div class="hint">Select the solvent used to dissolve the drug</div>
-                <select id="carrier">
-                    <option value="">-- Select an option --</option>
-                    <option value="Water">Water</option>
-                    <option value="Ethanol">Ethanol</option>
-                    <option value="DMSO">DMSO</option>
-                    <option value="__other__">Other (email to add new carrier)</option>
-                </select>
-                <div class="valid" id="carrier-valid" style="display: none;">✓ Carrier selected</div>
-            </div>
-            
-            <!-- Question 14: Physical treatment -->
-            <div class="question" id="q-physical-treatment">
-                <label for="physical-treatment">
-                    <span class="question-number">14</span>
-                    Was there any physical treatment?
-                </label>
-                <div class="hint">Select Yes if any positions received a physical treatment</div>
-                <select id="physical-treatment">
-                    <option value="">-- Select an option --</option>
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-                <div class="valid" id="physical-treatment-valid" style="display: none;">✓ Physical treatment response selected</div>
+    <div class="control-row">
+      <div class="control-name">Genetic line</div>
 
-                <div id="physical-treatment-type-wrap" style="display: none; margin-top: 16px;">
-                    <label for="physical-treatment-type">Type of physical treatment</label>
-                    <select id="physical-treatment-type">
-                        <option value="">-- Select an option --</option>
-                        <option value="Night Shaking">Night Shaking</option>
-                        <option value="Night Red Light">Night Red Light</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <div class="valid" id="physical-treatment-type-valid" style="display: none;">✓ Physical treatment type selected</div>
-                </div>
+      <label class="field" for="geneticLineChoice">
+        Select genetic line
+      </label>
 
-                <div id="physical-treatment-control-wrap" style="display: none; margin-top: 16px;">
-                    <label for="physical-treatment-control">Is there a control group for the physical treatment?</label>
-                    <div class="hint" style="padding-left: 0;">If Yes, control and treatment positions will be balanced and randomized. If No, all positions will receive the selected physical treatment.</div>
-                    <select id="physical-treatment-control">
-                        <option value="">-- Select an option --</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select>
-                    <div class="valid" id="physical-treatment-control-valid" style="display: none;">✓ Physical treatment control response selected</div>
-                </div>
-            </div>
+      <select id="geneticLineChoice">
+        <option value="Leicester" selected>Leicester</option>
+        <option value="Alternative">Alternative line(s)</option>
+      </select>
 
-            <!-- Question 15: Temperature -->
-            <div class="question" id="q-temperature">
-                <label for="temperature">
-                    <span class="question-number">15</span>
-                    What temperatures are used?
-                </label>
-                <div class="hint">Enter temperature(s) in °C, separated by commas (e.g., 25 or 20, 25, 30). If multiple temperatures are entered, they will be randomized across positions.</div>
-                <input type="text" id="temperature" placeholder="e.g., 25 or 20, 25, 30">
-                <div class="error" id="temperature-error">Please enter valid temperature(s) as numbers separated by commas</div>
-                <div class="valid" id="temperature-valid" style="display: none;">✓ Temperature(s) valid</div>
-            </div>
-            
-            <!-- Question 16: Light:Dark cycle -->
-            <div class="question" id="q-ld-cycle">
-                <label for="ld-cycle">
-                    <span class="question-number">16</span>
-                    What is the Light:Dark cycle?
-                </label>
-                <div class="hint">Enter as L:D ratio (e.g., 12:12, 16:8, 0:24 for constant dark)</div>
-                <input type="text" id="ld-cycle" placeholder="e.g., 12:12">
-                <div class="error" id="ld-cycle-error">Please enter a valid L:D ratio (e.g., 12:12)</div>
-                <div class="valid" id="ld-cycle-valid" style="display: none;">✓ Valid L:D cycle</div>
-            </div>
-            
-            <div class="actions" id="actions">
-                <button id="generate-btn" class="generate-btn">📥 Generate CSV</button>
-            </div>
+      <div class="conditional" id="geneticLineDetails">
+        <label class="field" for="geneticLines">
+          Alternative genetic line(s)
+        </label>
+
+        <input
+          type="text"
+          id="geneticLines"
+          placeholder="e.g. AsymC, LabII"
+        >
+
+        <div class="food-note">
+          Enter multiple lines separated by commas. They will be balanced
+          and randomised across monitor positions.
         </div>
-        
-        <div class="sidebar">
-            <div class="sidebar-box">
-                <h3>💡 Need additional factors?</h3>
-                <p>If you need to add extra variables or new options to the metadata generator, get in touch.</p>
-                <a href="mailto:Christianluthomas@gmail.com?subject=Nasonia%20Metadata%20Generator%20-%20Additional%20Factors">
-                    ✉️ Email to request
-                </a>
-            </div>
+
+        <div class="error" id="geneticLineError">
+          Enter at least one genetic line.
         </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="footer">
-        <p>Built for the Social Epigenetics Lab • <a href="mailto:Christianluthomas@gmail.com">Report an issue</a></p>
+      </div>
     </div>
 
-    <script>
-        // Known drugs list
-        const KNOWN_DRUGS = ['AKG', 'Caffeine','Rapamycin', 'Resveratrol','Nicotinamide Mononucleotide'];
-        
-        // Valid dose units
-        const VALID_UNITS = ['nM', 'uM', 'mM', 'M', 'ng/mL', 'ug/mL', 'mg/mL', 'g/mL', 'ppm', '%'];
-        
-        // Total steps for progress tracking
-        const TOTAL_STEPS = 16;
-        
-        // Elements
-        const monitorsInput = document.getElementById('monitors');
-        const monitorsError = document.getElementById('monitors-error');
-        const monitorsPreview = document.getElementById('monitors-preview');
-        const monitorsPreviewContent = document.getElementById('monitors-preview-content');
-        
-        const startDateInput = document.getElementById('start-date');
-        const startDateError = document.getElementById('start-date-error');
-        const startDateValid = document.getElementById('start-date-valid');
-        
-        const sexSelect = document.getElementById('sex');
-        const sexValid = document.getElementById('sex-valid');
-        
-        const matedSelect = document.getElementById('mated');
-        const matedValid = document.getElementById('mated-valid');
+    <div id="controls"></div>
 
-        const baseMediaSelect = document.getElementById('base-media');
-        const baseMediaValid = document.getElementById('base-media-valid');
-        
-        const incubatorSelect = document.getElementById('incubator');
-        const incubatorValid = document.getElementById('incubator-valid');
+    <div class="summary" id="summary"></div>
+  </section>
 
-        const waterSourceSelect = document.getElementById('water-source');
-        const waterSourceValid = document.getElementById('water-source-valid');
-        
-        const userInput = document.getElementById('user-name');
-        const userValid = document.getElementById('user-valid');
+  <!-- Question 6 -->
+  <section class="card" id="q6">
+    <div class="title">
+      <span class="num">6</span>
+      Incubator
+    </div>
 
-        const careerStageSelect = document.getElementById('career-stage');
-        const careerStageValid = document.getElementById('career-stage-valid');
+    <p class="hint">
+      This incubator will apply to every wasp in this metadata file.
+    </p>
 
-        const physicalTreatmentSelect = document.getElementById('physical-treatment');
-        const physicalTreatmentValid = document.getElementById('physical-treatment-valid');
-        const physicalTreatmentTypeWrap = document.getElementById('physical-treatment-type-wrap');
-        const physicalTreatmentTypeSelect = document.getElementById('physical-treatment-type');
-        const physicalTreatmentTypeValid = document.getElementById('physical-treatment-type-valid');
-        const physicalTreatmentControlWrap = document.getElementById('physical-treatment-control-wrap');
-        const physicalTreatmentControlSelect = document.getElementById('physical-treatment-control');
-        const physicalTreatmentControlValid = document.getElementById('physical-treatment-control-valid');
-        
-        const foodChangeSelect = document.getElementById('food-change');
-        const foodChangeValid = document.getElementById('food-change-valid');
-        
-        const drugChoiceSelect = document.getElementById('drug-choice');
-        const drugChoiceValid = document.getElementById('drug-choice-valid');
-        
-        const drugEntriesContainer = document.getElementById('drug-entries');
-        const addDrugBtn = document.getElementById('add-drug-btn');
-        const includeControlCheckbox = document.getElementById('include-control');
-        const includeCarrierControlCheckbox = document.getElementById('include-carrier-control');
-        const drugError = document.getElementById('drug-error');
-        const treatmentPreview = document.getElementById('treatment-preview');
-        const treatmentList = document.getElementById('treatment-list');
-        const balanceWarning = document.getElementById('balance-warning');
-        
-        const carrierSelect = document.getElementById('carrier');
-        const carrierValid = document.getElementById('carrier-valid');
-        
-        const temperatureInput = document.getElementById('temperature');
-        const temperatureError = document.getElementById('temperature-error');
-        const temperatureValid = document.getElementById('temperature-valid');
-        
-        const ldCycleInput = document.getElementById('ld-cycle');
-        const ldCycleError = document.getElementById('ld-cycle-error');
-        const ldCycleValid = document.getElementById('ld-cycle-valid');
-        
-        const generateBtn = document.getElementById('generate-btn');
-        
-        const progressFill = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
-        
-        // Question containers
-// Question containers
-        const qMonitors = document.getElementById('q-monitors');
-        const qStartDate = document.getElementById('q-start-date');
-        const qSex = document.getElementById('q-sex');
-        const qMated = document.getElementById('q-mated');
-        const qBaseMedia = document.getElementById('q-base-media');
-        const qIncubator = document.getElementById('q-incubator');
-        const qWaterSource = document.getElementById('q-water-source');
-        const qUser = document.getElementById('q-user');
-        const qCareerStage = document.getElementById('q-career-stage');
-        const qPhysicalTreatment = document.getElementById('q-physical-treatment');
-        const qFoodChange = document.getElementById('q-food-change');
-        const qDrug = document.getElementById('q-drug');
-        const qDrugDetails = document.getElementById('q-drug-details');
-        const qCarrier = document.getElementById('q-carrier');
-        const qTemperature = document.getElementById('q-temperature');
-        const qLdCycle = document.getElementById('q-ld-cycle');
-        const actions = document.getElementById('actions');
-        
-        const REGIONS_PER_MONITOR = 32;
-        
-        // State
-        let parsedMonitors = [];
-        let validStartDate = false;
-        let startDateValue = '';
-        let selectedSex = '';
-        let selectedMated = '';
-        let selectedBaseMedia = '';
-        let selectedIncubator = '';
-        let selectedWaterSource = '';
-        let userName = '';
-        let selectedCareerStage = '';
-        let selectedPhysicalTreatment = '';
-        let selectedPhysicalTreatmentType = '';
-        let selectedPhysicalTreatmentControl = '';
-        let selectedFoodChange = '';
-        let selectedDrugChoice = '';
-        let drugEntries = [];
-        let drugIdCounter = 0;
-        let selectedCarrier = '';
-        let parsedTemperatures = [];
-        let validTemperatures = false;
-        let ldCycleValue = '';
-        let validLdCycle = false;
-        
-        // Update progress bar
-        function updateProgress() {
-            let completed = 0;
-            
-            if (parsedMonitors && parsedMonitors.length > 0) completed++;
-            if (validStartDate) completed++;
-            if (selectedSex) completed++;
-            if (selectedMated) completed++;
-            if (selectedBaseMedia) completed++;
-            if (selectedIncubator) completed++;
-            if (selectedWaterSource) completed++;
-            if (userName) completed++;
-            if (selectedCareerStage) completed++;
-            if (selectedPhysicalTreatment === 'No' || (selectedPhysicalTreatment === 'Yes' && selectedPhysicalTreatmentType && selectedPhysicalTreatmentControl)) completed++;
-            if (selectedFoodChange) completed++;
-            if (selectedDrugChoice) completed++;
-            if (selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0) completed++;
-            if (selectedDrugChoice === 'yes' && selectedCarrier) completed++;
-            if (selectedDrugChoice === 'no') completed += 2; // Skip drug details and carrier
-            if (validTemperatures) completed++;
-            if (validLdCycle) completed++;
-            
-            const percentage = Math.round((completed / TOTAL_STEPS) * 100);
-            progressFill.style.width = percentage + '%';
-            progressText.textContent = `${completed} of ${TOTAL_STEPS} steps completed`;
+    <label class="field" for="incubator">
+      Which incubator?
+    </label>
+
+    <select id="incubator">
+      <option value="">-- Select --</option>
+      <option>Incubator_1</option>
+      <option>Incubator_2</option>
+      <option>Incubator_3</option>
+      <option>Incubator_4</option>
+      <option>Unknown</option>
+    </select>
+
+    <button class="btn" id="generate" disabled>
+      Generate metadata CSV
+    </button>
+  </section>
+
+  <div class="footer">
+    Built for the Social Epigenetics Lab
+  </div>
+
+  <script>
+    const REGIONS = 32;
+
+    const configs = [
+      {
+        id: "sex",
+        label: "Sex",
+        def: "Male",
+        type: "select",
+        options: ["Male", "Female", "Mixed"]
+      },
+      {
+        id: "mated",
+        label: "Mated",
+        def: "Unknown",
+        type: "select",
+        options: ["Yes", "No", "Unknown"]
+      },
+      {
+        id: "baseMedia",
+        label: "Food composition",
+        def: "Nasonia_food",
+        type: "select",
+        options: ["Nasonia_food", "Drosophila_SYA", "Custom"]
+      },
+      {
+        id: "water",
+        label: "Water source",
+        def: "Greyline",
+        type: "select",
+        options: ["Greyline", "Ultrapure", "Tap", "Bottled"]
+      },
+      {
+        id: "foodChange",
+        label: "Food change",
+        def: "No",
+        type: "select",
+        options: ["No", "Daily", "Weekly", "Bi-Weekly"]
+      },
+      {
+        id: "drugChoice",
+        label: "Drug treatment",
+        def: "No",
+        type: "select",
+        options: ["No", "Yes"]
+      },
+      {
+        id: "physical",
+        label: "Physical treatment",
+        def: "No",
+        type: "select",
+        options: ["No", "Yes"]
+      },
+      {
+        id: "temperature",
+        label: "Temperature (°C)",
+        def: "25",
+        type: "text",
+        placeholder: "e.g. 25 or 20, 25, 30"
+      },
+      {
+        id: "ldCycle",
+        label: "Light:dark cycle",
+        def: "12:12",
+        type: "text",
+        placeholder: "e.g. 12:12"
+      }
+    ];
+
+    const values = Object.fromEntries(
+      configs.map(config => [config.id, config.def])
+    );
+
+    const controls = document.getElementById("controls");
+
+    function optionsHtml(config) {
+      return config.options.map(option => {
+        const selected = option === config.def ? "selected" : "";
+
+        return `
+          <option value="${option}" ${selected}>
+            ${option}
+          </option>
+        `;
+      }).join("");
+    }
+
+    configs.forEach(config => {
+      const row = document.createElement("div");
+      row.className = "control-row";
+
+      row.innerHTML = `
+        <div class="control-head">
+          <div>
+            <div class="control-name">${config.label}</div>
+
+            <div class="default">
+              Default: ${config.def.replaceAll("_", " ")}
+            </div>
+          </div>
+
+          <label class="edit-toggle">
+            <input type="checkbox" id="toggle-${config.id}">
+            Change
+          </label>
+        </div>
+
+        <div class="editor" id="edit-${config.id}">
+          ${
+            config.type === "select"
+              ? `<select id="${config.id}">
+                  ${optionsHtml(config)}
+                </select>`
+              : `<input
+                  type="text"
+                  id="${config.id}"
+                  value="${config.def}"
+                  placeholder="${config.placeholder}"
+                >`
+          }
+
+          <div class="error" id="error-${config.id}"></div>
+        </div>
+      `;
+
+      controls.appendChild(row);
+
+      const toggle = row.querySelector(`#toggle-${config.id}`);
+      const editor = row.querySelector(`#edit-${config.id}`);
+      const input = row.querySelector(`#${config.id}`);
+
+      toggle.addEventListener("change", () => {
+        editor.classList.toggle("open", toggle.checked);
+
+        if (!toggle.checked) {
+          input.value = config.def;
+          values[config.id] = config.def;
+
+          if (
+            config.id === "baseMedia" &&
+            document.getElementById("sucroseConcentration")
+          ) {
+            applyFoodPreset("Nasonia_food");
+          }
         }
-        
-        // Set default start date to tomorrow at 08:00:00
-        function setDefaultStartDate() {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            const year = tomorrow.getFullYear();
-            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
-            const day = String(tomorrow.getDate()).padStart(2, '0');
-            
-            const defaultDate = `${year}-${month}-${day} 08:00:00`;
-            startDateInput.value = defaultDate;
-            updateStartDate();
-        }
-        
-        function parseMonitors(input) {
-            if (!input.trim()) return [];
-            
-            const parts = input.split(',');
-            const numbers = [];
-            
-            for (const part of parts) {
-                const trimmed = part.trim();
-                if (trimmed === '') continue;
-                
-                const num = parseInt(trimmed, 10);
-                if (isNaN(num) || num < 0) {
-                    return null;
-                }
-                numbers.push(num);
-            }
-            
-            return [...new Set(numbers)].sort((a, b) => a - b);
-        }
-        
-        function validateStartDate(input) {
-            const trimmed = input.trim();
-            if (trimmed === '') return { valid: false, empty: true };
-            
-            const regex = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
-            const match = trimmed.match(regex);
-            
-            if (!match) return { valid: false, empty: false };
-            
-            const year = parseInt(match[1], 10);
-            const month = parseInt(match[2], 10);
-            const day = parseInt(match[3], 10);
-            const hour = parseInt(match[4], 10);
-            const minute = parseInt(match[5], 10);
-            const second = parseInt(match[6], 10);
-            
-            if (month < 1 || month > 12) return { valid: false, empty: false };
-            if (day < 1 || day > 31) return { valid: false, empty: false };
-            if (hour < 0 || hour > 23) return { valid: false, empty: false };
-            if (minute < 0 || minute > 59) return { valid: false, empty: false };
-            if (second < 0 || second > 59) return { valid: false, empty: false };
-            
-            return { valid: true, empty: false, value: trimmed };
-        }
-        
-        function validateDose(dose) {
-            const trimmed = dose.trim();
-            if (trimmed === '') return { valid: false };
-            
-            for (const unit of VALID_UNITS) {
-                const regex = new RegExp(`^(\\d+\\.?\\d*)\\s*${unit.replace('/', '\\/')}$`, 'i');
-                const match = trimmed.match(regex);
-                if (match) {
-                    const normalizedDose = match[1] + unit;
-                    return { valid: true, normalized: normalizedDose, unit: unit };
-                }
-            }
-            
-            return { valid: false };
-        }
-        
-        function parseDoses(input) {
-            if (!input.trim()) return { valid: false, doses: [], unit: null };
-            
-            const parts = input.split(',');
-            const doses = [];
-            let commonUnit = null;
-            
-            for (const part of parts) {
-                const result = validateDose(part);
-                if (!result.valid) {
-                    return { valid: false, doses: [], unit: null };
-                }
-                doses.push(result.normalized);
-                if (commonUnit === null) {
-                    commonUnit = result.unit;
-                }
-            }
-            
-            if (doses.length === 0) {
-                return { valid: false, doses: [], unit: null };
-            }
-            
-            return { valid: true, doses: [...new Set(doses)], unit: commonUnit };
-        }
-        
-        function parseTemperatures(input) {
-            if (!input.trim()) return { valid: false, temps: [] };
-            
-            const parts = input.split(',');
-            const temps = [];
-            
-            for (const part of parts) {
-                const trimmed = part.trim();
-                if (trimmed === '') continue;
-                
-                const num = parseFloat(trimmed);
-                if (isNaN(num)) {
-                    return { valid: false, temps: [] };
-                }
-                temps.push(num + 'C');
-            }
-            
-            if (temps.length === 0) {
-                return { valid: false, temps: [] };
-            }
-            
-            return { valid: true, temps: [...new Set(temps)] };
-        }
-        
-        function validateLdCycle(input) {
-            const trimmed = input.trim();
-            if (trimmed === '') return { valid: false, empty: true };
-            
-            const regex = /^(\d+):(\d+)$/;
-            const match = trimmed.match(regex);
-            
-            if (!match) return { valid: false, empty: false };
-            
-            const light = parseInt(match[1], 10);
-            const dark = parseInt(match[2], 10);
-            
-            if (light + dark !== 24) {
-                return { valid: false, empty: false };
-            }
-            
-            return { valid: true, empty: false, value: `${light}:${dark}` };
-        }
-        
-        function getFirstDoseUnit() {
-            for (const entry of drugEntries) {
-                if (entry.doses.length > 0 && entry.unit) {
-                    return entry.unit;
-                }
-            }
-            return null;
-        }
-        
-        function createDrugEntry() {
-            const id = drugIdCounter++;
-            const entry = document.createElement('div');
-            entry.className = 'drug-entry';
-            entry.id = `drug-entry-${id}`;
-            entry.innerHTML = `
-                <div class="drug-header">
-                    <h4>Drug ${drugEntries.length + 1}</h4>
-                    <button type="button" class="remove-drug-btn" data-id="${id}">Remove</button>
-                </div>
-                <label for="drug-select-${id}">Select drug:</label>
-                <select id="drug-select-${id}" data-id="${id}">
-                    <option value="">-- Select a drug --</option>
-                    ${KNOWN_DRUGS.map(d => `<option value="${d}">${d}</option>`).join('')}
-                    <option value="__other__">Other (email to add new drugs)</option>
-                </select>
-                <div class="dose-input">
-                    <label for="drug-doses-${id}">Doses (comma-separated, e.g., 10uM, 50uM, 100mM):</label>
-                    <input type="text" id="drug-doses-${id}" data-id="${id}" placeholder="e.g., 10uM, 50uM, 100uM">
-                    <div class="error" id="dose-error-${id}" style="display: none;">Invalid dose format. Use number + unit (e.g., 10uM, 5mM, 100ng/mL)</div>
-                    <div class="valid" id="dose-valid-${id}" style="display: none;">✓ Valid doses</div>
-                </div>
-            `;
-            
-            drugEntriesContainer.appendChild(entry);
-            drugEntries.push({ id, drug: '', doses: [], unit: null });
-            
-            const selectEl = document.getElementById(`drug-select-${id}`);
-            const dosesEl = document.getElementById(`drug-doses-${id}`);
-            const removeBtn = entry.querySelector('.remove-drug-btn');
-            
-            selectEl.addEventListener('change', () => updateDrugEntry(id));
-            dosesEl.addEventListener('input', () => updateDrugEntry(id));
-            removeBtn.addEventListener('click', () => removeDrugEntry(id));
-            
-            updateTreatmentPreview();
-        }
-        
-        function updateDrugEntry(id) {
-            const selectEl = document.getElementById(`drug-select-${id}`);
-            const dosesEl = document.getElementById(`drug-doses-${id}`);
-            const doseError = document.getElementById(`dose-error-${id}`);
-            const doseValid = document.getElementById(`dose-valid-${id}`);
-            
-            const entry = drugEntries.find(e => e.id === id);
-            if (!entry) return;
-            
-            const drugValue = selectEl.value;
-            if (drugValue === '__other__') {
-                selectEl.value = '';
-                alert('Please email Christianluthomas@gmail.com to request adding a new drug to the list.');
-                entry.drug = '';
-            } else {
-                entry.drug = drugValue;
-            }
-            
-            const dosesResult = parseDoses(dosesEl.value);
-            if (dosesEl.value.trim() === '') {
-                doseError.style.display = 'none';
-                doseValid.style.display = 'none';
-                entry.doses = [];
-                entry.unit = null;
-            } else if (dosesResult.valid) {
-                doseError.style.display = 'none';
-                doseValid.style.display = 'block';
-                entry.doses = dosesResult.doses;
-                entry.unit = dosesResult.unit;
-            } else {
-                doseError.style.display = 'block';
-                doseValid.style.display = 'none';
-                entry.doses = [];
-                entry.unit = null;
-            }
-            
-            updateTreatmentPreview();
-            updateVisibility();
-        }
-        
-        function removeDrugEntry(id) {
-            const entryEl = document.getElementById(`drug-entry-${id}`);
-            if (entryEl) {
-                entryEl.remove();
-            }
-            drugEntries = drugEntries.filter(e => e.id !== id);
-            
-            const entryEls = drugEntriesContainer.querySelectorAll('.drug-entry');
-            entryEls.forEach((el, index) => {
-                el.querySelector('h4').textContent = `Drug ${index + 1}`;
+
+        validateAll();
+      });
+
+      input.addEventListener("input", () => {
+        values[config.id] = input.value.trim();
+        validateAll();
+      });
+
+      input.addEventListener("change", () => {
+        values[config.id] = input.value;
+        validateAll();
+      });
+    });
+
+    /*
+     * Drug-treatment fields
+     */
+    const drugRow = document.getElementById("edit-drugChoice");
+
+    drugRow.insertAdjacentHTML(
+      "beforeend",
+      `
+        <div class="conditional" id="drugDetails">
+          <label class="field" for="drug">Drug</label>
+
+          <select id="drug">
+            <option value="">-- Select --</option>
+            <option>AKG</option>
+            <option>Caffeine</option>
+            <option>Rapamycin</option>
+            <option>Resveratrol</option>
+            <option>Nicotinamide Mononucleotide</option>
+          </select>
+
+          <label class="field" for="dose">
+            Dose(s), comma-separated
+          </label>
+
+          <input
+            type="text"
+            id="dose"
+            placeholder="e.g. 100uM, 5mM"
+          >
+
+          <label class="field" for="carrier">Carrier</label>
+
+          <select id="carrier">
+            <option value="">-- Select --</option>
+            <option>Water</option>
+            <option>Ethanol</option>
+            <option>DMSO</option>
+          </select>
+        </div>
+      `
+    );
+
+    /*
+     * Physical-treatment fields
+     */
+    const physicalRow = document.getElementById("edit-physical");
+
+    physicalRow.insertAdjacentHTML(
+      "beforeend",
+      `
+        <div class="conditional" id="physicalDetails">
+          <label class="field" for="physicalType">
+            Physical treatment type
+          </label>
+
+          <select id="physicalType">
+            <option value="">-- Select --</option>
+            <option>Night Shaking</option>
+            <option>Night Red Light</option>
+            <option>Other</option>
+          </select>
+
+          <label class="field" for="physicalControl">
+            Include a balanced control group?
+          </label>
+
+          <select id="physicalControl">
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+      `
+    );
+
+    /*
+     * Food composition
+     */
+    const FOOD_FIELDS = [
+      ["sucrose", "Sucrose", "% w/v"],
+      ["agar", "Agar", "% w/v"],
+      ["cornmeal", "Yellow cornmeal", "% w/v"],
+      ["brewersYeast", "Brewer's yeast", "% w/v"],
+      ["propionicAcid", "Propionic acid", "% v/v"],
+      ["nipagen", "Nipagen (active)", "% w/v"],
+      ["ethanol", "Ethanol-based Nipagen stock", "% v/v"]
+    ];
+
+    const FOOD_PRESETS = {
+      Nasonia_food: {
+        sucrose: "30",
+        agar: "1.5",
+        cornmeal: "0",
+        brewersYeast: "0",
+        propionicAcid: "0",
+        nipagen: "0",
+        ethanol: "0"
+      },
+
+      Drosophila_SYA: {
+        sucrose: "4",
+        agar: "1",
+        cornmeal: "6.65",
+        brewersYeast: "2",
+        propionicAcid: "0.4",
+        nipagen: "0.1316",
+        ethanol: "0.658"
+      }
+    };
+
+    const foodRow = document.getElementById("edit-baseMedia");
+
+    foodRow.insertAdjacentHTML(
+      "beforeend",
+      `
+        <div class="food-grid">
+          ${FOOD_FIELDS.map(([id, label, unit]) => `
+            <div>
+              <label class="field" for="${id}Concentration">
+                ${label} concentration(s), ${unit}
+              </label>
+
+              <input
+                type="text"
+                id="${id}Concentration"
+                value="${FOOD_PRESETS.Nasonia_food[id]}"
+                placeholder="Enter one or more values"
+              >
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="food-note">
+          Enter comma-separated values to create multiple food groups.
+          The ethanol value for Drosophila SYA records the volume of the
+          ethanol-based Nipagen stock added (65.8 ml in a 10 L final
+          volume), not a measured pure-ethanol concentration.
+        </div>
+
+        <div class="error" id="error-food"></div>
+      `
+    );
+
+    function applyFoodPreset(name) {
+      const preset = FOOD_PRESETS[name];
+
+      if (!preset) {
+        return;
+      }
+
+      FOOD_FIELDS.forEach(([id]) => {
+        document.getElementById(`${id}Concentration`).value =
+          preset[id];
+      });
+
+      document.getElementById("baseMedia").value = name;
+      values.baseMedia = name;
+    }
+
+    document.getElementById("baseMedia").addEventListener(
+      "change",
+      () => {
+        applyFoodPreset(
+          document.getElementById("baseMedia").value
+        );
+
+        validateAll();
+      }
+    );
+
+    /*
+     * Validation and helper functions
+     */
+    function parseMonitors() {
+      const text = document.getElementById("monitors").value.trim();
+
+      if (!text) {
+        return [];
+      }
+
+      const monitorValues = text
+        .split(",")
+        .map(value => value.trim());
+
+      if (
+        monitorValues.some(value => !/^\d+$/.test(value))
+      ) {
+        return null;
+      }
+
+      return [
+        ...new Set(
+          monitorValues.map(Number)
+        )
+      ];
+    }
+
+    function validDate(value) {
+      const match = value.match(
+        /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
+      );
+
+      if (!match) {
+        return false;
+      }
+
+      const [, year, month, day, hour, minute, second] =
+        match.map(Number);
+
+      const date = new Date(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute,
+        second
+      );
+
+      return (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day &&
+        hour < 24 &&
+        minute < 60 &&
+        second < 60
+      );
+    }
+
+    function validTemperatures(value) {
+      return value.split(",").every(item => {
+        const trimmed = item.trim();
+
+        return trimmed !== "" && !isNaN(Number(trimmed));
+      });
+    }
+
+    function concentrations(id) {
+      return document
+        .getElementById(id)
+        .value
+        .split(",")
+        .map(value => value.trim())
+        .filter(Boolean);
+    }
+
+    function validConcentrations(id) {
+      const entries = concentrations(id);
+
+      return (
+        entries.length > 0 &&
+        entries.every(value => {
+          return !isNaN(Number(value)) && Number(value) >= 0;
+        })
+      );
+    }
+
+    function syncFoodName() {
+      const matchingPreset = Object.entries(
+        FOOD_PRESETS
+      ).find(([, preset]) => {
+        return FOOD_FIELDS.every(([id]) => {
+          const currentValue = document
+            .getElementById(`${id}Concentration`)
+            .value
+            .trim();
+
+          return currentValue === preset[id];
+        });
+      });
+
+      const foodSelect = document.getElementById("baseMedia");
+
+      foodSelect.value = matchingPreset
+        ? matchingPreset[0]
+        : "Custom";
+
+      values.baseMedia = foodSelect.value;
+    }
+
+    function validLightDarkCycle(value) {
+      const match = value.match(/^(\d{1,2}):(\d{1,2})$/);
+
+      return (
+        Boolean(match) &&
+        Number(match[1]) + Number(match[2]) === 24
+      );
+    }
+
+    function csv(value) {
+      const text = String(value ?? "");
+
+      if (/[",\n]/.test(text)) {
+        return `"${text.replaceAll('"', '""')}"`;
+      }
+
+      return text;
+    }
+
+    /*
+     * Produce an approximately balanced, randomised assignment.
+     */
+    function balanced(numberRequired, options) {
+      const assignments = Array.from(
+        { length: numberRequired },
+        (_, index) => options[index % options.length]
+      );
+
+      for (
+        let index = assignments.length - 1;
+        index > 0;
+        index--
+      ) {
+        const randomIndex = Math.floor(
+          Math.random() * (index + 1)
+        );
+
+        [
+          assignments[index],
+          assignments[randomIndex]
+        ] = [
+          assignments[randomIndex],
+          assignments[index]
+        ];
+      }
+
+      return assignments;
+    }
+
+    function validateAll() {
+      /*
+       * Section 1: monitors
+       */
+      const monitors = parseMonitors();
+
+      const monitorOK =
+        Array.isArray(monitors) &&
+        monitors.length > 0;
+
+      document
+        .getElementById("q2")
+        .classList.toggle("visible", monitorOK);
+
+      document.getElementById("monitorError").style.display =
+        monitors === null ? "block" : "none";
+
+      document.getElementById("monitorValid").textContent =
+        monitorOK
+          ? `✓ ${monitors.length} monitor(s); ${
+              monitors.length * REGIONS
+            } rows will be generated`
+          : "";
+
+      /*
+       * Section 2: start date
+       */
+      const startDate = document
+        .getElementById("startDate")
+        .value
+        .trim();
+
+      const dateOK =
+        monitorOK &&
+        validDate(startDate);
+
+      document.getElementById("dateError").style.display =
+        startDate && !validDate(startDate)
+          ? "block"
+          : "none";
+
+      document.getElementById("dateValid").textContent =
+        dateOK ? "✓ Valid date format" : "";
+
+      document
+        .getElementById("q3")
+        .classList.toggle("visible", dateOK);
+
+      /*
+       * Genetic line
+       */
+      const alternativeLines =
+        document.getElementById("geneticLineChoice").value ===
+        "Alternative";
+
+      const geneticLineEntries = document
+        .getElementById("geneticLines")
+        .value
+        .split(",")
+        .map(value => value.trim())
+        .filter(Boolean);
+
+      const geneticLineOK =
+        !alternativeLines ||
+        geneticLineEntries.length > 0;
+
+      document
+        .getElementById("geneticLineDetails")
+        .classList.toggle("open", alternativeLines);
+
+      document.getElementById("geneticLineError").style.display =
+        alternativeLines && !geneticLineOK
+          ? "block"
+          : "none";
+
+      /*
+       * Section 3: user information
+       */
+      const userInformationOK =
+        dateOK &&
+        document.getElementById("userName").value.trim() &&
+        document.getElementById("career").value;
+
+      document
+        .getElementById("q4")
+        .classList.toggle(
+          "visible",
+          Boolean(userInformationOK)
+        );
+
+      /*
+       * Section 4: experiment focus
+       */
+      const experimentFocusOK =
+        userInformationOK &&
+        document.getElementById("experimentFocus").value;
+
+      document
+        .getElementById("q5")
+        .classList.toggle(
+          "visible",
+          Boolean(experimentFocusOK)
+        );
+
+      /*
+       * Conditional treatment fields
+       */
+      document
+        .getElementById("drugDetails")
+        .classList.toggle(
+          "open",
+          values.drugChoice === "Yes"
+        );
+
+      document
+        .getElementById("physicalDetails")
+        .classList.toggle(
+          "open",
+          values.physical === "Yes"
+        );
+
+      /*
+       * Food validation
+       */
+      const foodOK = FOOD_FIELDS.every(([id]) => {
+        return validConcentrations(`${id}Concentration`);
+      });
+
+      /*
+       * Experimental-condition validation
+       */
+      let conditionsOK =
+        validTemperatures(values.temperature) &&
+        validLightDarkCycle(values.ldCycle) &&
+        foodOK;
+
+      if (values.drugChoice === "Yes") {
+        conditionsOK =
+          conditionsOK &&
+          document.getElementById("drug").value &&
+          document.getElementById("dose").value.trim() &&
+          document.getElementById("carrier").value;
+      }
+
+      if (values.physical === "Yes") {
+        conditionsOK =
+          conditionsOK &&
+          document.getElementById("physicalType").value;
+      }
+
+      const temperatureError =
+        document.getElementById("error-temperature");
+
+      temperatureError.textContent =
+        validTemperatures(values.temperature)
+          ? ""
+          : "Enter one or more numeric temperatures separated by commas.";
+
+      temperatureError.style.display =
+        validTemperatures(values.temperature)
+          ? "none"
+          : "block";
+
+      const lightDarkError =
+        document.getElementById("error-ldCycle");
+
+      lightDarkError.textContent =
+        validLightDarkCycle(values.ldCycle)
+          ? ""
+          : "Light and dark hours must use L:D format and total 24.";
+
+      lightDarkError.style.display =
+        validLightDarkCycle(values.ldCycle)
+          ? "none"
+          : "block";
+
+      const foodError =
+        document.getElementById("error-food");
+
+      foodError.textContent =
+        foodOK
+          ? ""
+          : "Enter one or more non-negative numeric concentrations, separated by commas.";
+
+      foodError.style.display =
+        foodOK ? "none" : "block";
+
+      /*
+       * Section 5 and 6 visibility
+       */
+      const conditionsComplete =
+        experimentFocusOK &&
+        geneticLineOK &&
+        conditionsOK;
+
+      document
+        .getElementById("q6")
+        .classList.toggle(
+          "visible",
+          Boolean(conditionsComplete)
+        );
+
+      const incubatorOK =
+        conditionsComplete &&
+        document.getElementById("incubator").value;
+
+      document.getElementById("generate").disabled =
+        !incubatorOK;
+
+      /*
+       * Progress bar
+       */
+      const completed = [
+        monitorOK,
+        dateOK,
+        userInformationOK,
+        experimentFocusOK,
+        conditionsComplete,
+        incubatorOK
+      ].filter(Boolean).length;
+
+      document.getElementById("fill").style.width =
+        `${(completed / 6) * 100}%`;
+
+      document.getElementById("progressText").textContent =
+        `${completed} of 6 sections completed`;
+
+      /*
+       * Metadata summary
+       */
+      document.getElementById("summary").innerHTML =
+        "<strong>Metadata values:</strong> " +
+        configs.map(config => {
+          return (
+            `${config.label}: ` +
+            values[config.id].replaceAll("_", " ")
+          );
+        }).join(" · ") +
+        FOOD_FIELDS.map(([id, label, unit]) => {
+          return (
+            ` · ${label}: ` +
+            `${concentrations(`${id}Concentration`).join(", ")} ` +
+            unit
+          );
+        }).join("");
+    }
+
+    /*
+     * Set tomorrow at 08:00 as the default date.
+     */
+    function setTomorrowAsDefault() {
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+
+      const pad = number =>
+        String(number).padStart(2, "0");
+
+      document.getElementById("startDate").value =
+        `${date.getFullYear()}-` +
+        `${pad(date.getMonth() + 1)}-` +
+        `${pad(date.getDate())} 08:00:00`;
+    }
+
+    /*
+     * Generate the CSV.
+     */
+    function generate() {
+      const monitors = parseMonitors();
+
+      const temperatures = values.temperature
+        .split(",")
+        .map(value => value.trim());
+
+      const sexes =
+        values.sex === "Mixed"
+          ? ["Male", "Female"]
+          : [values.sex];
+
+      const geneticLines =
+        document.getElementById("geneticLineChoice").value ===
+        "Leicester"
+          ? ["Leicester"]
+          : document
+              .getElementById("geneticLines")
+              .value
+              .split(",")
+              .map(value => value.trim())
+              .filter(Boolean);
+
+      const drugTreatment =
+        values.drugChoice === "Yes";
+
+      const physicalTreatment =
+        values.physical === "Yes";
+
+      /*
+       * Read all food concentrations.
+       */
+      const ingredientValues = Object.fromEntries(
+        FOOD_FIELDS.map(([id]) => {
+          return [
+            id,
+            concentrations(`${id}Concentration`)
+          ];
+        })
+      );
+
+      /*
+       * Create every combination of the food concentrations.
+       *
+       * For example, sucrose values 10, 20 and 30 with one
+       * agar value will create three food groups.
+       */
+      const foodGroups = FOOD_FIELDS.reduce(
+        (groups, [id]) => {
+          return groups.flatMap(group => {
+            return ingredientValues[id].map(value => {
+              return {
+                ...group,
+                [id]: value
+              };
             });
-            
-            updateTreatmentPreview();
-            updateVisibility();
-        }
-        
-        function getTreatmentGroups() {
-            const groups = [];
-            const firstUnit = getFirstDoseUnit();
-            const controlDose = firstUnit ? '0' + firstUnit : '0';
-            
-            // Untreated control: no drug and no carrier.
-            if (includeControlCheckbox.checked) {
-                groups.push({ drug: 'Control', dose: controlDose, carrier: 'None' });
-            }
+          });
+        },
+        [{}]
+      );
 
-            // Carrier-only control: selected carrier, but no active drug.
-            // This group becomes available once a carrier has been selected.
-            if (includeCarrierControlCheckbox.checked && selectedCarrier) {
-                groups.push({ drug: 'Carrier_Control', dose: controlDose, carrier: selectedCarrier });
-            }
-            
-            // Active drug groups use the selected carrier.
-            for (const entry of drugEntries) {
-                if (entry.drug && entry.doses.length > 0) {
-                    for (const dose of entry.doses) {
-                        groups.push({ drug: entry.drug, dose: dose, carrier: selectedCarrier });
-                    }
-                }
-            }
-            
-            return groups;
-        }
-        
-        function updateTreatmentPreview() {
-            const groups = getTreatmentGroups();
-            
-            if (groups.length === 0) {
-                treatmentPreview.style.display = 'none';
-                return;
-            }
-            
-            treatmentPreview.style.display = 'block';
-            treatmentList.innerHTML = groups.map(g => {
-                const carrierText = g.carrier ? `; carrier: ${g.carrier}` : '';
-                return `<li>${g.drug} (${g.dose}${carrierText})</li>`;
-            }).join('');
-            
-            const totalPositions = parsedMonitors.length * REGIONS_PER_MONITOR;
-            const perGroup = Math.floor(totalPositions / groups.length);
-            const remainder = totalPositions % groups.length;
-            
-            if (remainder === 0) {
-                balanceWarning.textContent = `✓ ${groups.length} groups × ${perGroup} positions each = ${totalPositions} total (perfectly balanced)`;
-                balanceWarning.style.color = '#047857';
-            } else {
-                balanceWarning.textContent = `${groups.length} groups across ${totalPositions} positions: ${groups.length - remainder} groups get ${perGroup}, ${remainder} groups get ${perGroup + 1} (randomized)`;
-                balanceWarning.style.color = '#92400e';
-            }
-        }
-        
-        function updateVisibility() {
-            const monitorsComplete = parsedMonitors && parsedMonitors.length > 0;
-            const startDateComplete = monitorsComplete && validStartDate;
-            const sexComplete = startDateComplete && selectedSex;
-            const matedComplete = sexComplete && selectedMated;
-            const baseMediaComplete = matedComplete && selectedBaseMedia;
-            const incubatorComplete = baseMediaComplete && selectedIncubator;
-            const waterSourceComplete = incubatorComplete && selectedWaterSource;
-            const userComplete = waterSourceComplete && userName;
-            const careerStageComplete = userComplete && selectedCareerStage;
-            const foodChangeComplete = careerStageComplete && selectedFoodChange;
+      const header = [
+        "file",
+        "start_datetime",
+        "stop_datetime",
+        "region_id",
+        "experiment_focus",
+        "sex",
+        "mated",
+        "genetic_line",
+        "food_formulation",
+        "sucrose_pct_wv",
+        "agar_pct_wv",
+        "cornmeal_pct_wv",
+        "brewers_yeast_pct_wv",
+        "propionic_acid_pct_vv",
+        "nipagen_pct_wv",
+        "ethanol_stock_pct_vv",
+        "incubator",
+        "water_source",
+        "user",
+        "career_stage",
+        "food_change",
+        "drug",
+        "dose",
+        "carrier",
+        "physical_treatment",
+        "temperature",
+        "ld_cycle",
+        "dataset_id"
+      ];
 
-            if (monitorsComplete) {
-                qStartDate.classList.add('visible');
-            } else {
-                qStartDate.classList.remove('visible');
-            }
-            
-            if (startDateComplete) {
-                qSex.classList.add('visible');
-            } else {
-                qSex.classList.remove('visible');
-            }
-            
-            if (sexComplete) {
-                qMated.classList.add('visible');
-            } else {
-                qMated.classList.remove('visible');
-            }
-            
-            if (matedComplete) {
-                qBaseMedia.classList.add('visible');
-            } else {
-                qBaseMedia.classList.remove('visible');
-            }
-            
-            if (baseMediaComplete) {
-                qIncubator.classList.add('visible');
-            } else {
-                qIncubator.classList.remove('visible');
-            }
-            
-            if (incubatorComplete) {
-                qWaterSource.classList.add('visible');
-            } else {
-                qWaterSource.classList.remove('visible');
-            }
-            
-            if (waterSourceComplete) {
-                qUser.classList.add('visible');
-            } else {
-                qUser.classList.remove('visible');
-            }
-            
-            if (userComplete) {
-                qCareerStage.classList.add('visible');
-            } else {
-                qCareerStage.classList.remove('visible');
-            }
+      const rows = [header.join(",")];
 
-            if (careerStageComplete) {
-                qFoodChange.classList.add('visible');
-            } else {
-                qFoodChange.classList.remove('visible');
-            }
-            
-            if (foodChangeComplete) {
-                qDrug.classList.add('visible');
-            } else {
-                qDrug.classList.remove('visible');
-            }
-            
-            const drugChoiceComplete = foodChangeComplete && selectedDrugChoice;
+      const datasetID =
+        "NAS_" +
+        new Date()
+          .toISOString()
+          .replace(/[-:TZ.]/g, "")
+          .slice(0, 14);
 
-            if (drugChoiceComplete && selectedDrugChoice === 'yes') {
-                qDrugDetails.classList.add('visible');
-            } else {
-                qDrugDetails.classList.remove('visible');
-            }
-            
-            const drugDetailsComplete = drugChoiceComplete && selectedDrugChoice === 'yes' && getTreatmentGroups().length > 0;
-            if (selectedDrugChoice === 'yes' && drugDetailsComplete) {
-                qCarrier.classList.add('visible');
-            } else {
-                qCarrier.classList.remove('visible');
-            }
-            
-            const drugSectionComplete = drugChoiceComplete && (selectedDrugChoice === 'no' ||
-                (selectedDrugChoice === 'yes' && selectedCarrier));
-            if (drugSectionComplete) {
-                qPhysicalTreatment.classList.add('visible');
-            } else {
-                qPhysicalTreatment.classList.remove('visible');
-            }
+      monitors.forEach(monitor => {
+        const sexAssignments =
+          balanced(REGIONS, sexes);
 
-            const physicalTreatmentComplete = selectedPhysicalTreatment === 'No' ||
-                (selectedPhysicalTreatment === 'Yes' && selectedPhysicalTreatmentType && selectedPhysicalTreatmentControl);
-            if (physicalTreatmentComplete) {
-                qTemperature.classList.add('visible');
-            } else {
-                qTemperature.classList.remove('visible');
-            }
-            
-            if (validTemperatures) {
-                qLdCycle.classList.add('visible');
-            } else {
-                qLdCycle.classList.remove('visible');
-            }
-            
-            let canGenerate = parsedMonitors && parsedMonitors.length > 0 && 
-                validStartDate && 
-                selectedSex && 
-                selectedMated && 
-                selectedBaseMedia && 
-                selectedIncubator &&
-                selectedWaterSource &&
-                userName &&
-                selectedCareerStage &&
-                selectedFoodChange &&
-                selectedDrugChoice &&
-                physicalTreatmentComplete &&
-                validTemperatures &&
-                validLdCycle;
-            
-            if (selectedDrugChoice === 'yes') {
-                const groups = getTreatmentGroups();
-                canGenerate = canGenerate && groups.length > 0 && selectedCarrier;
-            }
-            
-            if (canGenerate) {
-                actions.classList.add('visible');
-            } else {
-                actions.classList.remove('visible');
-            }
-            
-            updateProgress();
+        const lineAssignments =
+          balanced(REGIONS, geneticLines);
+
+        const temperatureAssignments =
+          balanced(REGIONS, temperatures);
+
+        const foodAssignments =
+          balanced(REGIONS, foodGroups);
+
+        for (
+          let region = 1;
+          region <= REGIONS;
+          region++
+        ) {
+          const food = foodAssignments[region - 1];
+
+          const row = [
+            `Monitor${monitor}.txt`,
+            document.getElementById("startDate").value,
+            "",
+            region,
+            document.getElementById("experimentFocus").value,
+            sexAssignments[region - 1],
+            values.mated,
+            lineAssignments[region - 1],
+            values.baseMedia,
+            food.sucrose,
+            food.agar,
+            food.cornmeal,
+            food.brewersYeast,
+            food.propionicAcid,
+            food.nipagen,
+            food.ethanol,
+            document.getElementById("incubator").value,
+            values.water,
+            document.getElementById("userName").value.trim(),
+            document.getElementById("career").value,
+            values.foodChange,
+            drugTreatment
+              ? document.getElementById("drug").value
+              : "Control",
+            drugTreatment
+              ? document.getElementById("dose").value.trim()
+              : "0",
+            drugTreatment
+              ? document.getElementById("carrier").value
+              : "None",
+            physicalTreatment
+              ? document.getElementById("physicalType").value
+              : "No",
+            temperatureAssignments[region - 1],
+            values.ldCycle,
+            datasetID
+          ];
+
+          rows.push(
+            row.map(csv).join(",")
+          );
         }
-        
-        function updateMonitors() {
-            const input = monitorsInput.value;
-            parsedMonitors = parseMonitors(input);
-            
-            if (parsedMonitors === null) {
-                monitorsError.style.display = 'block';
-                monitorsPreview.style.display = 'none';
-                parsedMonitors = [];
-                updateVisibility();
-                return;
-            }
-            
-            monitorsError.style.display = 'none';
-            
-            if (parsedMonitors.length === 0) {
-                monitorsPreview.style.display = 'none';
-                updateVisibility();
-                return;
-            }
-            
-            const fileNames = parsedMonitors.map(num => `Monitor${num}.txt`);
-            const previewLines = fileNames.map(name => `${name} (×${REGIONS_PER_MONITOR} rows)`);
-            
-            monitorsPreviewContent.innerHTML = previewLines.join('<br>');
-            monitorsPreview.style.display = 'block';
-            updateTreatmentPreview();
-            updateVisibility();
+      });
+
+      const blob = new Blob(
+        [rows.join("\n")],
+        {
+          type: "text/csv;charset=utf-8"
         }
-        
-        function updateStartDate() {
-            const result = validateStartDate(startDateInput.value);
-            
-            if (result.empty) {
-                startDateError.style.display = 'none';
-                startDateValid.style.display = 'none';
-                validStartDate = false;
-                startDateValue = '';
-            } else if (result.valid) {
-                startDateError.style.display = 'none';
-                startDateValid.style.display = 'block';
-                validStartDate = true;
-                startDateValue = result.value;
-            } else {
-                startDateError.style.display = 'block';
-                startDateValid.style.display = 'none';
-                validStartDate = false;
-                startDateValue = '';
-            }
-            
-            updateVisibility();
-        }
-        
-        function updateSex() {
-            selectedSex = sexSelect.value;
-            sexValid.style.display = selectedSex ? 'block' : 'none';
-            updateVisibility();
-        }
-        
-        function updateMated() {
-            selectedMated = matedSelect.value;
-            matedValid.style.display = selectedMated ? 'block' : 'none';
-            updateVisibility();
+      );
+
+      const downloadLink =
+        document.createElement("a");
+
+      downloadLink.href =
+        URL.createObjectURL(blob);
+
+      downloadLink.download =
+        "metadata.csv";
+
+      downloadLink.click();
+
+      URL.revokeObjectURL(
+        downloadLink.href
+      );
+    }
+
+    /*
+     * Add listeners to the main form fields.
+     */
+    const formFieldIDs = [
+      "monitors",
+      "startDate",
+      "incubator",
+      "userName",
+      "career",
+      "experimentFocus",
+      "geneticLineChoice",
+      "geneticLines",
+      "drug",
+      "dose",
+      "carrier",
+      "physicalType",
+      "physicalControl",
+      ...FOOD_FIELDS.map(([id]) => {
+        return `${id}Concentration`;
+      })
+    ];
+
+    formFieldIDs.forEach(id => {
+      const element =
+        document.getElementById(id);
+
+      element.addEventListener("input", () => {
+        if (id.endsWith("Concentration")) {
+          syncFoodName();
         }
 
-        function updateBaseMedia() {
-            selectedBaseMedia = baseMediaSelect.value;
-            baseMediaValid.style.display = selectedBaseMedia ? 'block' : 'none';
-            updateVisibility();
-        }
-        
-        function updateIncubator() {
-            selectedIncubator = incubatorSelect.value;
-            incubatorValid.style.display = selectedIncubator ? 'block' : 'none';
-            updateVisibility();
+        validateAll();
+      });
+
+      element.addEventListener("change", () => {
+        if (id.endsWith("Concentration")) {
+          syncFoodName();
         }
 
-        function updateWaterSource() {
-            selectedWaterSource = waterSourceSelect.value;
-            waterSourceValid.style.display = selectedWaterSource ? 'block' : 'none';
-            updateVisibility();
-        }
-        
-        function updateUser() {
-            userName = userInput.value.trim();
-            userValid.style.display = userName ? 'block' : 'none';
-            updateVisibility();
-        }
+        validateAll();
+      });
+    });
 
-        function updateCareerStage() {
-            selectedCareerStage = careerStageSelect.value;
-            careerStageValid.style.display = selectedCareerStage ? 'block' : 'none';
-            updateVisibility();
-        }
+    document
+      .getElementById("generate")
+      .addEventListener("click", generate);
 
-        function updatePhysicalTreatment() {
-            selectedPhysicalTreatment = physicalTreatmentSelect.value;
-            physicalTreatmentValid.style.display = selectedPhysicalTreatment ? 'block' : 'none';
-
-            if (selectedPhysicalTreatment === 'Yes') {
-                physicalTreatmentTypeWrap.style.display = 'block';
-                physicalTreatmentControlWrap.style.display = 'block';
-            } else {
-                physicalTreatmentTypeWrap.style.display = 'none';
-                physicalTreatmentControlWrap.style.display = 'none';
-                physicalTreatmentTypeSelect.value = '';
-                physicalTreatmentControlSelect.value = '';
-                selectedPhysicalTreatmentType = '';
-                selectedPhysicalTreatmentControl = '';
-                physicalTreatmentTypeValid.style.display = 'none';
-                physicalTreatmentControlValid.style.display = 'none';
-            }
-
-            updateVisibility();
-        }
-
-        function updatePhysicalTreatmentType() {
-            selectedPhysicalTreatmentType = physicalTreatmentTypeSelect.value;
-            physicalTreatmentTypeValid.style.display = selectedPhysicalTreatmentType ? 'block' : 'none';
-            updateVisibility();
-        }
-
-        function updatePhysicalTreatmentControl() {
-            selectedPhysicalTreatmentControl = physicalTreatmentControlSelect.value;
-            physicalTreatmentControlValid.style.display = selectedPhysicalTreatmentControl ? 'block' : 'none';
-            updateVisibility();
-        }
-
-        function updateFoodChange() {
-            selectedFoodChange = foodChangeSelect.value;
-            foodChangeValid.style.display = selectedFoodChange ? 'block' : 'none';
-            updateVisibility();
-        }
-        
-        function updateDrugChoice() {
-            selectedDrugChoice = drugChoiceSelect.value;
-            drugChoiceValid.style.display = selectedDrugChoice ? 'block' : 'none';
-            updateVisibility();
-        }
-        
-        function updateCarrier() {
-            const carrierValue = carrierSelect.value;
-            if (carrierValue === '__other__') {
-                carrierSelect.value = '';
-                alert('Please email Christianluthomas@gmail.com to request adding a new carrier to the list.');
-                selectedCarrier = '';
-            } else {
-                selectedCarrier = carrierValue;
-            }
-            carrierValid.style.display = selectedCarrier ? 'block' : 'none';
-            updateVisibility();
-        }
-        
-        function updateTemperature() {
-            const result = parseTemperatures(temperatureInput.value);
-            
-            if (temperatureInput.value.trim() === '') {
-                temperatureError.style.display = 'none';
-                temperatureValid.style.display = 'none';
-                validTemperatures = false;
-                parsedTemperatures = [];
-            } else if (result.valid) {
-                temperatureError.style.display = 'none';
-                temperatureValid.style.display = 'block';
-                temperatureValid.textContent = result.temps.length === 1 
-                    ? `✓ All positions will be ${result.temps[0]}`
-                    : `✓ Temperatures will be randomized: ${result.temps.join(', ')}`;
-                validTemperatures = true;
-                parsedTemperatures = result.temps;
-            } else {
-                temperatureError.style.display = 'block';
-                temperatureValid.style.display = 'none';
-                validTemperatures = false;
-                parsedTemperatures = [];
-            }
-            
-            updateVisibility();
-        }
-        
-        function updateLdCycle() {
-            const result = validateLdCycle(ldCycleInput.value);
-            
-            if (result.empty) {
-                ldCycleError.style.display = 'none';
-                ldCycleValid.style.display = 'none';
-                validLdCycle = false;
-                ldCycleValue = '';
-            } else if (result.valid) {
-                ldCycleError.style.display = 'none';
-                ldCycleValid.style.display = 'block';
-                validLdCycle = true;
-                ldCycleValue = result.value;
-            } else {
-                ldCycleError.style.display = 'block';
-                ldCycleError.textContent = 'Please enter a valid L:D ratio (must add up to 24 hours, e.g., 12:12)';
-                ldCycleValid.style.display = 'none';
-                validLdCycle = false;
-                ldCycleValue = '';
-            }
-            
-            updateVisibility();
-        }
-        
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-        
-        function generateBalancedAssignments(count, options) {
-            if (options.length === 0) return [];
-            if (options.length === 1) return Array(count).fill(options[0]);
-            
-            const assignments = [];
-            const perOption = Math.floor(count / options.length);
-            const remainder = count % options.length;
-            
-            for (let i = 0; i < options.length; i++) {
-                const extra = i < remainder ? 1 : 0;
-                for (let j = 0; j < perOption + extra; j++) {
-                    assignments.push(options[i]);
-                }
-            }
-            
-            return shuffleArray(assignments);
-        }
-        
-        function generateSexAssignments(count, sexOption) {
-            if (sexOption === 'Male') {
-                return Array(count).fill('Male');
-            } else if (sexOption === 'Female') {
-                return Array(count).fill('Female');
-            } else if (sexOption === 'Mixed') {
-                return generateBalancedAssignments(count, ['Male', 'Female']);
-            }
-            return [];
-        }
-        
-        function generateTreatmentAssignments(count, groups) {
-            if (groups.length === 0) {
-                return Array(count).fill({ drug: 'Control', dose: '0', carrier: 'None' });
-            }
-            return generateBalancedAssignments(count, groups);
-        }
-        
-        function generatePhysicalTreatmentAssignments(count) {
-            if (selectedPhysicalTreatment === 'No') {
-                return Array(count).fill('Control');
-            }
-
-            if (selectedPhysicalTreatmentControl === 'Yes') {
-                return generateBalancedAssignments(count, ['Control', selectedPhysicalTreatmentType]);
-            }
-
-            return Array(count).fill(selectedPhysicalTreatmentType);
-        }
-        
-        function generateDatasetId() {
-            // Prefer the browser's native UUID generator, with a fallback for
-            // browsers or local-file contexts where crypto.randomUUID is unavailable.
-            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-                return `DS-${window.crypto.randomUUID()}`;
-            }
-
-            const bytes = new Uint8Array(16);
-            if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
-                window.crypto.getRandomValues(bytes);
-            } else {
-                for (let i = 0; i < bytes.length; i++) {
-                    bytes[i] = Math.floor(Math.random() * 256);
-                }
-            }
-
-            bytes[6] = (bytes[6] & 0x0f) | 0x40;
-            bytes[8] = (bytes[8] & 0x3f) | 0x80;
-            const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0'));
-            const uuid = `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
-            return `DS-${uuid}`;
-        }
-
-        function generateCSV() {
-            if (parsedMonitors.length === 0 || !validStartDate || !selectedSex || 
-                !selectedMated || !selectedBaseMedia || !selectedIncubator || !selectedWaterSource || !userName || !selectedCareerStage ||
-                !selectedFoodChange || !selectedDrugChoice ||
-                !(selectedPhysicalTreatment === 'No' || (selectedPhysicalTreatment === 'Yes' && selectedPhysicalTreatmentType && selectedPhysicalTreatmentControl)) ||
-                !validTemperatures || !validLdCycle) return;
-            
-            const rows = [];
-            const datasetId = generateDatasetId();
-            
-            // Header
-            let header = 'file,start_datetime,stop_datetime,region_id,sex,mated,base_media,incubator,water_source,user,career_stage,food_change,drug,dose';
-            if (selectedDrugChoice === 'yes') {
-                header += ',carrier';
-            }
-            header += ',physical_treatment,temperature,ld_cycle,dataset_id';
-            rows.push(header);
-            
-            // Get treatment groups
-            let treatmentGroups = [];
-            if (selectedDrugChoice === 'no') {
-                treatmentGroups = [{ drug: 'Control', dose: '0', carrier: 'None' }];
-            } else {
-                treatmentGroups = getTreatmentGroups();
-            }
-            
-            // Data rows
-            for (const monitorNum of parsedMonitors) {
-                const fileName = `Monitor${monitorNum}.txt`;
-                const sexAssignments = generateSexAssignments(REGIONS_PER_MONITOR, selectedSex);
-                const treatmentAssignments = generateTreatmentAssignments(REGIONS_PER_MONITOR, treatmentGroups);
-                const physicalTreatmentAssignments = generatePhysicalTreatmentAssignments(REGIONS_PER_MONITOR);
-                const temperatureAssignments = generateBalancedAssignments(REGIONS_PER_MONITOR, parsedTemperatures);
-                
-                for (let region = 1; region <= REGIONS_PER_MONITOR; region++) {
-                    const sex = sexAssignments[region - 1];
-                    const treatment = treatmentAssignments[region - 1];
-                    const physicalTreatment = physicalTreatmentAssignments[region - 1];
-                    const temp = temperatureAssignments[region - 1];
-                    
-                    let row = `${fileName},${startDateValue},,${region},${sex},${selectedMated},${selectedBaseMedia},${selectedIncubator},${selectedWaterSource},${userName},${selectedCareerStage},${selectedFoodChange},${treatment.drug},${treatment.dose}`;
-                    if (selectedDrugChoice === 'yes') {
-                        row += `,${treatment.carrier || selectedCarrier}`;
-                    }
-                    row += `,${physicalTreatment},${temp},${ldCycleValue},${datasetId}`;
-                    rows.push(row);
-                }
-            }
-            
-            const csvContent = rows.join('\n');
-            downloadCSV(csvContent, 'metadata.csv');
-        }
-        
-        function downloadCSV(content, filename) {
-            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            URL.revokeObjectURL(url);
-        }
-        
-        // Event listeners
-        monitorsInput.addEventListener('input', updateMonitors);
-        startDateInput.addEventListener('input', updateStartDate);
-        sexSelect.addEventListener('change', updateSex);
-        matedSelect.addEventListener('change', updateMated);
-        baseMediaSelect.addEventListener('change', updateBaseMedia);
-        incubatorSelect.addEventListener('change', updateIncubator);
-        waterSourceSelect.addEventListener('change', updateWaterSource);
-        userInput.addEventListener('input', updateUser);
-        careerStageSelect.addEventListener('change', updateCareerStage);
-        physicalTreatmentSelect.addEventListener('change', updatePhysicalTreatment);
-        physicalTreatmentTypeSelect.addEventListener('change', updatePhysicalTreatmentType);
-        physicalTreatmentControlSelect.addEventListener('change', updatePhysicalTreatmentControl);
-        foodChangeSelect.addEventListener('change', updateFoodChange);
-        drugChoiceSelect.addEventListener('change', updateDrugChoice);
-        addDrugBtn.addEventListener('click', createDrugEntry);
-        includeControlCheckbox.addEventListener('change', () => {
-            updateTreatmentPreview();
-            updateVisibility();
-        });
-        includeCarrierControlCheckbox.addEventListener('change', () => {
-            updateTreatmentPreview();
-            updateVisibility();
-        });
-        carrierSelect.addEventListener('change', updateCarrier);
-        temperatureInput.addEventListener('input', updateTemperature);
-        ldCycleInput.addEventListener('input', updateLdCycle);
-        generateBtn.addEventListener('click', generateCSV);
-        
-        // Initialize
-        setDefaultStartDate();
-        updateProgress();
-    </script>
+    setTomorrowAsDefault();
+    validateAll();
+  </script>
 </body>
 </html>
