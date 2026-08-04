@@ -512,7 +512,7 @@
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select></div>`,
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1"><div class="food-note">This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div></div>`,
       );
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
@@ -722,6 +722,12 @@
         document
           .getElementById("drugDetails")
           .classList.toggle("open", values.drugChoice === "Yes");
+        const ethanolCarrierSelected =
+          values.drugChoice === "Yes" &&
+          document.getElementById("carrier").value === "Ethanol";
+        document
+          .getElementById("ethanolCarrierDetails")
+          .classList.toggle("open", ethanolCarrierSelected);
         document
           .getElementById("physicalDetails")
           .classList.toggle("open", values.physical === "Yes");
@@ -736,6 +742,21 @@
             document.getElementById("drug").value &&
             document.getElementById("dose").value.trim() &&
             document.getElementById("carrier").value;
+        const ethanolCarrierValue = document
+          .getElementById("ethanolCarrierConcentration")
+          .value.trim();
+        const ethanolCarrierOK =
+          !ethanolCarrierSelected ||
+          (ethanolCarrierValue !== "" &&
+            !isNaN(Number(ethanolCarrierValue)) &&
+            Number(ethanolCarrierValue) >= 0);
+        conditionsOK = conditionsOK && ethanolCarrierOK;
+        document.getElementById("error-ethanolCarrier").textContent =
+          ethanolCarrierOK
+            ? ""
+            : "Enter a non-negative numeric ethanol concentration.";
+        document.getElementById("error-ethanolCarrier").style.display =
+          ethanolCarrierOK ? "none" : "block";
         if (values.physical === "Yes")
           conditionsOK =
             conditionsOK && document.getElementById("physicalType").value;
@@ -816,6 +837,12 @@
                   .filter(Boolean);
         const drugYes = values.drugChoice === "Yes",
           physYes = values.physical === "Yes";
+        const ethanolCarrierAddition =
+          drugYes && document.getElementById("carrier").value === "Ethanol"
+            ? Number(
+                document.getElementById("ethanolCarrierConcentration").value,
+              )
+            : 0;
         const ingredientValues = Object.fromEntries(
           FOOD_FIELDS.map(([id]) => [id, concentrations(`${id}Concentration`)]),
         );
@@ -880,7 +907,7 @@
                 f.brewersYeast,
                 f.propionicAcid,
                 f.nipagen,
-                f.ethanol,
+                Number(f.ethanol) + ethanolCarrierAddition,
                 document.getElementById("incubator").value,
                 values.water,
                 document.getElementById("userName").value.trim(),
@@ -919,6 +946,7 @@
         "drug",
         "dose",
         "carrier",
+        "ethanolCarrierConcentration",
         "physicalType",
         "physicalControl",
         ...FOOD_FIELDS.map(([id]) => `${id}Concentration`),
