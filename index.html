@@ -569,6 +569,48 @@
         validateAll();
       });
 
+      function openConditionEditor(id) {
+        const toggle = document.getElementById(`toggle-${id}`);
+        const editor = document.getElementById(`edit-${id}`);
+
+        toggle.checked = true;
+        editor.classList.add("open");
+      }
+
+      function preselectExperimentFocus() {
+        const focus = document.getElementById("experimentFocus").value;
+
+        if (focus === "Nutrition") {
+          openConditionEditor("baseMedia");
+        }
+
+        if (focus === "Drug Exposure") {
+          openConditionEditor("drugChoice");
+          document.getElementById("drugChoice").value = "Yes";
+          values.drugChoice = "Yes";
+        }
+
+        if (focus === "Light Cycle") {
+          openConditionEditor("ldCycle");
+        }
+
+        if (focus === "Physical Intervention") {
+          openConditionEditor("physical");
+          document.getElementById("physical").value = "Yes";
+          values.physical = "Yes";
+        }
+
+        if (focus === "Genetic Line") {
+          document.getElementById("geneticLineChoice").value = "Alternative";
+        }
+
+        validateAll();
+      }
+
+      document
+        .getElementById("experimentFocus")
+        .addEventListener("change", preselectExperimentFocus);
+
       function parseMonitors() {
         const s = document.getElementById("monitors").value.trim();
         if (!s) return [];
@@ -812,15 +854,8 @@
           "physical_treatment",
           "temperature",
           "ld_cycle",
-          "dataset_id",
         ];
         const rows = [header.join(",")];
-        const dataset =
-          "NAS_" +
-          new Date()
-            .toISOString()
-            .replace(/[-:TZ.]/g, "")
-            .slice(0, 14);
         mons.forEach((m) => {
           const sexA = balanced(REGIONS, sexes),
             lineA = balanced(REGIONS, geneticLines),
@@ -857,7 +892,6 @@
                 physYes ? document.getElementById("physicalType").value : "No",
                 tempA[r - 1],
                 values.ldCycle,
-                dataset,
               ]
                 .map(csv)
                 .join(","),
