@@ -345,6 +345,7 @@
         <option>Genetic Line</option>
         <option>Other</option>
       </select>
+
     </section>
 
     <section class="card" id="q5">
@@ -355,15 +356,19 @@
         control.
       </div>
       <div class="control-row">
-        <div class="control-name">Genetic line</div>
-        <label class="field" for="geneticLineChoice">Select genetic line</label
-        ><select id="geneticLineChoice">
-          <option value="Leicester" selected>Leicester</option>
-          <option value="Alternative">Alternative line(s)</option>
-        </select>
-        <div class="conditional" id="geneticLineDetails">
+        <div class="control-head">
+          <div>
+            <div class="control-name">Strain</div>
+            <div class="default">Default: Leicester</div>
+          </div>
+          <label class="edit-toggle">
+            <input type="checkbox" id="toggle-geneticLine" />
+            Change
+          </label>
+        </div>
+        <div class="editor" id="geneticLineDetails">
           <label class="field" for="geneticLines"
-            >Alternative genetic line(s)</label
+            >Alternative strain(s)</label
           ><input
             type="text"
             id="geneticLines"
@@ -374,7 +379,7 @@
             randomised across monitor positions.
           </div>
           <div class="error" id="geneticLineError">
-            Enter at least one genetic line.
+            Enter at least one strain.
           </div>
         </div>
       </div>
@@ -430,6 +435,13 @@
           def: "Greyline",
           type: "select",
           options: ["Greyline", "Ultrapure", "Tap", "Bottled"],
+        },
+        {
+          id: "building",
+          label: "Building",
+          def: "The Hodgkin Building",
+          type: "select",
+          options: ["The Hodgkin Building", "The Adrian Building"],
         },
         {
           id: "foodChange",
@@ -601,7 +613,7 @@
         }
 
         if (focus === "Genetic Line") {
-          document.getElementById("geneticLineChoice").value = "Alternative";
+          document.getElementById("toggle-geneticLine").checked = true;
         }
 
         validateAll();
@@ -698,8 +710,7 @@
           : "";
         document.getElementById("q3").classList.toggle("visible", dateOK);
         const alternativeLines =
-            document.getElementById("geneticLineChoice").value ===
-            "Alternative",
+            document.getElementById("toggle-geneticLine").checked,
           lineOK =
             !alternativeLines ||
             document
@@ -828,7 +839,7 @@
           temps = values.temperature.split(",").map((x) => x.trim()),
           sexes = values.sex === "Mixed" ? ["Male", "Female"] : [values.sex],
           geneticLines =
-            document.getElementById("geneticLineChoice").value === "Leicester"
+            !document.getElementById("toggle-geneticLine").checked
               ? ["Leicester"]
               : document
                   .getElementById("geneticLines")
@@ -870,6 +881,7 @@
           "propionic_acid_pct_vv",
           "nipagen_pct_wv",
           "ethanol_stock_pct_vv",
+          "building",
           "incubator",
           "water_source",
           "user",
@@ -908,6 +920,7 @@
                 f.propionicAcid,
                 f.nipagen,
                 Number(f.ethanol) + ethanolCarrierAddition,
+                values.building,
                 document.getElementById("incubator").value,
                 values.water,
                 document.getElementById("userName").value.trim(),
@@ -938,10 +951,11 @@
         "monitors",
         "startDate",
         "incubator",
+        "building",
         "userName",
         "career",
         "experimentFocus",
-        "geneticLineChoice",
+        "toggle-geneticLine",
         "geneticLines",
         "drug",
         "dose",
