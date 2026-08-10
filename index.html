@@ -1,8 +1,3 @@
-Nasonia_Trikinetics_Control_Metadata_Generator.html
-
-
-
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -541,7 +536,7 @@ Nasonia_Trikinetics_Control_Metadata_Generator.html
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option>Vibrational Stimulation</option><option>Night Red Light</option><option>Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
+        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option>Vibrational Stimulation</option><option>Red Light</option><option>Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
       );
 
       const FOOD_FIELDS = [
@@ -793,13 +788,14 @@ Nasonia_Trikinetics_Control_Metadata_Generator.html
         document
           .getElementById("physicalDetails")
           .classList.toggle("open", values.physical === "Yes");
-        const vibrationalStimulationSelected =
+        const frequencyTreatmentSelected =
           values.physical === "Yes" &&
-          document.getElementById("physicalType").value ===
-            "Vibrational Stimulation";
+          ["Vibrational Stimulation", "Red Light"].includes(
+            document.getElementById("physicalType").value,
+          );
         document
           .getElementById("frequencyDetails")
-          .classList.toggle("open", vibrationalStimulationSelected);
+          .classList.toggle("open", frequencyTreatmentSelected);
         updateFoodEditors();
         const multipleFoodsSelected = values.baseMedia === "Multiple_foods";
         const customFoodSelected = values.baseMedia === "Custom";
@@ -836,7 +832,7 @@ Nasonia_Trikinetics_Control_Metadata_Generator.html
         if (values.physical === "Yes")
           conditionsOK =
             conditionsOK && document.getElementById("physicalType").value;
-        if (vibrationalStimulationSelected)
+        if (frequencyTreatmentSelected)
           conditionsOK =
             conditionsOK && document.getElementById("frequency").value;
         document.getElementById("error-temperature").textContent = validTemps(
@@ -1038,8 +1034,9 @@ Nasonia_Trikinetics_Control_Metadata_Generator.html
                 assignedCarrier,
                 physYes ? document.getElementById("physicalType").value : "No",
                 physYes &&
-                document.getElementById("physicalType").value ===
-                  "Vibrational Stimulation"
+                ["Vibrational Stimulation", "Red Light"].includes(
+                  document.getElementById("physicalType").value,
+                )
                   ? document.getElementById("frequency").value
                   : "None",
                 tempA[r - 1],
