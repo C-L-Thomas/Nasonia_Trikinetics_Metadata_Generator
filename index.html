@@ -1,3 +1,8 @@
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+
+
+
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -343,6 +348,7 @@
         <option>Light Cycle</option>
         <option>Physical Intervention</option>
         <option>Genetic Line</option>
+        <option>Mating</option>
         <option>Other</option>
       </select>
 
@@ -427,7 +433,13 @@
           label: "Food composition",
           def: "Nasonia_food",
           type: "select",
-          options: ["Nasonia_food", "Drosophila_SYA", "Custom"],
+          options: [
+            "Nasonia_food",
+            "Drosophila_SYA",
+            "No_Food",
+            "Multiple_foods",
+            "Custom",
+          ],
         },
         {
           id: "water",
@@ -524,12 +536,12 @@
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1"><div class="food-note">This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div></div>`,
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 0, 100uM, 5mM"><div class="food-note">Each dose is treated as a separate group and balanced across monitor positions. Enter 0 to include a control group.</div><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1"><div class="food-note">This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div></div>`,
       );
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option>Night Shaking</option><option>Night Red Light</option><option>Other</option></select><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
+        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option>Vibrational Stimulation</option><option>Night Red Light</option><option>Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
       );
 
       const FOOD_FIELDS = [
@@ -560,11 +572,27 @@
           nipagen: "0.1316",
           ethanol: "0.658",
         },
+        No_Food: {
+          sucrose: "0",
+          agar: "0",
+          cornmeal: "0",
+          brewersYeast: "0",
+          propionicAcid: "0",
+          nipagen: "0",
+          ethanol: "0",
+        },
       };
       const foodRow = document.getElementById("edit-baseMedia");
       foodRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="food-grid">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note">Enter comma-separated values to create multiple food groups. The ethanol value for Drosophila SYA records the volume of ethanol-based Nipagen stock added (65.8 ml in a 10 L final volume), not a measured pure-ethanol concentration.</div><div class="error" id="error-food"></div>`,
+        `<div class="conditional" id="multipleFoodDetails">
+          <label class="field">Food formulations to include</label>
+          <label class="edit-toggle"><input type="checkbox" class="food-preset-choice" value="Nasonia_food" checked> Nasonia food</label>
+          <label class="edit-toggle"><input type="checkbox" class="food-preset-choice" value="Drosophila_SYA" checked> Drosophila SYA</label>
+          <label class="edit-toggle"><input type="checkbox" class="food-preset-choice" value="No_Food"> No Food</label>
+          <div class="food-note">Selected foods will be balanced and randomised across monitor positions.</div>
+        </div>
+        <div class="food-grid" id="customFoodDetails">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note" id="customFoodNote">Enter comma-separated values to create multiple custom food groups. The ethanol value for Drosophila SYA records the volume of ethanol-based Nipagen stock added (65.8 ml in a 10 L final volume), not a measured pure-ethanol concentration.</div><div class="error" id="error-food"></div>`,
       );
       function applyFoodPreset(name) {
         const preset = FOOD_PRESETS[name];
@@ -577,9 +605,32 @@
         values.baseMedia = name;
       }
       document.getElementById("baseMedia").addEventListener("change", () => {
-        applyFoodPreset(document.getElementById("baseMedia").value);
+        const foodName = document.getElementById("baseMedia").value;
+        applyFoodPreset(foodName);
         validateAll();
       });
+
+      function chosenFoodPresets() {
+        return [...document.querySelectorAll(".food-preset-choice:checked")].map(
+          (checkbox) => checkbox.value,
+        );
+      }
+
+      function updateFoodEditors() {
+        const foodName = document.getElementById("baseMedia").value;
+        const multiple = foodName === "Multiple_foods";
+        const custom = foodName === "Custom";
+
+        document
+          .getElementById("multipleFoodDetails")
+          .classList.toggle("open", multiple);
+        document.getElementById("customFoodDetails").style.display = custom
+          ? "grid"
+          : "none";
+        document.getElementById("customFoodNote").style.display = custom
+          ? "block"
+          : "none";
+      }
 
       function openConditionEditor(id) {
         const toggle = document.getElementById(`toggle-${id}`);
@@ -742,9 +793,23 @@
         document
           .getElementById("physicalDetails")
           .classList.toggle("open", values.physical === "Yes");
-        const foodOK = FOOD_FIELDS.every(([id]) =>
-          validConcentrations(`${id}Concentration`),
-        );
+        const vibrationalStimulationSelected =
+          values.physical === "Yes" &&
+          document.getElementById("physicalType").value ===
+            "Vibrational Stimulation";
+        document
+          .getElementById("frequencyDetails")
+          .classList.toggle("open", vibrationalStimulationSelected);
+        updateFoodEditors();
+        const multipleFoodsSelected = values.baseMedia === "Multiple_foods";
+        const customFoodSelected = values.baseMedia === "Custom";
+        const foodOK = multipleFoodsSelected
+          ? chosenFoodPresets().length >= 2
+          : customFoodSelected
+            ? FOOD_FIELDS.every(([id]) =>
+                validConcentrations(`${id}Concentration`),
+              )
+            : Boolean(FOOD_PRESETS[values.baseMedia]);
         let conditionsOK =
           validTemps(values.temperature) && validLD(values.ldCycle) && foodOK;
         if (values.drugChoice === "Yes")
@@ -771,6 +836,9 @@
         if (values.physical === "Yes")
           conditionsOK =
             conditionsOK && document.getElementById("physicalType").value;
+        if (vibrationalStimulationSelected)
+          conditionsOK =
+            conditionsOK && document.getElementById("frequency").value;
         document.getElementById("error-temperature").textContent = validTemps(
           values.temperature,
         )
@@ -793,7 +861,9 @@
           : "block";
         document.getElementById("error-food").textContent = foodOK
           ? ""
-          : "Enter one or more non-negative numeric concentrations, separated by commas.";
+          : multipleFoodsSelected
+            ? "Select at least two food formulations."
+            : "Enter one or more non-negative numeric concentrations, separated by commas.";
         document.getElementById("error-food").style.display = foodOK
           ? "none"
           : "block";
@@ -848,22 +918,50 @@
                   .filter(Boolean);
         const drugYes = values.drugChoice === "Yes",
           physYes = values.physical === "Yes";
+        const drugDoses = drugYes
+          ? document
+              .getElementById("dose")
+              .value.split(",")
+              .map((dose) => dose.trim())
+              .filter(Boolean)
+          : ["0"];
         const ethanolCarrierAddition =
           drugYes && document.getElementById("carrier").value === "Ethanol"
             ? Number(
                 document.getElementById("ethanolCarrierConcentration").value,
               )
             : 0;
-        const ingredientValues = Object.fromEntries(
-          FOOD_FIELDS.map(([id]) => [id, concentrations(`${id}Concentration`)]),
-        );
-        const foods = FOOD_FIELDS.reduce(
-          (groups, [id]) =>
-            groups.flatMap((g) =>
-              ingredientValues[id].map((value) => ({ ...g, [id]: value })),
-            ),
-          [{}],
-        );
+        let foods;
+        if (values.baseMedia === "Multiple_foods") {
+          foods = chosenFoodPresets().map((name) => ({
+            formulation: name,
+            ...FOOD_PRESETS[name],
+          }));
+        } else if (values.baseMedia === "Custom") {
+          const ingredientValues = Object.fromEntries(
+            FOOD_FIELDS.map(([id]) => [
+              id,
+              concentrations(`${id}Concentration`),
+            ]),
+          );
+          foods = FOOD_FIELDS.reduce(
+            (groups, [id]) =>
+              groups.flatMap((group) =>
+                ingredientValues[id].map((value) => ({
+                  ...group,
+                  [id]: value,
+                })),
+              ),
+            [{ formulation: "Custom" }],
+          );
+        } else {
+          foods = [
+            {
+              formulation: values.baseMedia,
+              ...FOOD_PRESETS[values.baseMedia],
+            },
+          ];
+        }
         const header = [
           "file",
           "start_datetime",
@@ -891,6 +989,7 @@
           "dose",
           "carrier",
           "physical_treatment",
+          "frequency",
           "temperature",
           "ld_cycle",
         ];
@@ -899,9 +998,17 @@
           const sexA = balanced(REGIONS, sexes),
             lineA = balanced(REGIONS, geneticLines),
             tempA = balanced(REGIONS, temps),
-            foodA = balanced(REGIONS, foods);
+            foodA = balanced(REGIONS, foods),
+            doseA = balanced(REGIONS, drugDoses);
           for (let r = 1; r <= REGIONS; r++) {
             const f = foodA[r - 1];
+            const assignedDose = doseA[r - 1];
+            const drugControl = !drugYes || assignedDose === "0";
+            const assignedCarrier = drugControl
+              ? "None"
+              : document.getElementById("carrier").value;
+            const assignedEthanolAddition =
+              assignedCarrier === "Ethanol" ? ethanolCarrierAddition : 0;
             rows.push(
               [
                 `Monitor${m}.txt`,
@@ -912,24 +1019,29 @@
                 sexA[r - 1],
                 values.mated,
                 lineA[r - 1],
-                values.baseMedia,
+                f.formulation,
                 f.sucrose,
                 f.agar,
                 f.cornmeal,
                 f.brewersYeast,
                 f.propionicAcid,
                 f.nipagen,
-                Number(f.ethanol) + ethanolCarrierAddition,
+                Number(f.ethanol) + assignedEthanolAddition,
                 values.building,
                 document.getElementById("incubator").value,
                 values.water,
                 document.getElementById("userName").value.trim(),
                 document.getElementById("career").value,
                 values.foodChange,
-                drugYes ? document.getElementById("drug").value : "Control",
-                drugYes ? document.getElementById("dose").value.trim() : "0",
-                drugYes ? document.getElementById("carrier").value : "None",
+                drugControl ? "Control" : document.getElementById("drug").value,
+                assignedDose,
+                assignedCarrier,
                 physYes ? document.getElementById("physicalType").value : "No",
+                physYes &&
+                document.getElementById("physicalType").value ===
+                  "Vibrational Stimulation"
+                  ? document.getElementById("frequency").value
+                  : "None",
                 tempA[r - 1],
                 values.ldCycle,
               ]
@@ -962,18 +1074,32 @@
         "carrier",
         "ethanolCarrierConcentration",
         "physicalType",
+        "frequency",
         "physicalControl",
         ...FOOD_FIELDS.map(([id]) => `${id}Concentration`),
       ].forEach((id) => {
         const e = document.getElementById(id);
         e.addEventListener("input", () => {
-          if (id.endsWith("Concentration")) syncFoodName();
+          if (
+            FOOD_FIELDS.some(
+              ([foodID]) => id === `${foodID}Concentration`,
+            )
+          )
+            syncFoodName();
           validateAll();
         });
         e.addEventListener("change", () => {
-          if (id.endsWith("Concentration")) syncFoodName();
+          if (
+            FOOD_FIELDS.some(
+              ([foodID]) => id === `${foodID}Concentration`,
+            )
+          )
+            syncFoodName();
           validateAll();
         });
+      });
+      document.querySelectorAll(".food-preset-choice").forEach((checkbox) => {
+        checkbox.addEventListener("change", validateAll);
       });
       document.getElementById("generate").addEventListener("click", generate);
       tomorrow();
@@ -981,4 +1107,3 @@
     </script>
   </body>
 </html>
-
