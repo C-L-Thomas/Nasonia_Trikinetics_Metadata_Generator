@@ -536,7 +536,7 @@
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option>Vibrational Stimulation</option><option>Red Light</option><option>Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
+        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option value="Vibrational Stimulation">Vibrational Stimulation</option><option value="Red Light">Red Light</option><option value="Other">Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
       );
 
       const FOOD_FIELDS = [
