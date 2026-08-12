@@ -1,3 +1,64 @@
+Pasted text(3).txt
+Document
+Worked for 1m 1s
+
+Done:
+
+Night Red Light renamed to Red Light
+Selecting Red Light now reveals the Frequency dropdown
+Frequency exports as 2 seconds randomly every minute
+Vibrational Stimulation retains the same behaviour
+JavaScript syntax check passed
+
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+HTML
+it still comes up as Night Red light
+Worked for 42s
+
+Fixed. The dropdown now explicitly uses:
+
+<option value="Red Light">Red Light</option>
+
+There are no remaining instances of “Night Red Light” in the file.
+
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+
+Replace the published index.html with this exact file, commit the change, then hard-refresh the website (Cmd + Shift + R on Mac or Ctrl + F5 on Windows).
+
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+HTML
+Today 1:49 PM
+Can you add Tazemetostat as a drug option please.
+
+Could you add "Temperature & Humidity" as an experiment focus option. IF this is selected can you automatically change the temperature tab.
+
+For the temperature tab, if more than one temperature is selected can you randomise these. can you also add this in an explainer for temperature.
+
+
+
+Worked for 1m 9s
+
+Done:
+
+Added Tazemetostat as a drug option.
+Added Temperature & Humidity as an Experiment Focus.
+Selecting it automatically ticks Change and opens the Temperature control.
+Comma-separated temperatures are balanced and randomised across each monitor’s 32 positions.
+Added an explainer beneath the Temperature input.
+JavaScript syntax checked successfully.
+
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+
+Nasonia_Trikinetics_Control_Metadata_Generator.html
+HTML
+
+Library
+/
+Nasonia_Lifespan_Project
+/
+Nasonia_Trikinetics_Control_Metadata_Generator.html
 <!doctype html>
 <html lang="en">
   <head>
@@ -344,6 +405,7 @@
         <option>Physical Intervention</option>
         <option>Genetic Line</option>
         <option>Mating</option>
+        <option>Temperature &amp; Humidity</option>
         <option>Other</option>
       </select>
 
@@ -477,6 +539,8 @@
           def: "25",
           type: "text",
           placeholder: "e.g. 25 or 20, 25, 30",
+          note:
+            "Enter multiple temperatures separated by commas. They will be balanced and randomised across monitor positions.",
         },
         {
           id: "ldCycle",
@@ -500,7 +564,7 @@
       configs.forEach((c) => {
         const row = document.createElement("div");
         row.className = "control-row" + (c.unresolved ? " unresolved" : "");
-        row.innerHTML = `<div class="control-head"><div><div class="control-name">${c.label}</div><div class="default">Default: ${c.def.replaceAll("_", " ")}${c.unresolved ? " — we will finalise this later" : ""}</div></div><label class="edit-toggle"><input type="checkbox" id="toggle-${c.id}"> Change</label></div><div class="editor" id="edit-${c.id}">${c.type === "select" ? `<select id="${c.id}">${optionsHtml(c)}</select>` : `<input type="text" id="${c.id}" value="${c.def}" placeholder="${c.placeholder}">`}<div class="error" id="error-${c.id}"></div></div>`;
+        row.innerHTML = `<div class="control-head"><div><div class="control-name">${c.label}</div><div class="default">Default: ${c.def.replaceAll("_", " ")}${c.unresolved ? " — we will finalise this later" : ""}</div></div><label class="edit-toggle"><input type="checkbox" id="toggle-${c.id}"> Change</label></div><div class="editor" id="edit-${c.id}">${c.type === "select" ? `<select id="${c.id}">${optionsHtml(c)}</select>` : `<input type="text" id="${c.id}" value="${c.def}" placeholder="${c.placeholder}">`}${c.note ? `<div class="food-note">${c.note}</div>` : ""}<div class="error" id="error-${c.id}"></div></div>`;
         controls.appendChild(row);
         const toggle = row.querySelector(`#toggle-${c.id}`),
           editor = row.querySelector(`#edit-${c.id}`),
@@ -531,7 +595,7 @@
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 0, 100uM, 5mM"><div class="food-note">Each dose is treated as a separate group and balanced across monitor positions. Enter 0 to include a control group.</div><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1"><div class="food-note">This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div></div>`,
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 0, 100uM, 5mM"><div class="food-note">Each dose is treated as a separate group and balanced across monitor positions. Enter 0 to include a control group.</div><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1"><div class="food-note">This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div></div>`,
       );
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
@@ -660,6 +724,10 @@
 
         if (focus === "Genetic Line") {
           document.getElementById("toggle-geneticLine").checked = true;
+        }
+
+        if (focus === "Temperature & Humidity") {
+          openConditionEditor("temperature");
         }
 
         validateAll();
