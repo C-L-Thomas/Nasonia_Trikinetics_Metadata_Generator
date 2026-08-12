@@ -345,6 +345,7 @@
         <option>Genetic Line</option>
         <option>Mating</option>
         <option>Temperature &amp; Humidity</option>
+        <option>Pupae Quality</option>
         <option>Other</option>
       </select>
 
@@ -382,6 +383,69 @@
           </div>
           <div class="error" id="geneticLineError">
             Enter at least one strain.
+          </div>
+        </div>
+      </div>
+      <div class="control-row">
+        <div class="control-head">
+          <div>
+            <div class="control-name">Pupae</div>
+            <div class="default">Default: Unknown</div>
+          </div>
+          <label class="edit-toggle">
+            <input type="checkbox" id="toggle-pupae" />
+            Change
+          </label>
+        </div>
+        <div class="editor" id="pupaeDetails">
+          <div class="food-grid">
+            <div>
+              <label class="field" for="pupaeLength">Pupae length (mm)</label>
+              <input type="text" id="pupaeLength" value="Unknown" placeholder="e.g. 3.5" />
+            </div>
+            <div>
+              <label class="field" for="pupaeWeight">Pupae weight (mg)</label>
+              <input type="text" id="pupaeWeight" value="Unknown" placeholder="e.g. 2.1" />
+            </div>
+            <div>
+              <label class="field" for="pupaeAge">Pupae age (days)</label>
+              <input type="text" id="pupaeAge" value="Unknown" placeholder="e.g. 2" />
+            </div>
+          </div>
+          <div class="food-note">
+            Leave a measurement as Unknown if it was not recorded, or enter a non-negative numeric value in the unit shown.
+          </div>
+          <div class="error" id="error-pupae"></div>
+        </div>
+      </div>
+      <div class="control-row">
+        <div class="control-head">
+          <div>
+            <div class="control-name">Relatedness</div>
+            <div class="default">Default: Unknown</div>
+          </div>
+          <label class="edit-toggle">
+            <input type="checkbox" id="toggle-relatedness" />
+            Change
+          </label>
+        </div>
+        <div class="editor" id="relatednessDetails">
+          <div class="food-grid">
+            <div>
+              <label class="field" for="sharedPupaeNumber">Shared Pupae Number</label>
+              <select id="sharedPupaeNumber">
+                <option>Unknown</option>
+              </select>
+            </div>
+            <div>
+              <label class="field" for="sharedMother">Shared Mother</label>
+              <select id="sharedMother">
+                <option>Unknown</option>
+              </select>
+            </div>
+          </div>
+          <div class="food-note">
+            These columns must be edited manually after downloading the CSV. For Shared Pupae Number, give individuals from the same host the same label (for example A, B or C). For Shared Mother, give individuals from the same mother the same label. Leave unrecorded or unrelated individuals as Unknown.
           </div>
         </div>
       </div>
@@ -669,6 +733,11 @@
           openConditionEditor("temperature");
         }
 
+        if (focus === "Pupae Quality") {
+          document.getElementById("toggle-pupae").checked = true;
+          document.getElementById("pupaeDetails").classList.add("open");
+        }
+
         validateAll();
       }
 
@@ -745,6 +814,16 @@
         return a;
       }
 
+      function validPupaeMeasurement(value) {
+        const measurement = value.trim();
+        return (
+          measurement.toLowerCase() === "unknown" ||
+          (measurement !== "" &&
+            !isNaN(Number(measurement)) &&
+            Number(measurement) >= 0)
+        );
+      }
+
       function validateAll() {
         const mons = parseMonitors(),
           monitorOK = Array.isArray(mons) && mons.length > 0;
@@ -815,6 +894,19 @@
             : Boolean(FOOD_PRESETS[values.baseMedia]);
         let conditionsOK =
           validTemps(values.temperature) && validLD(values.ldCycle) && foodOK;
+        const pupaeChanged = document.getElementById("toggle-pupae").checked;
+        const pupaeOK =
+          !pupaeChanged ||
+          ["pupaeLength", "pupaeWeight", "pupaeAge"].every((id) =>
+            validPupaeMeasurement(document.getElementById(id).value),
+          );
+        conditionsOK = conditionsOK && pupaeOK;
+        document.getElementById("error-pupae").textContent = pupaeOK
+          ? ""
+          : "Enter a non-negative number or Unknown for each pupae measurement.";
+        document.getElementById("error-pupae").style.display = pupaeOK
+          ? "none"
+          : "block";
         if (values.drugChoice === "Yes")
           conditionsOK =
             conditionsOK &&
@@ -993,6 +1085,11 @@
           "carrier",
           "physical_treatment",
           "frequency",
+          "pupae_length_mm",
+          "pupae_weight_mg",
+          "pupae_age_days",
+          "shared_pupae_number",
+          "shared_mother",
           "temperature",
           "ld_cycle",
         ];
@@ -1046,6 +1143,17 @@
                 )
                   ? document.getElementById("frequency").value
                   : "None",
+                document.getElementById("toggle-pupae").checked
+                  ? document.getElementById("pupaeLength").value.trim()
+                  : "Unknown",
+                document.getElementById("toggle-pupae").checked
+                  ? document.getElementById("pupaeWeight").value.trim()
+                  : "Unknown",
+                document.getElementById("toggle-pupae").checked
+                  ? document.getElementById("pupaeAge").value.trim()
+                  : "Unknown",
+                "Unknown",
+                "Unknown",
                 tempA[r - 1],
                 values.ldCycle,
               ]
@@ -1080,6 +1188,9 @@
         "physicalType",
         "frequency",
         "physicalControl",
+        "pupaeLength",
+        "pupaeWeight",
+        "pupaeAge",
         ...FOOD_FIELDS.map(([id]) => `${id}Concentration`),
       ].forEach((id) => {
         const e = document.getElementById(id);
@@ -1105,6 +1216,27 @@
       document.querySelectorAll(".food-preset-choice").forEach((checkbox) => {
         checkbox.addEventListener("change", validateAll);
       });
+      document.getElementById("toggle-pupae").addEventListener("change", () => {
+        const changed = document.getElementById("toggle-pupae").checked;
+        document.getElementById("pupaeDetails").classList.toggle("open", changed);
+        if (!changed) {
+          document.getElementById("pupaeLength").value = "Unknown";
+          document.getElementById("pupaeWeight").value = "Unknown";
+          document.getElementById("pupaeAge").value = "Unknown";
+        }
+        validateAll();
+      });
+      document
+        .getElementById("toggle-relatedness")
+        .addEventListener("change", () => {
+          document
+            .getElementById("relatednessDetails")
+            .classList.toggle(
+              "open",
+              document.getElementById("toggle-relatedness").checked,
+            );
+          validateAll();
+        });
       document.getElementById("generate").addEventListener("click", generate);
       tomorrow();
       validateAll();
