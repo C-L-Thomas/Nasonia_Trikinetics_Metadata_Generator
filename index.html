@@ -342,6 +342,7 @@
         <option>Drug Exposure</option>
         <option>Light Cycle</option>
         <option>Physical Intervention</option>
+        <option>Diapause</option>
         <option>Genetic Line</option>
         <option>Mating</option>
         <option>Temperature &amp; Humidity</option>
@@ -447,6 +448,35 @@
           <div class="food-note">
             These columns must be edited manually after downloading the CSV. For Shared Pupae Number, give individuals from the same host the same label (for example A, B or C). For Shared Mother, give individuals from the same mother the same label. Leave unrecorded or unrelated individuals as Unknown.
           </div>
+        </div>
+      </div>
+      <div class="control-row">
+        <div class="control-head">
+          <div>
+            <div class="control-name">Wasp Source</div>
+            <div class="default">Default: Unknown</div>
+          </div>
+          <label class="edit-toggle">
+            <input type="checkbox" id="toggle-waspSource" />
+            Change
+          </label>
+        </div>
+        <div class="editor" id="waspSourceDetails">
+          <label class="field" for="waspSource">Wasp source</label>
+          <select id="waspSource">
+            <option selected>Unknown</option>
+            <option>Crowded</option>
+            <option>Low-density</option>
+            <option>Solitary</option>
+          </select>
+          <label class="field" for="waspObtainingMethod">Method of obtaining wasp</label>
+          <select id="waspObtainingMethod">
+            <option selected>Unknown</option>
+            <option value="CO2">CO₂</option>
+            <option>Ice</option>
+            <option>Straight from tube</option>
+          </select>
+          <div class="error" id="error-waspSource"></div>
         </div>
       </div>
       <div id="controls"></div>
@@ -580,8 +610,10 @@
             if (
               c.id === "baseMedia" &&
               document.getElementById("sucroseConcentration")
-            )
+            ) {
               applyFoodPreset("Nasonia_food");
+              document.getElementById("foodPreparationTime").value = "Unknown";
+            }
           }
           validateAll();
         });
@@ -598,12 +630,12 @@
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 0, 100uM, 5mM"><div class="food-note">Each dose is treated as a separate group and balanced across monitor positions. Enter 0 to include a control group.</div><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1"><div class="food-note">This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div></div>`,
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 0, 100uM, 5mM"><div class="food-note">Each dose is treated as a separate group and balanced across monitor positions. Enter 0 to include a control group.</div><label class="field">Length of Exposure</label><select id="lengthOfExposure"><option value="">-- Select --</option><option>Exposed for First Week Only</option><option>Exposed for Second Week Only</option><option>Exposed for Lifespan</option></select><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div><div class="conditional" id="dmsoCarrierDetails"><label class="field">DMSO carrier concentration, % w/v</label><input type="text" id="dmsoCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the DMSO already present in the selected food formulation.</div><div class="error" id="error-dmsoCarrier"></div></div></div>`,
       );
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option value="Vibrational Stimulation">Vibrational Stimulation</option><option value="Red Light">Red Light</option><option value="Other">Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
+        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option value="Vibrational Stimulation">Vibrational Stimulation</option><option value="Red Light">Red Light</option><option value="Diapause">Diapause</option><option value="Other">Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
       );
 
       const FOOD_FIELDS = [
@@ -614,6 +646,7 @@
         ["propionicAcid", "Propionic acid", "% v/v"],
         ["nipagen", "Nipagen (active)", "% w/v"],
         ["ethanol", "Ethanol-based Nipagen stock", "% v/v"],
+        ["dmso", "DMSO", "% w/v"],
       ];
       const FOOD_PRESETS = {
         Nasonia_food: {
@@ -624,6 +657,7 @@
           propionicAcid: "0",
           nipagen: "0",
           ethanol: "0",
+          dmso: "0",
         },
         Drosophila_SYA: {
           sucrose: "4",
@@ -633,6 +667,7 @@
           propionicAcid: "0.4",
           nipagen: "0.1316",
           ethanol: "0.658",
+          dmso: "0",
         },
         No_Food: {
           sucrose: "0",
@@ -642,19 +677,13 @@
           propionicAcid: "0",
           nipagen: "0",
           ethanol: "0",
+          dmso: "0",
         },
       };
       const foodRow = document.getElementById("edit-baseMedia");
       foodRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="multipleFoodDetails">
-          <label class="field">Food formulations to include</label>
-          <label class="edit-toggle"><input type="checkbox" class="food-preset-choice" value="Nasonia_food" checked> Nasonia food</label>
-          <label class="edit-toggle"><input type="checkbox" class="food-preset-choice" value="Drosophila_SYA" checked> Drosophila SYA</label>
-          <label class="edit-toggle"><input type="checkbox" class="food-preset-choice" value="No_Food"> No Food</label>
-          <div class="food-note">Selected foods will be balanced and randomised across monitor positions.</div>
-        </div>
-        <div class="food-grid" id="customFoodDetails">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note" id="customFoodNote">Enter comma-separated values to create multiple custom food groups. The ethanol value for Drosophila SYA records the volume of ethanol-based Nipagen stock added (65.8 ml in a 10 L final volume), not a measured pure-ethanol concentration.</div><div class="error" id="error-food"></div>`,
+        `<div class="food-grid" id="customFoodDetails">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note" id="customFoodNote"></div><label class="field" for="foodPreparationTime">Time of Preparation</label><select id="foodPreparationTime"><option>Unknown</option><option>Same Day</option><option>Within 24 hours</option><option>Over 24 hours prior</option></select><div class="error" id="error-food"></div>`,
       );
       function applyFoodPreset(name) {
         const preset = FOOD_PRESETS[name];
@@ -672,26 +701,22 @@
         validateAll();
       });
 
-      function chosenFoodPresets() {
-        return [...document.querySelectorAll(".food-preset-choice:checked")].map(
-          (checkbox) => checkbox.value,
-        );
-      }
-
       function updateFoodEditors() {
         const foodName = document.getElementById("baseMedia").value;
         const multiple = foodName === "Multiple_foods";
         const custom = foodName === "Custom";
 
-        document
-          .getElementById("multipleFoodDetails")
-          .classList.toggle("open", multiple);
-        document.getElementById("customFoodDetails").style.display = custom
+        document.getElementById("customFoodDetails").style.display =
+          custom || multiple
           ? "grid"
           : "none";
-        document.getElementById("customFoodNote").style.display = custom
+        document.getElementById("customFoodNote").style.display =
+          custom || multiple
           ? "block"
           : "none";
+        document.getElementById("customFoodNote").textContent = multiple
+          ? "Enter the same number of comma-separated values for every ingredient. Values in the same position form one recipe and stay together when recipes are balanced and randomised. Example: sucrose 30, 20, 0 with agar 1.5, 0, 1.5 creates three paired recipes."
+          : "Enter comma-separated values to create custom food groups. If several ingredients contain multiple values, all combinations will be generated.";
       }
 
       function openConditionEditor(id) {
@@ -723,6 +748,13 @@
           openConditionEditor("physical");
           document.getElementById("physical").value = "Yes";
           values.physical = "Yes";
+        }
+
+        if (focus === "Diapause") {
+          openConditionEditor("physical");
+          document.getElementById("physical").value = "Yes";
+          values.physical = "Yes";
+          document.getElementById("physicalType").value = "Diapause";
         }
 
         if (focus === "Genetic Line") {
@@ -784,7 +816,22 @@
           a.length > 0 && a.every((x) => !isNaN(Number(x)) && Number(x) >= 0)
         );
       }
+      function validAlignedFoodRecipes() {
+        const lengths = FOOD_FIELDS.map(([id]) =>
+          concentrations(`${id}Concentration`).length,
+        );
+        return (
+          lengths[0] >= 2 &&
+          lengths.every((length) => length === lengths[0]) &&
+          FOOD_FIELDS.every(([id]) =>
+            validConcentrations(`${id}Concentration`),
+          )
+        );
+      }
       function syncFoodName() {
+        if (document.getElementById("baseMedia").value === "Multiple_foods") {
+          return;
+        }
         const match = Object.entries(FOOD_PRESETS).find(([, preset]) =>
           FOOD_FIELDS.every(
             ([id]) =>
@@ -822,6 +869,13 @@
             !isNaN(Number(measurement)) &&
             Number(measurement) >= 0)
         );
+      }
+
+      function parseEthanolConcentration(value) {
+        const match = value
+          .trim()
+          .match(/^(\d+(?:\.\d+)?)\s*(?:%\s*(?:w\s*\/\s*v)?)?$/i);
+        return match ? Number(match[1]) : null;
       }
 
       function validateAll() {
@@ -871,6 +925,12 @@
         document
           .getElementById("ethanolCarrierDetails")
           .classList.toggle("open", ethanolCarrierSelected);
+        const dmsoCarrierSelected =
+          values.drugChoice === "Yes" &&
+          document.getElementById("carrier").value === "DMSO";
+        document
+          .getElementById("dmsoCarrierDetails")
+          .classList.toggle("open", dmsoCarrierSelected);
         document
           .getElementById("physicalDetails")
           .classList.toggle("open", values.physical === "Yes");
@@ -886,7 +946,7 @@
         const multipleFoodsSelected = values.baseMedia === "Multiple_foods";
         const customFoodSelected = values.baseMedia === "Custom";
         const foodOK = multipleFoodsSelected
-          ? chosenFoodPresets().length >= 2
+          ? validAlignedFoodRecipes()
           : customFoodSelected
             ? FOOD_FIELDS.every(([id]) =>
                 validConcentrations(`${id}Concentration`),
@@ -907,27 +967,53 @@
         document.getElementById("error-pupae").style.display = pupaeOK
           ? "none"
           : "block";
+        const waspSourceChanged = document.getElementById("toggle-waspSource").checked;
+        const waspSourceOK =
+          !waspSourceChanged ||
+          (document.getElementById("waspSource").value &&
+            document.getElementById("waspObtainingMethod").value);
+        conditionsOK = conditionsOK && waspSourceOK;
+        document.getElementById("error-waspSource").textContent = waspSourceOK
+          ? ""
+          : "Select both the wasp source and the method of obtaining the wasp.";
+        document.getElementById("error-waspSource").style.display = waspSourceOK
+          ? "none"
+          : "block";
         if (values.drugChoice === "Yes")
           conditionsOK =
             conditionsOK &&
             document.getElementById("drug").value &&
             document.getElementById("dose").value.trim() &&
+            document.getElementById("lengthOfExposure").value &&
             document.getElementById("carrier").value;
         const ethanolCarrierValue = document
           .getElementById("ethanolCarrierConcentration")
           .value.trim();
+        const parsedEthanolCarrier = parseEthanolConcentration(
+          ethanolCarrierValue,
+        );
         const ethanolCarrierOK =
           !ethanolCarrierSelected ||
-          (ethanolCarrierValue !== "" &&
-            !isNaN(Number(ethanolCarrierValue)) &&
-            Number(ethanolCarrierValue) >= 0);
+          parsedEthanolCarrier !== null;
         conditionsOK = conditionsOK && ethanolCarrierOK;
         document.getElementById("error-ethanolCarrier").textContent =
           ethanolCarrierOK
             ? ""
-            : "Enter a non-negative numeric ethanol concentration.";
+            : "Enter a non-negative ethanol concentration, for example 1, 1%, or 1% w/v.";
         document.getElementById("error-ethanolCarrier").style.display =
           ethanolCarrierOK ? "none" : "block";
+        const dmsoCarrierValue = document
+          .getElementById("dmsoCarrierConcentration")
+          .value.trim();
+        const parsedDmsoCarrier = parseEthanolConcentration(dmsoCarrierValue);
+        const dmsoCarrierOK =
+          !dmsoCarrierSelected || parsedDmsoCarrier !== null;
+        conditionsOK = conditionsOK && dmsoCarrierOK;
+        document.getElementById("error-dmsoCarrier").textContent = dmsoCarrierOK
+          ? ""
+          : "Enter a non-negative DMSO concentration, for example 1, 1%, or 1% w/v.";
+        document.getElementById("error-dmsoCarrier").style.display =
+          dmsoCarrierOK ? "none" : "block";
         if (values.physical === "Yes")
           conditionsOK =
             conditionsOK && document.getElementById("physicalType").value;
@@ -957,7 +1043,7 @@
         document.getElementById("error-food").textContent = foodOK
           ? ""
           : multipleFoodsSelected
-            ? "Select at least two food formulations."
+            ? "Enter at least two recipes and the same number of numeric values for every food ingredient."
             : "Enter one or more non-negative numeric concentrations, separated by commas.";
         document.getElementById("error-food").style.display = foodOK
           ? "none"
@@ -1022,16 +1108,33 @@
           : ["0"];
         const ethanolCarrierAddition =
           drugYes && document.getElementById("carrier").value === "Ethanol"
-            ? Number(
+            ? parseEthanolConcentration(
                 document.getElementById("ethanolCarrierConcentration").value,
+              )
+            : 0;
+        const dmsoCarrierAddition =
+          drugYes && document.getElementById("carrier").value === "DMSO"
+            ? parseEthanolConcentration(
+                document.getElementById("dmsoCarrierConcentration").value,
               )
             : 0;
         let foods;
         if (values.baseMedia === "Multiple_foods") {
-          foods = chosenFoodPresets().map((name) => ({
-            formulation: name,
-            ...FOOD_PRESETS[name],
-          }));
+          const ingredientValues = Object.fromEntries(
+            FOOD_FIELDS.map(([id]) => [
+              id,
+              concentrations(`${id}Concentration`),
+            ]),
+          );
+          foods = Array.from(
+            { length: ingredientValues[FOOD_FIELDS[0][0]].length },
+            (_, index) => ({
+              formulation: `Multiple_food_${index + 1}`,
+              ...Object.fromEntries(
+                FOOD_FIELDS.map(([id]) => [id, ingredientValues[id][index]]),
+              ),
+            }),
+          );
         } else if (values.baseMedia === "Custom") {
           const ingredientValues = Object.fromEntries(
             FOOD_FIELDS.map(([id]) => [
@@ -1074,6 +1177,8 @@
           "propionic_acid_pct_vv",
           "nipagen_pct_wv",
           "ethanol_stock_pct_vv",
+          "dmso_pct_wv",
+          "food_preparation_time",
           "building",
           "incubator",
           "water_source",
@@ -1083,6 +1188,7 @@
           "drug",
           "dose",
           "carrier",
+          "length_of_exposure",
           "physical_treatment",
           "frequency",
           "pupae_length_mm",
@@ -1090,6 +1196,8 @@
           "pupae_age_days",
           "shared_pupae_number",
           "shared_mother",
+          "wasp_source",
+          "wasp_obtaining_method",
           "temperature",
           "ld_cycle",
         ];
@@ -1109,6 +1217,8 @@
               : document.getElementById("carrier").value;
             const assignedEthanolAddition =
               assignedCarrier === "Ethanol" ? ethanolCarrierAddition : 0;
+            const assignedDmsoAddition =
+              assignedCarrier === "DMSO" ? dmsoCarrierAddition : 0;
             rows.push(
               [
                 `Monitor${m}.txt`,
@@ -1127,6 +1237,8 @@
                 f.propionicAcid,
                 f.nipagen,
                 Number(f.ethanol) + assignedEthanolAddition,
+                Number(f.dmso) + assignedDmsoAddition,
+                document.getElementById("foodPreparationTime").value,
                 values.building,
                 document.getElementById("incubator").value,
                 values.water,
@@ -1136,6 +1248,9 @@
                 drugControl ? "Control" : document.getElementById("drug").value,
                 assignedDose,
                 assignedCarrier,
+                drugControl
+                  ? "None"
+                  : document.getElementById("lengthOfExposure").value,
                 physYes ? document.getElementById("physicalType").value : "No",
                 physYes &&
                 ["Vibrational Stimulation", "Red Light"].includes(
@@ -1154,6 +1269,12 @@
                   : "Unknown",
                 "Unknown",
                 "Unknown",
+                document.getElementById("toggle-waspSource").checked
+                  ? document.getElementById("waspSource").value
+                  : "Unknown",
+                document.getElementById("toggle-waspSource").checked
+                  ? document.getElementById("waspObtainingMethod").value
+                  : "Unknown",
                 tempA[r - 1],
                 values.ldCycle,
               ]
@@ -1183,14 +1304,19 @@
         "geneticLines",
         "drug",
         "dose",
+        "lengthOfExposure",
         "carrier",
         "ethanolCarrierConcentration",
+        "dmsoCarrierConcentration",
         "physicalType",
         "frequency",
         "physicalControl",
         "pupaeLength",
         "pupaeWeight",
         "pupaeAge",
+        "waspSource",
+        "waspObtainingMethod",
+        "foodPreparationTime",
         ...FOOD_FIELDS.map(([id]) => `${id}Concentration`),
       ].forEach((id) => {
         const e = document.getElementById(id);
@@ -1213,9 +1339,6 @@
           validateAll();
         });
       });
-      document.querySelectorAll(".food-preset-choice").forEach((checkbox) => {
-        checkbox.addEventListener("change", validateAll);
-      });
       document.getElementById("toggle-pupae").addEventListener("change", () => {
         const changed = document.getElementById("toggle-pupae").checked;
         document.getElementById("pupaeDetails").classList.toggle("open", changed);
@@ -1235,6 +1358,19 @@
               "open",
               document.getElementById("toggle-relatedness").checked,
             );
+          validateAll();
+        });
+      document
+        .getElementById("toggle-waspSource")
+        .addEventListener("change", () => {
+          const changed = document.getElementById("toggle-waspSource").checked;
+          document
+            .getElementById("waspSourceDetails")
+            .classList.toggle("open", changed);
+          if (!changed) {
+            document.getElementById("waspSource").value = "Unknown";
+            document.getElementById("waspObtainingMethod").value = "Unknown";
+          }
           validateAll();
         });
       document.getElementById("generate").addEventListener("click", generate);
