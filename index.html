@@ -465,10 +465,9 @@
           <label class="field" for="waspSource">Wasp source</label>
           <select id="waspSource">
             <option selected>Unknown</option>
-            <option>From Single Pupae (Multiple Wasps)</option>
-            <option>Solitary (Isolated During Development)</option>
-            <option>From Low Pupae Number</option>
-            <option>High Density (From Stocks)</option>
+            <option>Crowded</option>
+            <option>Low-density</option>
+            <option>Solitary</option>
           </select>
           <label class="field" for="waspObtainingMethod">Method of obtaining wasp</label>
           <select id="waspObtainingMethod">
@@ -636,7 +635,7 @@
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option value="Vibrational Stimulation">Vibrational Stimulation</option><option value="Red Light">Red Light</option><option value="Diapause">Diapause</option><option value="Other">Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
+        `<div class="conditional" id="physicalDetails"><label class="field">Physical treatment type</label><select id="physicalType"><option value="">-- Select --</option><option value="Vibrational Stimulation">Vibrational Stimulation</option><option value="Red Light">Red Light</option><option value="Diapause">Diapause</option><option value="Other">Other</option></select><div class="conditional" id="frequencyDetails"><label class="field">Frequency</label><select id="frequency"><option value="">-- Select --</option><option>2 seconds randomly every minute</option></select></div><div class="conditional" id="diapauseMonthsDetails"><label class="field">Months in diapause</label><input type="text" inputmode="decimal" id="monthsDiapause" value="N/A" placeholder="e.g. 3"><div class="food-note">Replace N/A with the number of months the wasps spent in diapause.</div><div class="error" id="error-monthsDiapause"></div></div><label class="field">Include a balanced control group?</label><select id="physicalControl"><option value="Yes">Yes</option><option value="No">No</option></select></div>`,
       );
 
       const FOOD_FIELDS = [
@@ -943,6 +942,12 @@
         document
           .getElementById("frequencyDetails")
           .classList.toggle("open", frequencyTreatmentSelected);
+        const diapauseSelected =
+          values.physical === "Yes" &&
+          document.getElementById("physicalType").value === "Diapause";
+        document
+          .getElementById("diapauseMonthsDetails")
+          .classList.toggle("open", diapauseSelected);
         updateFoodEditors();
         const multipleFoodsSelected = values.baseMedia === "Multiple_foods";
         const customFoodSelected = values.baseMedia === "Custom";
@@ -1021,6 +1026,21 @@
         if (frequencyTreatmentSelected)
           conditionsOK =
             conditionsOK && document.getElementById("frequency").value;
+        const monthsDiapauseValue = document
+          .getElementById("monthsDiapause")
+          .value.trim();
+        const monthsDiapauseOK =
+          !diapauseSelected ||
+          (monthsDiapauseValue !== "" &&
+            Number.isFinite(Number(monthsDiapauseValue)) &&
+            Number(monthsDiapauseValue) > 0);
+        conditionsOK = conditionsOK && monthsDiapauseOK;
+        document.getElementById("error-monthsDiapause").textContent =
+          monthsDiapauseOK
+            ? ""
+            : "Enter a number greater than 0 for months in diapause.";
+        document.getElementById("error-monthsDiapause").style.display =
+          monthsDiapauseOK ? "none" : "block";
         document.getElementById("error-temperature").textContent = validTemps(
           values.temperature,
         )
@@ -1192,6 +1212,7 @@
           "length_of_exposure",
           "physical_treatment",
           "frequency",
+          "months_diapause",
           "pupae_length_mm",
           "pupae_weight_mg",
           "pupae_age_days",
@@ -1259,6 +1280,10 @@
                 )
                   ? document.getElementById("frequency").value
                   : "None",
+                physYes &&
+                document.getElementById("physicalType").value === "Diapause"
+                  ? document.getElementById("monthsDiapause").value
+                  : "N/A",
                 document.getElementById("toggle-pupae").checked
                   ? document.getElementById("pupaeLength").value.trim()
                   : "Unknown",
@@ -1311,6 +1336,7 @@
         "dmsoCarrierConcentration",
         "physicalType",
         "frequency",
+        "monthsDiapause",
         "physicalControl",
         "pupaeLength",
         "pupaeWeight",
