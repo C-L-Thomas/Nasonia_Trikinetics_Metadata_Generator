@@ -412,6 +412,10 @@
               <label class="field" for="pupaeAge">Pupae age (days)</label>
               <input type="text" id="pupaeAge" value="Unknown" placeholder="e.g. 2" />
             </div>
+            <div>
+              <label class="field" for="developmentTimeDays">Development time since laying (days)</label>
+              <input type="text" id="developmentTimeDays" value="Unknown" placeholder="e.g. 14" />
+            </div>
           </div>
           <div class="food-note">
             Leave a measurement as Unknown if it was not recorded, or enter a non-negative numeric value in the unit shown.
@@ -963,7 +967,7 @@
         const pupaeChanged = document.getElementById("toggle-pupae").checked;
         const pupaeOK =
           !pupaeChanged ||
-          ["pupaeLength", "pupaeWeight", "pupaeAge"].every((id) =>
+          ["pupaeLength", "pupaeWeight", "pupaeAge", "developmentTimeDays"].every((id) =>
             validPupaeMeasurement(document.getElementById(id).value),
           );
         conditionsOK = conditionsOK && pupaeOK;
@@ -1216,6 +1220,7 @@
           "pupae_length_mm",
           "pupae_weight_mg",
           "pupae_age_days",
+          "development_time_days_since_laying",
           "shared_pupae_number",
           "shared_mother",
           "wasp_source",
@@ -1293,6 +1298,9 @@
                 document.getElementById("toggle-pupae").checked
                   ? document.getElementById("pupaeAge").value.trim()
                   : "Unknown",
+                document.getElementById("toggle-pupae").checked
+                  ? document.getElementById("developmentTimeDays").value.trim()
+                  : "Unknown",
                 "Unknown",
                 "Unknown",
                 document.getElementById("toggle-waspSource").checked
@@ -1341,6 +1349,7 @@
         "pupaeLength",
         "pupaeWeight",
         "pupaeAge",
+        "developmentTimeDays",
         "waspSource",
         "waspObtainingMethod",
         "foodPreparationTime",
@@ -1373,6 +1382,7 @@
           document.getElementById("pupaeLength").value = "Unknown";
           document.getElementById("pupaeWeight").value = "Unknown";
           document.getElementById("pupaeAge").value = "Unknown";
+          document.getElementById("developmentTimeDays").value = "Unknown";
         }
         validateAll();
       });
