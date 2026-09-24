@@ -638,8 +638,11 @@
               </div>
             </div>
           </div>
+          <label class="edit-toggle conditional" id="pairRelatednessOption">
+            <input type="checkbox" id="pairRelatednessAssignments" /> Pair shared-pupa and shared-mother assignments
+          </label>
           <div class="food-note">
-            Record either shared-pupa groups, shared-mother groups, or both. Enter how many rows belong to each lettered group. Assignments are randomised separately within each monitor; the unselected field and any unassigned rows remain blank.
+            Counts apply once across the complete dataset, not once per monitor. Record either shared-pupa groups, shared-mother groups, or both. Pairing requires matching letters and counts in both grids and places each matching pair on the same randomly selected rows. Unassigned rows remain blank.
           </div>
           <div class="error" id="error-relatedness"></div>
         </div>
@@ -1182,7 +1185,7 @@
         return shuffled;
       }
 
-      function relatednessGridState(gridId) {
+      function relatednessGridState(gridId, maximumRows) {
         const rows = [...document.querySelectorAll(`#${gridId} .relatedness-row`)];
         let total = 0;
         let valid = true;
@@ -1198,22 +1201,22 @@
           total += count;
           groups.push({ label: row.dataset.label, count });
         });
-        if (total > REGIONS) valid = false;
+        if (total > maximumRows) valid = false;
         return { valid, total, groups };
       }
 
-      function buildRelatednessAssignments(gridId) {
+      function buildRelatednessAssignments(gridId, totalRows) {
         const enabledId = gridId === "sharedPupaeGrid"
           ? "enableSharedPupae"
           : "enableSharedMother";
         if (!document.getElementById(enabledId).checked) {
-          return Array.from({ length: REGIONS }, () => "");
+          return Array.from({ length: totalRows }, () => "");
         }
-        const { groups } = relatednessGridState(gridId);
+        const { groups } = relatednessGridState(gridId, totalRows);
         const assignments = groups.flatMap(({ label, count }) =>
           Array.from({ length: count }, () => label),
         );
-        while (assignments.length < REGIONS) assignments.push("");
+        while (assignments.length < totalRows) assignments.push("");
         return shuffleArray(assignments);
       }
 
@@ -1322,24 +1325,40 @@
         const relatednessReviewed =
           document.getElementById("confirm-relatedness").checked ||
           document.getElementById("toggle-relatedness").checked;
-        const sharedPupaeState = relatednessGridState("sharedPupaeGrid");
-        const sharedMotherState = relatednessGridState("sharedMotherGrid");
+        const availableRows = monitorOK ? mons.length * REGIONS : 0;
+        const sharedPupaeState = relatednessGridState(
+          "sharedPupaeGrid",
+          availableRows,
+        );
+        const sharedMotherState = relatednessGridState(
+          "sharedMotherGrid",
+          availableRows,
+        );
         const relatednessChanged =
           document.getElementById("toggle-relatedness").checked;
         const sharedPupaeEnabled =
           document.getElementById("enableSharedPupae").checked;
         const sharedMotherEnabled =
           document.getElementById("enableSharedMother").checked;
+        const pairRelatedness =
+          document.getElementById("pairRelatednessAssignments").checked;
+        const pairedGroupsMatch =
+          JSON.stringify(sharedPupaeState.groups) ===
+          JSON.stringify(sharedMotherState.groups);
         const relatednessOK =
           !relatednessChanged ||
           ((sharedPupaeEnabled || sharedMotherEnabled) &&
             (!sharedPupaeEnabled ||
               (sharedPupaeState.valid && sharedPupaeState.total > 0)) &&
             (!sharedMotherEnabled ||
-              (sharedMotherState.valid && sharedMotherState.total > 0)));
+              (sharedMotherState.valid && sharedMotherState.total > 0)) &&
+            (!pairRelatedness ||
+              (sharedPupaeEnabled && sharedMotherEnabled && pairedGroupsMatch)));
         document.getElementById("error-relatedness").textContent = relatednessOK
           ? ""
-          : "Select at least one relatedness type. For each selected type, enter positive whole-number counts totalling no more than 32 rows.";
+          : pairRelatedness && !pairedGroupsMatch
+            ? "Paired assignments require the same letters and row counts in both grids."
+            : `Select at least one relatedness type. For each selected type, enter positive whole-number counts totalling no more than ${availableRows} dataset rows.`;
         document.getElementById("error-relatedness").style.display = relatednessOK
           ? "none"
           : "block";
@@ -1736,15 +1755,24 @@
           "dmso_stock_pct_vv",
         ];
         const rows = [header.join(",")];
-        mons.forEach((m) => {
+        const totalRows = mons.length * REGIONS;
+        const sharedPupaeAssignments = buildRelatednessAssignments(
+          "sharedPupaeGrid",
+          totalRows,
+        );
+        const sharedMotherAssignments = document.getElementById(
+          "pairRelatednessAssignments",
+        ).checked
+          ? [...sharedPupaeAssignments]
+          : buildRelatednessAssignments("sharedMotherGrid", totalRows);
+        mons.forEach((m, monitorIndex) => {
           const sexA = balanced(REGIONS, sexes),
             lineA = balanced(REGIONS, geneticLines),
             tempA = balanced(REGIONS, temps),
             foodA = balanced(REGIONS, foods),
-            doseA = balanced(REGIONS, drugDoses),
-            sharedPupaeA = buildRelatednessAssignments("sharedPupaeGrid"),
-            sharedMotherA = buildRelatednessAssignments("sharedMotherGrid");
+            doseA = balanced(REGIONS, drugDoses);
           for (let r = 1; r <= REGIONS; r++) {
+            const datasetRowIndex = monitorIndex * REGIONS + (r - 1);
             const f = foodA[r - 1];
             const assignedDose = doseA[r - 1];
             const drugControl = !drugYes || assignedDose === "0";
@@ -1805,8 +1833,8 @@
                   ? ""
                   : document.getElementById("pupaeWeight").value.trim(),
                 document.getElementById("developmentTimeToEclosionDays").value.trim(),
-                sharedPupaeA[r - 1],
-                sharedMotherA[r - 1],
+                sharedPupaeAssignments[datasetRowIndex],
+                sharedMotherAssignments[datasetRowIndex],
                 Number(f.dmso) + assignedDmsoAddition,
                 document.getElementById("foodPreparationTime").value,
                 drugControl
@@ -1894,6 +1922,18 @@
         const grid = document.getElementById(gridId);
         grid.innerHTML = `<div class="relatedness-row" data-label="A"><span class="relatedness-letter">A</span><input type="number" min="1" step="1" class="relatedness-count" placeholder="Number of rows" aria-label="Rows assigned to ${gridId === "sharedPupaeGrid" ? "shared pupa" : "shared mother"} A" /><span></span></div>`;
       }
+      function updatePairRelatednessOption() {
+        const bothEnabled =
+          document.getElementById("enableSharedPupae").checked &&
+          document.getElementById("enableSharedMother").checked;
+        document.getElementById("pairRelatednessOption").classList.toggle(
+          "open",
+          bothEnabled,
+        );
+        if (!bothEnabled) {
+          document.getElementById("pairRelatednessAssignments").checked = false;
+        }
+      }
       [
         ["enableSharedPupae", "sharedPupaeEditor"],
         ["enableSharedMother", "sharedMotherEditor"],
@@ -1903,9 +1943,13 @@
             "open",
             document.getElementById(checkboxId).checked,
           );
+          updatePairRelatednessOption();
           validateAll();
         });
       });
+      document
+        .getElementById("pairRelatednessAssignments")
+        .addEventListener("change", validateAll);
       document.querySelectorAll(".add-relatedness-row").forEach((button) => {
         button.addEventListener("click", () => {
           const grid = document.getElementById(button.dataset.grid);
@@ -1957,8 +2001,10 @@
         () => {
           document.getElementById("enableSharedPupae").checked = false;
           document.getElementById("enableSharedMother").checked = false;
+          document.getElementById("pairRelatednessAssignments").checked = false;
           document.getElementById("sharedPupaeEditor").classList.remove("open");
           document.getElementById("sharedMotherEditor").classList.remove("open");
+          document.getElementById("pairRelatednessOption").classList.remove("open");
           resetRelatednessGrid("sharedPupaeGrid");
           resetRelatednessGrid("sharedMotherGrid");
         },
