@@ -112,6 +112,7 @@
         margin: 14px 0 6px;
       }
       input[type="text"],
+      input[type="number"],
       select {
         width: 100%;
         padding: 12px 14px;
@@ -158,6 +159,10 @@
         margin: 12px 0;
         background: #fafafa;
       }
+      .control-row.reviewed {
+        border-color: #86efac;
+        background: #f0fdf4;
+      }
       .control-head {
         display: flex;
         align-items: center;
@@ -178,6 +183,79 @@
         gap: 7px;
         font-size: 13px;
         white-space: nowrap;
+      }
+      .condition-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+      .confirm-toggle {
+        color: #047857;
+        font-weight: 700;
+      }
+      .required-note {
+        background: #fff7ed;
+        border-left: 4px solid #f97316;
+        padding: 11px 13px;
+        margin-top: 12px;
+        border-radius: 0 8px 8px 0;
+        color: #9a3412;
+        font-size: 13px;
+      }
+      .condition-step-nav {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+        margin: 16px 0 20px;
+      }
+      .condition-step-tab {
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #475569;
+        padding: 10px 6px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .condition-step-tab.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: white;
+      }
+      .condition-step-tab.complete:not(.active) {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+      }
+      .condition-step-tab:disabled { opacity: 0.45; cursor: not-allowed; }
+      .condition-panel { display: none; }
+      .condition-panel.active { display: block; }
+      .condition-panel-title {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      .condition-panel-controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .step-btn {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: white;
+        padding: 10px 18px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .step-btn.next { background: #2563eb; border-color: #2563eb; color: white; }
+      .step-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      @media (max-width: 760px) {
+        .condition-step-nav { grid-template-columns: 1fr; }
       }
       .editor {
         display: none;
@@ -211,6 +289,32 @@
         color: #64748b;
         font-size: 12px;
         margin-top: 8px;
+      }
+      .relatedness-grid {
+        display: grid;
+        gap: 8px;
+      }
+      .relatedness-row {
+        display: grid;
+        grid-template-columns: 38px 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+      .relatedness-letter {
+        font-weight: 700;
+        text-align: center;
+      }
+      .small-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 9px 12px;
+        background: #1e3a5f;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .remove-relatedness-row {
+        background: #b91c1c;
       }
       .btn {
         width: 100%;
@@ -355,9 +459,55 @@
     <section class="card" id="q5">
       <div class="title"><span class="num">5</span>Experimental Conditions</div>
       <div class="control-intro">
-        The values below will be used automatically. Tick
-        <strong>Change</strong> only for factors that differ from the standard
-        control.
+        Review every condition before continuing. For each card, either
+        <strong>confirm the assumed value</strong> or select
+        <strong>Change</strong> and provide the correct value.
+      </div>
+      <div class="condition-step-nav" id="conditionStepNav">
+        <button type="button" class="condition-step-tab active" data-step="0">5A Biology</button>
+        <button type="button" class="condition-step-tab" data-step="1">5B Host &amp; Pupae</button>
+        <button type="button" class="condition-step-tab" data-step="2">5C Environment</button>
+        <button type="button" class="condition-step-tab" data-step="3">5D Food</button>
+        <button type="button" class="condition-step-tab" data-step="4">5E Treatments</button>
+      </div>
+      <div class="condition-panel active" id="condition-panel-0">
+        <h3 class="condition-panel-title">Biological characteristics</h3>
+        <p class="hint">Confirm the sex, mating status and strain used.</p>
+        <div class="condition-panel-body" id="condition-body-biological"></div>
+      </div>
+      <div class="condition-panel" id="condition-panel-1">
+        <h3 class="condition-panel-title">Host and pupae information</h3>
+        <p class="hint">Record pupae measurements, development information, source and relatedness.</p>
+        <div class="condition-panel-body" id="condition-body-pupae"></div>
+      </div>
+      <div class="condition-panel" id="condition-panel-2">
+        <h3 class="condition-panel-title">Environmental conditions</h3>
+        <p class="hint">Confirm where and under which environmental conditions the experiment ran.</p>
+        <div class="condition-panel-body" id="condition-body-environment">
+          <div class="control-row" id="incubatorConditionRow">
+            <div class="control-name">Incubator</div>
+            <div class="default">Required: select the incubator used</div>
+            <label class="field" for="incubator">Which incubator?</label>
+            <select id="incubator">
+              <option value="">-- Select --</option>
+              <option>Incubator_1</option>
+              <option>Incubator_2</option>
+              <option>Incubator_3</option>
+              <option>Incubator_4</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="condition-panel" id="condition-panel-3">
+        <h3 class="condition-panel-title">Food conditions</h3>
+        <p class="hint">Confirm the food formulation, preparation and changing schedule.</p>
+        <div class="condition-panel-body" id="condition-body-food"></div>
+      </div>
+      <div class="condition-panel" id="condition-panel-4">
+        <h3 class="condition-panel-title">Experimental treatments</h3>
+        <p class="hint">Confirm drug, physical and diapause treatments.</p>
+        <div class="condition-panel-body" id="condition-body-treatments"></div>
       </div>
       <div class="control-row">
         <div class="control-head">
@@ -365,10 +515,16 @@
             <div class="control-name">Strain</div>
             <div class="default">Default: Leicester</div>
           </div>
-          <label class="edit-toggle">
-            <input type="checkbox" id="toggle-geneticLine" />
-            Change
-          </label>
+          <div class="condition-actions">
+            <label class="edit-toggle confirm-toggle">
+              <input type="checkbox" id="confirm-geneticLine" />
+              Confirm Leicester
+            </label>
+            <label class="edit-toggle">
+              <input type="checkbox" id="toggle-geneticLine" />
+              Change
+            </label>
+          </div>
         </div>
         <div class="editor" id="geneticLineDetails">
           <label class="field" for="geneticLines"
@@ -391,116 +547,160 @@
         <div class="control-head">
           <div>
             <div class="control-name">Pupae</div>
-            <div class="default">Default: Unknown</div>
+            <div class="default">Measurements must be actively reviewed</div>
           </div>
           <label class="edit-toggle">
             <input type="checkbox" id="toggle-pupae" />
-            Change
+            Review pupae details
           </label>
         </div>
         <div class="editor" id="pupaeDetails">
           <div class="food-grid">
             <div>
               <label class="field" for="pupaeLength">Pupae length (mm)</label>
-              <input type="text" id="pupaeLength" value="Unknown" placeholder="e.g. 3.5" />
+              <input type="text" id="pupaeLength" placeholder="e.g. 3.5" />
+              <label class="edit-toggle"><input type="checkbox" id="pupaeLengthNotMeasured" /> Confirm unrecorded</label>
             </div>
             <div>
               <label class="field" for="pupaeWeight">Pupae weight (mg)</label>
-              <input type="text" id="pupaeWeight" value="Unknown" placeholder="e.g. 2.1" />
+              <input type="text" id="pupaeWeight" placeholder="e.g. 2.1" />
+              <label class="edit-toggle"><input type="checkbox" id="pupaeWeightNotMeasured" /> Confirm unrecorded</label>
             </div>
             <div>
-              <label class="field" for="pupaeAge">Pupae age (days)</label>
-              <input type="text" id="pupaeAge" value="Unknown" placeholder="e.g. 2" />
-            </div>
-            <div>
-              <label class="field" for="developmentTimeDays">Development time since laying (days)</label>
-              <input type="text" id="developmentTimeDays" value="Unknown" placeholder="e.g. 14" />
+              <label class="field" for="developmentTimeToEclosionDays">Developmental time to eclosion (days)</label>
+              <input type="number" min="0" step="any" id="developmentTimeToEclosionDays" placeholder="e.g. 14" />
             </div>
           </div>
           <div class="food-note">
-            Leave a measurement as Unknown if it was not recorded, or enter a non-negative numeric value in the unit shown.
+            Enter measurements where available. Length and weight require either a numeric value or an explicit confirmation that they were unrecorded.
           </div>
           <div class="error" id="error-pupae"></div>
         </div>
+      </div>
+      <div class="control-row" id="hostPupationDateRow">
+        <div class="control-name">Host pupation date</div>
+        <div class="default">Required for all new experiments</div>
+        <label class="field" for="hostPupationDate">Date the host became a pupa</label>
+        <input type="date" id="hostPupationDate" />
+        <label class="edit-toggle">
+          <input type="checkbox" id="hostPupationDateNotRecorded" />
+          Not recorded — historical data only
+        </label>
+        <div class="required-note">
+          <strong>This date must be recorded for all new experiments.</strong>
+          “Not recorded” is only for historical experiments where the date cannot be recovered.
+        </div>
+        <div class="error" id="error-hostPupationDate"></div>
       </div>
       <div class="control-row">
         <div class="control-head">
           <div>
             <div class="control-name">Relatedness</div>
-            <div class="default">Default: Unknown</div>
+            <div class="default">Default: blank</div>
           </div>
-          <label class="edit-toggle">
-            <input type="checkbox" id="toggle-relatedness" />
-            Change
-          </label>
+          <div class="condition-actions">
+            <label class="edit-toggle confirm-toggle"><input type="checkbox" id="confirm-relatedness" /> Confirm blank</label>
+            <label class="edit-toggle"><input type="checkbox" id="toggle-relatedness" /> Change</label>
+          </div>
         </div>
         <div class="editor" id="relatednessDetails">
           <div class="food-grid">
             <div>
-              <label class="field" for="sharedPupaeNumber">Shared Pupae Number</label>
-              <select id="sharedPupaeNumber">
-                <option>Unknown</option>
-              </select>
+              <label class="field">Wasps per shared pupa</label>
+              <label class="edit-toggle">
+                <input type="checkbox" id="enableSharedPupae" /> Record shared-pupa groups
+              </label>
+              <div class="conditional" id="sharedPupaeEditor">
+                <div class="relatedness-grid" id="sharedPupaeGrid">
+                  <div class="relatedness-row" data-label="A">
+                    <span class="relatedness-letter">A</span>
+                    <input type="number" min="1" step="1" class="relatedness-count" placeholder="Number of rows" aria-label="Rows assigned to shared pupa A" />
+                    <span></span>
+                  </div>
+                </div>
+                <button type="button" class="small-btn add-relatedness-row" data-grid="sharedPupaeGrid">Add next letter</button>
+              </div>
             </div>
             <div>
-              <label class="field" for="sharedMother">Shared Mother</label>
-              <select id="sharedMother">
-                <option>Unknown</option>
-              </select>
+              <label class="field">Wasps per shared mother</label>
+              <label class="edit-toggle">
+                <input type="checkbox" id="enableSharedMother" /> Record shared-mother groups
+              </label>
+              <div class="conditional" id="sharedMotherEditor">
+                <div class="relatedness-grid" id="sharedMotherGrid">
+                  <div class="relatedness-row" data-label="A">
+                    <span class="relatedness-letter">A</span>
+                    <input type="number" min="1" step="1" class="relatedness-count" placeholder="Number of rows" aria-label="Rows assigned to shared mother A" />
+                    <span></span>
+                  </div>
+                </div>
+                <button type="button" class="small-btn add-relatedness-row" data-grid="sharedMotherGrid">Add next letter</button>
+              </div>
             </div>
           </div>
           <div class="food-note">
-            These columns must be edited manually after downloading the CSV. For Shared Pupae Number, give individuals from the same host the same label (for example A, B or C). For Shared Mother, give individuals from the same mother the same label. Leave unrecorded or unrelated individuals as Unknown.
+            Record either shared-pupa groups, shared-mother groups, or both. Enter how many rows belong to each lettered group. Assignments are randomised separately within each monitor; the unselected field and any unassigned rows remain blank.
           </div>
+          <div class="error" id="error-relatedness"></div>
         </div>
       </div>
       <div class="control-row">
         <div class="control-head">
           <div>
             <div class="control-name">Wasp Source</div>
-            <div class="default">Default: Unknown</div>
+            <div class="default">Default: blank</div>
           </div>
-          <label class="edit-toggle">
-            <input type="checkbox" id="toggle-waspSource" />
-            Change
-          </label>
+          <div class="condition-actions">
+            <label class="edit-toggle confirm-toggle"><input type="checkbox" id="confirm-waspSource" /> Confirm blank</label>
+            <label class="edit-toggle"><input type="checkbox" id="toggle-waspSource" /> Change</label>
+          </div>
         </div>
         <div class="editor" id="waspSourceDetails">
           <label class="field" for="waspSource">Wasp source</label>
           <select id="waspSource">
-            <option selected>Unknown</option>
-            <option>Crowded</option>
-            <option>Low-density</option>
-            <option>Solitary</option>
-          </select>
-          <label class="field" for="waspObtainingMethod">Method of obtaining wasp</label>
-          <select id="waspObtainingMethod">
-            <option selected>Unknown</option>
-            <option value="CO2">CO₂</option>
-            <option>Ice</option>
-            <option>Straight from tube</option>
+            <option value="" selected>-- Not recorded --</option>
+            <option>From Single Pupae (Multiple Wasps)</option>
+            <option>High Density (From Stocks)</option>
+            <option>Solitary (Isolated During Development)</option>
+            <option>1:1:1 stocks</option>
+            <option>5:5:5 stocks</option>
           </select>
           <div class="error" id="error-waspSource"></div>
         </div>
       </div>
+      <div class="control-row">
+        <div class="control-head">
+          <div>
+            <div class="control-name">Method of obtaining wasp</div>
+            <div class="default">Default: blank</div>
+          </div>
+          <div class="condition-actions">
+            <label class="edit-toggle confirm-toggle"><input type="checkbox" id="confirm-waspMethod" /> Confirm blank</label>
+            <label class="edit-toggle"><input type="checkbox" id="toggle-waspMethod" /> Change</label>
+          </div>
+        </div>
+        <div class="editor" id="waspMethodDetails">
+          <label class="field" for="waspObtainingMethod">Method of obtaining wasp</label>
+          <select id="waspObtainingMethod">
+            <option value="" selected>-- Not recorded --</option>
+            <option value="CO2">CO₂</option>
+            <option>Straight from tube (no ice)</option>
+          </select>
+          <div class="error" id="error-waspMethod"></div>
+        </div>
+      </div>
       <div id="controls"></div>
+      <div class="condition-panel-controls">
+        <button type="button" class="step-btn" id="conditionBack">Back</button>
+        <button type="button" class="step-btn next" id="conditionNext">Continue</button>
+      </div>
+      <div class="control-intro" id="conditionReviewStatus"></div>
       <div class="summary" id="summary"></div>
     </section>
 
     <section class="card" id="q6">
-      <div class="title"><span class="num">6</span>Incubator</div>
-      <p class="hint">
-        This incubator will apply to every wasp in this metadata file.
-      </p>
-      <label class="field" for="incubator">Which incubator?</label
-      ><select id="incubator">
-        <option value="">-- Select --</option>
-        <option>Incubator_1</option>
-        <option>Incubator_2</option>
-        <option>Incubator_3</option>
-        <option>Incubator_4</option>
-        <option>Unknown</option>
-      </select>
+      <div class="title"><span class="num">6</span>Review and Download</div>
+      <p class="hint">All experimental conditions have been reviewed. Generate the metadata file when ready.</p>
       <button class="btn" id="generate" disabled>Generate metadata CSV</button>
     </section>
     <div class="footer">Built for the Social Epigenetics Lab</div>
@@ -540,7 +740,7 @@
           label: "Water source",
           def: "Greyline",
           type: "select",
-          options: ["Greyline", "Ultrapure", "Tap", "Bottled"],
+          options: ["Greyline", "Double Distilled", "Ultrapure", "Tap", "Bottled"],
         },
         {
           id: "building",
@@ -601,12 +801,27 @@
       configs.forEach((c) => {
         const row = document.createElement("div");
         row.className = "control-row" + (c.unresolved ? " unresolved" : "");
-        row.innerHTML = `<div class="control-head"><div><div class="control-name">${c.label}</div><div class="default">Default: ${c.def.replaceAll("_", " ")}${c.unresolved ? " — we will finalise this later" : ""}</div></div><label class="edit-toggle"><input type="checkbox" id="toggle-${c.id}"> Change</label></div><div class="editor" id="edit-${c.id}">${c.type === "select" ? `<select id="${c.id}">${optionsHtml(c)}</select>` : `<input type="text" id="${c.id}" value="${c.def}" placeholder="${c.placeholder}">`}${c.note ? `<div class="food-note">${c.note}</div>` : ""}<div class="error" id="error-${c.id}"></div></div>`;
+        row.innerHTML = `<div class="control-head"><div><div class="control-name">${c.label}</div><div class="default">Assumed: ${c.def.replaceAll("_", " ")}${c.unresolved ? " — we will finalise this later" : ""}</div></div><div class="condition-actions"><label class="edit-toggle confirm-toggle"><input type="checkbox" id="confirm-${c.id}"> Confirm ${c.def.replaceAll("_", " ")}</label><label class="edit-toggle"><input type="checkbox" id="toggle-${c.id}"> Change</label></div></div><div class="editor" id="edit-${c.id}">${c.type === "select" ? `<select id="${c.id}">${optionsHtml(c)}</select>` : `<input type="text" id="${c.id}" value="${c.def}" placeholder="${c.placeholder}">`}${c.note ? `<div class="food-note">${c.note}</div>` : ""}<div class="error" id="error-${c.id}"></div></div>`;
         controls.appendChild(row);
-        const toggle = row.querySelector(`#toggle-${c.id}`),
+        const confirm = row.querySelector(`#confirm-${c.id}`),
+          toggle = row.querySelector(`#toggle-${c.id}`),
           editor = row.querySelector(`#edit-${c.id}`),
           input = row.querySelector(`#${c.id}`);
+        confirm.addEventListener("change", () => {
+          if (confirm.checked) {
+            toggle.checked = false;
+            editor.classList.remove("open");
+            input.value = c.def;
+            values[c.id] = c.def;
+            if (c.id === "baseMedia") {
+              applyFoodPreset("Nasonia_food");
+              document.getElementById("foodPreparationTime").value = "";
+            }
+          }
+          validateAll();
+        });
         toggle.addEventListener("change", () => {
+          if (toggle.checked) confirm.checked = false;
           editor.classList.toggle("open", toggle.checked);
           if (!toggle.checked) {
             input.value = c.def;
@@ -616,7 +831,7 @@
               document.getElementById("sucroseConcentration")
             ) {
               applyFoodPreset("Nasonia_food");
-              document.getElementById("foodPreparationTime").value = "Unknown";
+              document.getElementById("foodPreparationTime").value = "";
             }
           }
           validateAll();
@@ -630,6 +845,70 @@
           validateAll();
         });
       });
+
+      const conditionBodies = {
+        biological: document.getElementById("condition-body-biological"),
+        pupae: document.getElementById("condition-body-pupae"),
+        hostDate: document.createElement("div"),
+        source: document.createElement("div"),
+        environment: document.getElementById("condition-body-environment"),
+        food: document.getElementById("condition-body-food"),
+        treatments: document.getElementById("condition-body-treatments"),
+      };
+      conditionBodies.hostDate.className = "condition-panel-body";
+      conditionBodies.source.className = "condition-panel-body";
+      function moveCondition(toggleId, target) {
+        conditionBodies[target].appendChild(
+          document.getElementById(toggleId).closest(".control-row"),
+        );
+      }
+      moveCondition("toggle-geneticLine", "biological");
+      moveCondition("toggle-sex", "biological");
+      moveCondition("toggle-mated", "biological");
+      moveCondition("toggle-pupae", "pupae");
+      conditionBodies.hostDate.appendChild(document.getElementById("hostPupationDateRow"));
+      moveCondition("toggle-relatedness", "source");
+      moveCondition("toggle-waspSource", "source");
+      moveCondition("toggle-waspMethod", "source");
+      ["water", "building", "temperature", "ldCycle"].forEach((id) =>
+        moveCondition(`toggle-${id}`, "environment"),
+      );
+      ["baseMedia", "foodChange"].forEach((id) =>
+        moveCondition(`toggle-${id}`, "food"),
+      );
+      ["drugChoice", "physical"].forEach((id) =>
+        moveCondition(`toggle-${id}`, "treatments"),
+      );
+
+      const conditionStaging = document.getElementById("q5");
+      conditionStaging.id = "conditionStaging";
+      const finalSection = document.getElementById("q6");
+      finalSection.id = "q12";
+      finalSection.querySelector(".num").textContent = "12";
+      const conditionSectionDefinitions = [
+        [5, "Biological Characteristics", "Confirm the sex, mating status and strain used.", "biological"],
+        [6, "Host Pupation Date", "Record the date on which the host became a pupa.", "hostDate"],
+        [7, "Pupae Measurements and Development", "Record measurements and developmental information for the pupae.", "pupae"],
+        [8, "Wasp Source and Relatedness", "Confirm the source of the wasps and any known relatedness.", "source"],
+        [9, "Environmental Conditions", "Confirm where and under which environmental conditions the experiment ran.", "environment"],
+        [10, "Food Conditions", "Confirm the food formulation, preparation and changing schedule.", "food"],
+        [11, "Experimental Treatments", "Confirm drug, physical and diapause treatments.", "treatments"],
+      ];
+      conditionSectionDefinitions.forEach(([number, title, hint, bodyKey]) => {
+        const section = document.createElement("section");
+        section.className = "card";
+        section.id = `q${number}`;
+        section.innerHTML = `<div class="title"><span class="num">${number}</span>${title}</div><p class="hint">${hint}</p>`;
+        section.appendChild(conditionBodies[bodyKey]);
+        finalSection.parentNode.insertBefore(section, finalSection);
+      });
+      const reviewStatus = document.getElementById("conditionReviewStatus");
+      const metadataSummary = document.getElementById("summary");
+      finalSection.insertBefore(reviewStatus, document.getElementById("generate"));
+      finalSection.insertBefore(metadataSummary, document.getElementById("generate"));
+      conditionStaging.remove();
+
+      let conditionStepComplete = [false, false, false, false, false, false, false];
 
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
@@ -687,7 +966,7 @@
       const foodRow = document.getElementById("edit-baseMedia");
       foodRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="food-grid" id="customFoodDetails">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note" id="customFoodNote"></div><label class="field" for="foodPreparationTime">Time of Preparation</label><select id="foodPreparationTime"><option>Unknown</option><option>Same Day</option><option>Within 24 hours</option><option>Over 24 hours prior</option></select><div class="error" id="error-food"></div>`,
+        `<div class="food-grid" id="customFoodDetails">${FOOD_FIELDS.map(([id, label, unit]) => `<div><label class="field">${label} concentration(s), ${unit}</label><input type="text" id="${id}Concentration" value="${FOOD_PRESETS.Nasonia_food[id]}" placeholder="Enter one or more values"></div>`).join("")}</div><div class="food-note" id="customFoodNote"></div><label class="field" for="foodPreparationTime">Time of Preparation</label><select id="foodPreparationTime"><option value="">-- Not recorded --</option><option>Same Day</option><option>Within 24 hours</option><option>Over 24 hours prior</option></select><div class="error" id="error-food"></div>`,
       );
       function applyFoodPreset(name) {
         const preset = FOOD_PRESETS[name];
@@ -727,6 +1006,7 @@
         const toggle = document.getElementById(`toggle-${id}`);
         const editor = document.getElementById(`edit-${id}`);
 
+        document.getElementById(`confirm-${id}`).checked = false;
         toggle.checked = true;
         editor.classList.add("open");
       }
@@ -762,6 +1042,7 @@
         }
 
         if (focus === "Genetic Line") {
+          document.getElementById("confirm-geneticLine").checked = false;
           document.getElementById("toggle-geneticLine").checked = true;
         }
 
@@ -875,6 +1156,74 @@
         );
       }
 
+      function validOptionalNonNegative(value) {
+        const measurement = value.trim();
+        return measurement === "" ||
+          (!isNaN(Number(measurement)) && Number(measurement) >= 0);
+      }
+
+      function alphaLabel(index) {
+        let value = index + 1;
+        let label = "";
+        while (value > 0) {
+          value -= 1;
+          label = String.fromCharCode(65 + (value % 26)) + label;
+          value = Math.floor(value / 26);
+        }
+        return label;
+      }
+
+      function shuffleArray(valuesToShuffle) {
+        const shuffled = [...valuesToShuffle];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      }
+
+      function relatednessGridState(gridId) {
+        const rows = [...document.querySelectorAll(`#${gridId} .relatedness-row`)];
+        let total = 0;
+        let valid = true;
+        const groups = [];
+        rows.forEach((row) => {
+          const raw = row.querySelector(".relatedness-count").value.trim();
+          if (raw === "") return;
+          const count = Number(raw);
+          if (!Number.isInteger(count) || count < 1) {
+            valid = false;
+            return;
+          }
+          total += count;
+          groups.push({ label: row.dataset.label, count });
+        });
+        if (total > REGIONS) valid = false;
+        return { valid, total, groups };
+      }
+
+      function buildRelatednessAssignments(gridId) {
+        const enabledId = gridId === "sharedPupaeGrid"
+          ? "enableSharedPupae"
+          : "enableSharedMother";
+        if (!document.getElementById(enabledId).checked) {
+          return Array.from({ length: REGIONS }, () => "");
+        }
+        const { groups } = relatednessGridState(gridId);
+        const assignments = groups.flatMap(({ label, count }) =>
+          Array.from({ length: count }, () => label),
+        );
+        while (assignments.length < REGIONS) assignments.push("");
+        return shuffleArray(assignments);
+      }
+
+      function validHostPupationDate(value) {
+        const date = value.trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+        const parsed = new Date(`${date}T00:00:00Z`);
+        return !isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+      }
+
       function parseEthanolConcentration(value) {
         const match = value
           .trim()
@@ -901,12 +1250,15 @@
         document.getElementById("q3").classList.toggle("visible", dateOK);
         const alternativeLines =
             document.getElementById("toggle-geneticLine").checked,
+          lineConfirmed =
+            document.getElementById("confirm-geneticLine").checked,
           lineOK =
-            !alternativeLines ||
-            document
-              .getElementById("geneticLines")
-              .value.split(",")
-              .some((x) => x.trim());
+            (lineConfirmed && !alternativeLines) ||
+            (alternativeLines &&
+              document
+                .getElementById("geneticLines")
+                .value.split(",")
+                .some((x) => x.trim()));
         document
           .getElementById("geneticLineDetails")
           .classList.toggle("open", alternativeLines);
@@ -962,40 +1314,148 @@
                 validConcentrations(`${id}Concentration`),
               )
             : Boolean(FOOD_PRESETS[values.baseMedia]);
-        let conditionsOK =
-          validTemps(values.temperature) && validLD(values.ldCycle) && foodOK;
+        const generatedConditionsReviewed = configs.every(
+          (c) =>
+            document.getElementById(`confirm-${c.id}`).checked ||
+            document.getElementById(`toggle-${c.id}`).checked,
+        );
+        const relatednessReviewed =
+          document.getElementById("confirm-relatedness").checked ||
+          document.getElementById("toggle-relatedness").checked;
+        const sharedPupaeState = relatednessGridState("sharedPupaeGrid");
+        const sharedMotherState = relatednessGridState("sharedMotherGrid");
+        const relatednessChanged =
+          document.getElementById("toggle-relatedness").checked;
+        const sharedPupaeEnabled =
+          document.getElementById("enableSharedPupae").checked;
+        const sharedMotherEnabled =
+          document.getElementById("enableSharedMother").checked;
+        const relatednessOK =
+          !relatednessChanged ||
+          ((sharedPupaeEnabled || sharedMotherEnabled) &&
+            (!sharedPupaeEnabled ||
+              (sharedPupaeState.valid && sharedPupaeState.total > 0)) &&
+            (!sharedMotherEnabled ||
+              (sharedMotherState.valid && sharedMotherState.total > 0)));
+        document.getElementById("error-relatedness").textContent = relatednessOK
+          ? ""
+          : "Select at least one relatedness type. For each selected type, enter positive whole-number counts totalling no more than 32 rows.";
+        document.getElementById("error-relatedness").style.display = relatednessOK
+          ? "none"
+          : "block";
+        const waspSourceReviewed =
+          document.getElementById("confirm-waspSource").checked ||
+          document.getElementById("toggle-waspSource").checked;
+        const waspMethodReviewed =
+          document.getElementById("confirm-waspMethod").checked ||
+          document.getElementById("toggle-waspMethod").checked;
         const pupaeChanged = document.getElementById("toggle-pupae").checked;
+        const pupaeLengthValue = document.getElementById("pupaeLength").value.trim();
+        const pupaeWeightValue = document.getElementById("pupaeWeight").value.trim();
+        const pupaeLengthOK =
+          document.getElementById("pupaeLengthNotMeasured").checked ||
+          (pupaeLengthValue !== "" && validPupaeMeasurement(pupaeLengthValue));
+        const pupaeWeightOK =
+          document.getElementById("pupaeWeightNotMeasured").checked ||
+          (pupaeWeightValue !== "" && validPupaeMeasurement(pupaeWeightValue));
+        const hostDateOK =
+          document.getElementById("hostPupationDateNotRecorded").checked ||
+          validHostPupationDate(document.getElementById("hostPupationDate").value);
         const pupaeOK =
-          !pupaeChanged ||
-          ["pupaeLength", "pupaeWeight", "pupaeAge", "developmentTimeDays"].every((id) =>
-            validPupaeMeasurement(document.getElementById(id).value),
+          pupaeChanged && pupaeLengthOK && pupaeWeightOK &&
+          validOptionalNonNegative(
+            document.getElementById("developmentTimeToEclosionDays").value,
           );
-        conditionsOK = conditionsOK && pupaeOK;
+        const reviewStates = [
+          lineOK,
+          hostDateOK,
+          pupaeOK,
+          relatednessReviewed,
+          waspSourceReviewed,
+          waspMethodReviewed,
+          Boolean(document.getElementById("incubator").value),
+          ...configs.map(
+            (c) =>
+              document.getElementById(`confirm-${c.id}`).checked ||
+              document.getElementById(`toggle-${c.id}`).checked,
+          ),
+        ];
+        const reviewedCount = reviewStates.filter(Boolean).length;
+        document.getElementById("conditionReviewStatus").innerHTML =
+          `<strong>${reviewedCount} of ${reviewStates.length} conditions reviewed.</strong> ` +
+          (reviewedCount === reviewStates.length
+            ? "All assumed values have been confirmed or changed."
+            : "Confirm or change every condition to continue.");
+        configs.forEach((c) => {
+          document.getElementById(`toggle-${c.id}`).closest(".control-row").classList.toggle(
+            "reviewed",
+            document.getElementById(`confirm-${c.id}`).checked ||
+              document.getElementById(`toggle-${c.id}`).checked,
+          );
+        });
+        [
+          ["toggle-geneticLine", lineOK],
+          ["toggle-pupae", pupaeOK],
+          ["toggle-relatedness", relatednessReviewed && relatednessOK],
+          ["toggle-waspSource", waspSourceReviewed],
+          ["toggle-waspMethod", waspMethodReviewed],
+        ].forEach(([id, reviewed]) =>
+          document.getElementById(id).closest(".control-row").classList.toggle("reviewed", reviewed),
+        );
+        let conditionsOK =
+          generatedConditionsReviewed &&
+          relatednessReviewed &&
+          relatednessOK &&
+          waspSourceReviewed &&
+          waspMethodReviewed &&
+          validTemps(values.temperature) && validLD(values.ldCycle) && foodOK;
+        conditionsOK = conditionsOK && hostDateOK && pupaeOK;
         document.getElementById("error-pupae").textContent = pupaeOK
           ? ""
-          : "Enter a non-negative number or Unknown for each pupae measurement.";
+          : "Review this card. Enter length and weight or explicitly confirm that they were unrecorded.";
         document.getElementById("error-pupae").style.display = pupaeOK
           ? "none"
           : "block";
+        document.getElementById("error-hostPupationDate").textContent = hostDateOK
+          ? ""
+          : "Enter the host pupation date, or use the historical-data exception.";
+        document.getElementById("error-hostPupationDate").style.display = hostDateOK
+          ? "none"
+          : "block";
+        document.getElementById("hostPupationDateRow").classList.toggle(
+          "reviewed",
+          hostDateOK,
+        );
         const waspSourceChanged = document.getElementById("toggle-waspSource").checked;
         const waspSourceOK =
           !waspSourceChanged ||
-          (document.getElementById("waspSource").value &&
-            document.getElementById("waspObtainingMethod").value);
-        conditionsOK = conditionsOK && waspSourceOK;
+          Boolean(document.getElementById("waspSource").value);
+        const waspMethodChanged = document.getElementById("toggle-waspMethod").checked;
+        const waspMethodOK =
+          !waspMethodChanged ||
+          Boolean(document.getElementById("waspObtainingMethod").value);
+        conditionsOK = conditionsOK && waspSourceOK && waspMethodOK;
         document.getElementById("error-waspSource").textContent = waspSourceOK
           ? ""
-          : "Select both the wasp source and the method of obtaining the wasp.";
+          : "Select the wasp source.";
         document.getElementById("error-waspSource").style.display = waspSourceOK
           ? "none"
           : "block";
-        if (values.drugChoice === "Yes")
-          conditionsOK =
-            conditionsOK &&
+        document.getElementById("error-waspMethod").textContent = waspMethodOK
+          ? ""
+          : "Select the method used to obtain the wasp.";
+        document.getElementById("error-waspMethod").style.display = waspMethodOK
+          ? "none"
+          : "block";
+        const drugDetailsOK =
+          values.drugChoice !== "Yes" ||
+          Boolean(
             document.getElementById("drug").value &&
             document.getElementById("dose").value.trim() &&
             document.getElementById("lengthOfExposure").value &&
-            document.getElementById("carrier").value;
+            document.getElementById("carrier").value,
+          );
+        conditionsOK = conditionsOK && drugDetailsOK;
         const ethanolCarrierValue = document
           .getElementById("ethanolCarrierConcentration")
           .value.trim();
@@ -1024,12 +1484,13 @@
           : "Enter a non-negative DMSO concentration, for example 1, 1%, or 1% w/v.";
         document.getElementById("error-dmsoCarrier").style.display =
           dmsoCarrierOK ? "none" : "block";
-        if (values.physical === "Yes")
-          conditionsOK =
-            conditionsOK && document.getElementById("physicalType").value;
-        if (frequencyTreatmentSelected)
-          conditionsOK =
-            conditionsOK && document.getElementById("frequency").value;
+        const physicalTypeOK =
+          values.physical !== "Yes" ||
+          Boolean(document.getElementById("physicalType").value);
+        const frequencyOK =
+          !frequencyTreatmentSelected ||
+          Boolean(document.getElementById("frequency").value);
+        conditionsOK = conditionsOK && physicalTypeOK && frequencyOK;
         const monthsDiapauseValue = document
           .getElementById("monthsDiapause")
           .value.trim();
@@ -1073,10 +1534,49 @@
         document.getElementById("error-food").style.display = foodOK
           ? "none"
           : "block";
-        const conditionsComplete = focusOK && lineOK && conditionsOK;
-        document
-          .getElementById("q6")
-          .classList.toggle("visible", !!conditionsComplete);
+        const isReviewed = (id) =>
+          document.getElementById(`confirm-${id}`).checked ||
+          document.getElementById(`toggle-${id}`).checked;
+        conditionStepComplete = [
+          lineOK && isReviewed("sex") && isReviewed("mated"),
+          hostDateOK,
+          pupaeOK,
+          relatednessReviewed &&
+            relatednessOK &&
+            waspSourceReviewed &&
+            waspMethodReviewed &&
+            waspSourceOK &&
+            waspMethodOK,
+          ["water", "building", "temperature", "ldCycle"].every(isReviewed) &&
+            validTemps(values.temperature) &&
+            validLD(values.ldCycle) &&
+            Boolean(document.getElementById("incubator").value),
+          isReviewed("baseMedia") && isReviewed("foodChange") && foodOK,
+          isReviewed("drugChoice") &&
+            isReviewed("physical") &&
+            drugDetailsOK &&
+            ethanolCarrierOK &&
+            dmsoCarrierOK &&
+            physicalTypeOK &&
+            frequencyOK &&
+            monthsDiapauseOK,
+        ];
+        document.getElementById("incubatorConditionRow").classList.toggle(
+          "reviewed",
+          Boolean(document.getElementById("incubator").value),
+        );
+        const conditionsComplete =
+          focusOK && lineOK && conditionsOK && conditionStepComplete.every(Boolean);
+        for (let sectionNumber = 6; sectionNumber <= 11; sectionNumber++) {
+          const previousStepsComplete = conditionStepComplete
+            .slice(0, sectionNumber - 5)
+            .every(Boolean);
+          document.getElementById(`q${sectionNumber}`).classList.toggle(
+            "visible",
+            Boolean(focusOK && previousStepsComplete),
+          );
+        }
+        document.getElementById("q12").classList.toggle("visible", !!conditionsComplete);
         const incubatorOK =
           conditionsComplete && document.getElementById("incubator").value;
         document.getElementById("generate").disabled = !incubatorOK;
@@ -1085,13 +1585,13 @@
           dateOK,
           preOK,
           focusOK,
-          conditionsComplete,
-          incubatorOK,
+          ...conditionStepComplete,
+          conditionsComplete && incubatorOK,
         ].filter(Boolean).length;
         document.getElementById("fill").style.width =
-          `${(completed / 6) * 100}%`;
+          `${(completed / 12) * 100}%`;
         document.getElementById("progressText").textContent =
-          `${completed} of 6 sections completed`;
+          `${completed} of 12 sections completed`;
         document.getElementById("summary").innerHTML =
           "<strong>Metadata values:</strong> " +
           configs
@@ -1202,8 +1702,6 @@
           "propionic_acid_pct_vv",
           "nipagen_pct_wv",
           "ethanol_stock_pct_vv",
-          "dmso_pct_wv",
-          "food_preparation_time",
           "building",
           "incubator",
           "water_source",
@@ -1213,20 +1711,29 @@
           "drug",
           "dose",
           "carrier",
-          "length_of_exposure",
           "physical_treatment",
           "frequency",
-          "months_diapause",
+          "temperature",
+          "ld_cycle",
+          "experiment_run_to_completion",
+          "data_censored",
+          "imported_by",
+          "import_notes",
+          "imported_datetime",
+          "experimental_purpose",
+          "experimental_batch",
           "pupae_length_mm",
           "pupae_weight_mg",
           "pupae_age_days",
-          "development_time_days_since_laying",
           "shared_pupae_number",
           "shared_mother",
+          "dmso_pct_wv",
+          "food_preparation_time",
+          "length_of_exposure",
           "wasp_source",
           "wasp_obtaining_method",
-          "temperature",
-          "ld_cycle",
+          "months_diapause",
+          "dmso_stock_pct_vv",
         ];
         const rows = [header.join(",")];
         mons.forEach((m) => {
@@ -1234,7 +1741,9 @@
             lineA = balanced(REGIONS, geneticLines),
             tempA = balanced(REGIONS, temps),
             foodA = balanced(REGIONS, foods),
-            doseA = balanced(REGIONS, drugDoses);
+            doseA = balanced(REGIONS, drugDoses),
+            sharedPupaeA = buildRelatednessAssignments("sharedPupaeGrid"),
+            sharedMotherA = buildRelatednessAssignments("sharedMotherGrid");
           for (let r = 1; r <= REGIONS; r++) {
             const f = foodA[r - 1];
             const assignedDose = doseA[r - 1];
@@ -1264,8 +1773,6 @@
                 f.propionicAcid,
                 f.nipagen,
                 Number(f.ethanol) + assignedEthanolAddition,
-                Number(f.dmso) + assignedDmsoAddition,
-                document.getElementById("foodPreparationTime").value,
                 values.building,
                 document.getElementById("incubator").value,
                 values.water,
@@ -1275,42 +1782,47 @@
                 drugControl ? "Control" : document.getElementById("drug").value,
                 assignedDose,
                 assignedCarrier,
-                drugControl
-                  ? "None"
-                  : document.getElementById("lengthOfExposure").value,
                 physYes ? document.getElementById("physicalType").value : "No",
                 physYes &&
                 ["Vibrational Stimulation", "Red Light"].includes(
                   document.getElementById("physicalType").value,
                 )
                   ? document.getElementById("frequency").value
-                  : "None",
+                  : "",
+                tempA[r - 1],
+                values.ldCycle,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                document.getElementById("pupaeLengthNotMeasured").checked
+                  ? ""
+                  : document.getElementById("pupaeLength").value.trim(),
+                document.getElementById("pupaeWeightNotMeasured").checked
+                  ? ""
+                  : document.getElementById("pupaeWeight").value.trim(),
+                document.getElementById("developmentTimeToEclosionDays").value.trim(),
+                sharedPupaeA[r - 1],
+                sharedMotherA[r - 1],
+                Number(f.dmso) + assignedDmsoAddition,
+                document.getElementById("foodPreparationTime").value,
+                drugControl
+                  ? "N/A"
+                  : document.getElementById("lengthOfExposure").value,
+                document.getElementById("toggle-waspSource").checked
+                  ? document.getElementById("waspSource").value
+                  : "",
+                document.getElementById("toggle-waspMethod").checked
+                  ? document.getElementById("waspObtainingMethod").value
+                  : "",
                 physYes &&
                 document.getElementById("physicalType").value === "Diapause"
                   ? document.getElementById("monthsDiapause").value
-                  : "N/A",
-                document.getElementById("toggle-pupae").checked
-                  ? document.getElementById("pupaeLength").value.trim()
-                  : "Unknown",
-                document.getElementById("toggle-pupae").checked
-                  ? document.getElementById("pupaeWeight").value.trim()
-                  : "Unknown",
-                document.getElementById("toggle-pupae").checked
-                  ? document.getElementById("pupaeAge").value.trim()
-                  : "Unknown",
-                document.getElementById("toggle-pupae").checked
-                  ? document.getElementById("developmentTimeDays").value.trim()
-                  : "Unknown",
-                "Unknown",
-                "Unknown",
-                document.getElementById("toggle-waspSource").checked
-                  ? document.getElementById("waspSource").value
-                  : "Unknown",
-                document.getElementById("toggle-waspSource").checked
-                  ? document.getElementById("waspObtainingMethod").value
-                  : "Unknown",
-                tempA[r - 1],
-                values.ldCycle,
+                  : "",
+                "",
               ]
                 .map(csv)
                 .join(","),
@@ -1348,8 +1860,11 @@
         "physicalControl",
         "pupaeLength",
         "pupaeWeight",
-        "pupaeAge",
-        "developmentTimeDays",
+        "developmentTimeToEclosionDays",
+        "hostPupationDate",
+        "pupaeLengthNotMeasured",
+        "pupaeWeightNotMeasured",
+        "hostPupationDateNotRecorded",
         "waspSource",
         "waspObtainingMethod",
         "foodPreparationTime",
@@ -1375,14 +1890,122 @@
           validateAll();
         });
       });
+      function resetRelatednessGrid(gridId) {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = `<div class="relatedness-row" data-label="A"><span class="relatedness-letter">A</span><input type="number" min="1" step="1" class="relatedness-count" placeholder="Number of rows" aria-label="Rows assigned to ${gridId === "sharedPupaeGrid" ? "shared pupa" : "shared mother"} A" /><span></span></div>`;
+      }
+      [
+        ["enableSharedPupae", "sharedPupaeEditor"],
+        ["enableSharedMother", "sharedMotherEditor"],
+      ].forEach(([checkboxId, editorId]) => {
+        document.getElementById(checkboxId).addEventListener("change", () => {
+          document.getElementById(editorId).classList.toggle(
+            "open",
+            document.getElementById(checkboxId).checked,
+          );
+          validateAll();
+        });
+      });
+      document.querySelectorAll(".add-relatedness-row").forEach((button) => {
+        button.addEventListener("click", () => {
+          const grid = document.getElementById(button.dataset.grid);
+          const label = alphaLabel(grid.querySelectorAll(".relatedness-row").length);
+          const subject = button.dataset.grid === "sharedPupaeGrid"
+            ? "shared pupa"
+            : "shared mother";
+          grid.insertAdjacentHTML(
+            "beforeend",
+            `<div class="relatedness-row" data-label="${label}"><span class="relatedness-letter">${label}</span><input type="number" min="1" step="1" class="relatedness-count" placeholder="Number of rows" aria-label="Rows assigned to ${subject} ${label}" /><button type="button" class="small-btn remove-relatedness-row" aria-label="Remove ${label}">Remove</button></div>`,
+          );
+          validateAll();
+        });
+      });
+      document.getElementById("relatednessDetails").addEventListener("input", (event) => {
+        if (event.target.classList.contains("relatedness-count")) validateAll();
+      });
+      document.getElementById("relatednessDetails").addEventListener("click", (event) => {
+        if (!event.target.classList.contains("remove-relatedness-row")) return;
+        event.target.closest(".relatedness-row").remove();
+        validateAll();
+      });
+      function connectStaticCondition(confirmId, changeId, editorId, reset) {
+        const confirm = document.getElementById(confirmId);
+        const change = document.getElementById(changeId);
+        const editor = document.getElementById(editorId);
+        confirm.addEventListener("change", () => {
+          if (confirm.checked) {
+            change.checked = false;
+            editor.classList.remove("open");
+            reset();
+          }
+          validateAll();
+        });
+        change.addEventListener("change", () => {
+          if (change.checked) confirm.checked = false;
+        });
+      }
+      connectStaticCondition(
+        "confirm-geneticLine",
+        "toggle-geneticLine",
+        "geneticLineDetails",
+        () => { document.getElementById("geneticLines").value = ""; },
+      );
+      connectStaticCondition(
+        "confirm-relatedness",
+        "toggle-relatedness",
+        "relatednessDetails",
+        () => {
+          document.getElementById("enableSharedPupae").checked = false;
+          document.getElementById("enableSharedMother").checked = false;
+          document.getElementById("sharedPupaeEditor").classList.remove("open");
+          document.getElementById("sharedMotherEditor").classList.remove("open");
+          resetRelatednessGrid("sharedPupaeGrid");
+          resetRelatednessGrid("sharedMotherGrid");
+        },
+      );
+      connectStaticCondition(
+        "confirm-waspSource",
+        "toggle-waspSource",
+        "waspSourceDetails",
+        () => {
+          document.getElementById("waspSource").value = "";
+        },
+      );
+      connectStaticCondition(
+        "confirm-waspMethod",
+        "toggle-waspMethod",
+        "waspMethodDetails",
+        () => { document.getElementById("waspObtainingMethod").value = ""; },
+      );
+      function connectMissingConfirmation(checkboxId, inputId) {
+        const checkbox = document.getElementById(checkboxId);
+        const input = document.getElementById(inputId);
+        checkbox.addEventListener("change", () => {
+          input.disabled = checkbox.checked;
+          if (checkbox.checked) input.value = "";
+          validateAll();
+        });
+        input.addEventListener("input", () => {
+          if (input.value.trim()) {
+            checkbox.checked = false;
+            input.disabled = false;
+          }
+        });
+      }
+      connectMissingConfirmation("pupaeLengthNotMeasured", "pupaeLength");
+      connectMissingConfirmation("pupaeWeightNotMeasured", "pupaeWeight");
+      connectMissingConfirmation("hostPupationDateNotRecorded", "hostPupationDate");
       document.getElementById("toggle-pupae").addEventListener("change", () => {
         const changed = document.getElementById("toggle-pupae").checked;
         document.getElementById("pupaeDetails").classList.toggle("open", changed);
         if (!changed) {
-          document.getElementById("pupaeLength").value = "Unknown";
-          document.getElementById("pupaeWeight").value = "Unknown";
-          document.getElementById("pupaeAge").value = "Unknown";
-          document.getElementById("developmentTimeDays").value = "Unknown";
+          document.getElementById("pupaeLength").value = "";
+          document.getElementById("pupaeWeight").value = "";
+          document.getElementById("developmentTimeToEclosionDays").value = "";
+          document.getElementById("pupaeLengthNotMeasured").checked = false;
+          document.getElementById("pupaeWeightNotMeasured").checked = false;
+          document.getElementById("pupaeLength").disabled = false;
+          document.getElementById("pupaeWeight").disabled = false;
         }
         validateAll();
       });
@@ -1405,8 +2028,19 @@
             .getElementById("waspSourceDetails")
             .classList.toggle("open", changed);
           if (!changed) {
-            document.getElementById("waspSource").value = "Unknown";
-            document.getElementById("waspObtainingMethod").value = "Unknown";
+            document.getElementById("waspSource").value = "";
+          }
+          validateAll();
+        });
+      document
+        .getElementById("toggle-waspMethod")
+        .addEventListener("change", () => {
+          const changed = document.getElementById("toggle-waspMethod").checked;
+          document
+            .getElementById("waspMethodDetails")
+            .classList.toggle("open", changed);
+          if (!changed) {
+            document.getElementById("waspObtainingMethod").value = "";
           }
           validateAll();
         });
