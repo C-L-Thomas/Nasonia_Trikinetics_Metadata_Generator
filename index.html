@@ -916,7 +916,7 @@
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Treatment dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><div class="food-note">Each treatment dose is balanced and randomised across monitor positions.</div><label class="field">Include a balanced control group?</label><select id="drugControl"><option value="Yes">Yes</option><option value="No">No</option></select><div class="food-note">Control rows export with dose 0, drug Control and carrier None.</div><label class="field">Length of Exposure</label><select id="lengthOfExposure"><option value="">-- Select --</option><option>Exposed for First Week Only</option><option>Exposed for Second Week Only</option><option>Exposed for Lifespan</option></select><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div><div class="conditional" id="dmsoCarrierDetails"><label class="field">DMSO carrier concentration, % w/v</label><input type="text" id="dmsoCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the DMSO already present in the selected food formulation.</div><div class="error" id="error-dmsoCarrier"></div></div></div>`,
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Treatment dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><div class="food-note">Each treatment dose is balanced and randomised across monitor positions.</div><label class="field">Add a vehicle-matched control group?</label><select id="drugControl"><option value="Yes">Yes</option><option value="No">No</option></select><div class="food-note">The control keeps the selected carrier, carrier concentration and exposure schedule, but exports drug as Control and dose as 0. One dose gives a 1:1 allocation; two doses give a 1:1:1 allocation.</div><label class="field">Length of Exposure</label><select id="lengthOfExposure"><option value="">-- Select --</option><option>Exposed for First Week Only</option><option>Exposed for Second Week Only</option><option>Exposed for Lifespan</option></select><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the ethanol already present in the selected food formulation, including vehicle-control rows.</div><div class="error" id="error-ethanolCarrier"></div></div><div class="conditional" id="dmsoCarrierDetails"><label class="field">DMSO carrier concentration, % w/v</label><input type="text" id="dmsoCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the DMSO already present in the selected food formulation, including vehicle-control rows.</div><div class="error" id="error-dmsoCarrier"></div></div></div>`,
       );
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
@@ -1783,8 +1783,10 @@
             const datasetRowIndex = monitorIndex * REGIONS + (r - 1);
             const f = foodA[r - 1];
             const assignedDose = doseA[r - 1];
-            const drugControl = !drugYes || assignedDose === "0";
-            const assignedCarrier = drugControl
+            const untreatedControl = !drugYes;
+            const pairedDrugControl = drugYes && assignedDose === "0";
+            const controlRow = untreatedControl || pairedDrugControl;
+            const assignedCarrier = untreatedControl
               ? "None"
               : document.getElementById("carrier").value;
             const assignedEthanolAddition =
@@ -1815,7 +1817,7 @@
                 document.getElementById("userName").value.trim(),
                 document.getElementById("career").value,
                 values.foodChange,
-                drugControl ? "Control" : document.getElementById("drug").value,
+                controlRow ? "Control" : document.getElementById("drug").value,
                 assignedDose,
                 assignedCarrier,
                 physYes ? document.getElementById("physicalType").value : "No",
@@ -1845,7 +1847,7 @@
                 sharedMotherAssignments[datasetRowIndex],
                 Number(f.dmso) + assignedDmsoAddition,
                 document.getElementById("foodPreparationTime").value,
-                drugControl
+                untreatedControl
                   ? "N/A"
                   : document.getElementById("lengthOfExposure").value,
                 document.getElementById("toggle-waspSource").checked
