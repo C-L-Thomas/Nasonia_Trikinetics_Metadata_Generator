@@ -916,7 +916,7 @@
       const drugRow = document.getElementById("edit-drugChoice");
       drugRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 0, 100uM, 5mM"><div class="food-note">Each dose is treated as a separate group and balanced across monitor positions. Enter 0 to include a control group.</div><label class="field">Length of Exposure</label><select id="lengthOfExposure"><option value="">-- Select --</option><option>Exposed for First Week Only</option><option>Exposed for Second Week Only</option><option>Exposed for Lifespan</option></select><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div><div class="conditional" id="dmsoCarrierDetails"><label class="field">DMSO carrier concentration, % w/v</label><input type="text" id="dmsoCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the DMSO already present in the selected food formulation.</div><div class="error" id="error-dmsoCarrier"></div></div></div>`,
+        `<div class="conditional" id="drugDetails"><label class="field">Drug</label><select id="drug"><option value="">-- Select --</option><option>AKG</option><option>Caffeine</option><option>Rapamycin</option><option>Resveratrol</option><option>Nicotinamide Mononucleotide</option><option>Tazemetostat</option></select><label class="field">Treatment dose(s), comma-separated</label><input type="text" id="dose" placeholder="e.g. 100uM, 5mM"><div class="food-note">Each treatment dose is balanced and randomised across monitor positions.</div><label class="field">Include a balanced control group?</label><select id="drugControl"><option value="Yes">Yes</option><option value="No">No</option></select><div class="food-note">Control rows export with dose 0, drug Control and carrier None.</div><label class="field">Length of Exposure</label><select id="lengthOfExposure"><option value="">-- Select --</option><option>Exposed for First Week Only</option><option>Exposed for Second Week Only</option><option>Exposed for Lifespan</option></select><label class="field">Carrier</label><select id="carrier"><option value="">-- Select --</option><option>None</option><option>Water</option><option>Ethanol</option><option>DMSO</option></select><div class="conditional" id="ethanolCarrierDetails"><label class="field">Ethanol carrier concentration, % w/v</label><input type="text" id="ethanolCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the ethanol already present in the selected food formulation.</div><div class="error" id="error-ethanolCarrier"></div></div><div class="conditional" id="dmsoCarrierDetails"><label class="field">DMSO carrier concentration, % w/v</label><input type="text" id="dmsoCarrierConcentration" placeholder="e.g. 1 or 1% w/v"><div class="food-note">Enter 1, 1%, or 1% w/v for a 1% concentration. This value will be added to the DMSO already present in the selected food formulation.</div><div class="error" id="error-dmsoCarrier"></div></div></div>`,
       );
       const physicalRow = document.getElementById("edit-physical");
       physicalRow.insertAdjacentHTML(
@@ -1466,11 +1466,16 @@
         document.getElementById("error-waspMethod").style.display = waspMethodOK
           ? "none"
           : "block";
+        const enteredTreatmentDoses = document
+          .getElementById("dose")
+          .value.split(",")
+          .map((dose) => dose.trim())
+          .filter((dose) => dose && dose !== "0");
         const drugDetailsOK =
           values.drugChoice !== "Yes" ||
           Boolean(
             document.getElementById("drug").value &&
-            document.getElementById("dose").value.trim() &&
+            enteredTreatmentDoses.length &&
             document.getElementById("lengthOfExposure").value &&
             document.getElementById("carrier").value,
           );
@@ -1643,12 +1648,15 @@
                   .filter(Boolean);
         const drugYes = values.drugChoice === "Yes",
           physYes = values.physical === "Yes";
-        const drugDoses = drugYes
-          ? document
+        const treatmentDoses = document
               .getElementById("dose")
               .value.split(",")
               .map((dose) => dose.trim())
-              .filter(Boolean)
+              .filter((dose) => dose && dose !== "0");
+        const drugDoses = drugYes
+          ? document.getElementById("drugControl").value === "Yes"
+            ? [...treatmentDoses, "0"]
+            : treatmentDoses
           : ["0"];
         const ethanolCarrierAddition =
           drugYes && document.getElementById("carrier").value === "Ethanol"
@@ -1878,6 +1886,7 @@
         "geneticLines",
         "drug",
         "dose",
+        "drugControl",
         "lengthOfExposure",
         "carrier",
         "ethanolCarrierConcentration",
