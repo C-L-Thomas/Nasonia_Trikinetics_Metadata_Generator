@@ -732,6 +732,10 @@
     <div class="editor" id="developmentTimeDetails">
       <label class="field" for="developmentTimeToEclosionDays">Developmental time to eclosion (days)</label>
       <input type="number" min="0" step="any" id="developmentTimeToEclosionDays" value="14" required />
+      <label class="edit-toggle confirm-toggle">
+        <input type="checkbox" id="developmentTimeUnknown" />
+        Unknown
+      </label>
       <div class="food-note">Enter the observed number of days from host pupation to adult eclosion.</div>
     </div>
     <div class="error" id="error-developmentTime"></div>
@@ -756,6 +760,10 @@
     <div class="editor" id="monitoringAgeDetails">
       <label class="field" for="monitoringAgeDays">Age when monitoring began (days)</label>
       <input type="number" min="0" step="any" id="monitoringAgeDays" value="1" required />
+      <label class="edit-toggle confirm-toggle">
+        <input type="checkbox" id="monitoringAgeUnknown" />
+        Unknown
+      </label>
       <div class="food-note">Default 1: monitoring begins at 08:00 on the day after the wasp is loaded.</div>
     </div>
     <div class="error" id="error-monitoringAge"></div>
@@ -945,7 +953,7 @@
       label: "Mated",
       def: "Unknown",
       type: "select",
-      options: ["Yes", "No", "Unknown"],
+      options: ["Mated", "Unmated", "Unknown"],
     },
     {
       id: "baseMedia",
@@ -1617,21 +1625,29 @@
     const developmentTimeValue = document
       .getElementById("developmentTimeToEclosionDays")
       .value.trim();
+    const developmentTimeUnknown = document
+      .getElementById("developmentTimeUnknown").checked;
     const developmentTimeReviewed =
       document.getElementById("confirm-developmentTime").checked ||
       document.getElementById("toggle-developmentTime").checked;
     const developmentTimeOK =
-      developmentTimeReviewed && developmentTimeValue !== "" &&
-      validOptionalNonNegative(developmentTimeValue);
+      developmentTimeReviewed &&
+      (developmentTimeUnknown ||
+        (developmentTimeValue !== "" &&
+          validOptionalNonNegative(developmentTimeValue)));
     const monitoringAgeValue = document
       .getElementById("monitoringAgeDays")
       .value.trim();
+    const monitoringAgeUnknown = document
+      .getElementById("monitoringAgeUnknown").checked;
     const monitoringAgeReviewed =
       document.getElementById("confirm-monitoringAge").checked ||
       document.getElementById("toggle-monitoringAge").checked;
     const monitoringAgeOK =
-      monitoringAgeReviewed && monitoringAgeValue !== "" &&
-      validOptionalNonNegative(monitoringAgeValue);
+      monitoringAgeReviewed &&
+      (monitoringAgeUnknown ||
+        (monitoringAgeValue !== "" &&
+          validOptionalNonNegative(monitoringAgeValue)));
     const pupaeOK =
       pupaeNotRecorded || (pupaeChanged && pupaeLengthOK && pupaeWeightOK);
     const reviewStates = [
@@ -1691,13 +1707,13 @@
       : "block";
     document.getElementById("error-developmentTime").textContent = developmentTimeOK
       ? ""
-      : "Confirm the 14-day default or select Change and enter a valid developmental time.";
+      : "Confirm the 14-day default, enter a valid developmental time, or explicitly select Unknown.";
     document.getElementById("error-developmentTime").style.display = developmentTimeOK
       ? "none"
       : "block";
     document.getElementById("error-monitoringAge").textContent = monitoringAgeOK
       ? ""
-      : "Confirm the 1-day default or select Change and enter a valid age.";
+      : "Confirm the 1-day default, enter a valid age, or explicitly select Unknown.";
     document.getElementById("error-monitoringAge").style.display = monitoringAgeOK
       ? "none"
       : "block";
@@ -1912,8 +1928,8 @@
         : document.getElementById("pupaeWeight").value;
     const reviewRows = [
       ...configs.map((c) => [c.label, values[c.id].replaceAll("_", " ")]),
-      ["Developmental time to eclosion", `${developmentTimeValue} days`],
-      ["Age when monitoring began", `${monitoringAgeValue} days`],
+      ["Developmental time to eclosion", developmentTimeUnknown ? "Unknown" : `${developmentTimeValue} days`],
+      ["Age when monitoring began", monitoringAgeUnknown ? "Unknown" : `${monitoringAgeValue} days`],
       ["Host pupation date", document.getElementById("hostPupationDateNotRecorded").checked ? "Unrecorded" : document.getElementById("hostPupationDate").value],
       ["Pupae length", pupaeLengthSummary ? `${pupaeLengthSummary}${pupaeLengthSummary === "Unrecorded" ? "" : " mm"}` : "Unrecorded"],
       ["Pupae weight", pupaeWeightSummary ? `${pupaeWeightSummary}${pupaeWeightSummary === "Unrecorded" ? "" : " mg"}` : "Unrecorded"],
@@ -2123,7 +2139,9 @@
             r,
             document.getElementById("startDate").value,
             "",
-            document.getElementById("monitoringAgeDays").value.trim(),
+            document.getElementById("monitoringAgeUnknown").checked
+              ? "Unknown"
+              : document.getElementById("monitoringAgeDays").value.trim(),
             "",
             sexA[r - 1],
             values.mated,
@@ -2145,7 +2163,9 @@
             document.getElementById("hostPupationDateNotRecorded").checked
               ? "Unrecorded"
               : document.getElementById("hostPupationDate").value,
-            document.getElementById("developmentTimeToEclosionDays").value.trim(),
+            document.getElementById("developmentTimeUnknown").checked
+              ? "Unknown"
+              : document.getElementById("developmentTimeToEclosionDays").value.trim(),
             physYes &&
             document.getElementById("physicalType").value === "Diapause"
               ? document.getElementById("monthsDiapause").value
@@ -2184,6 +2204,7 @@
             "",
             "",
             values.ldCycle,
+            // Environmental-monitor fields are populated during database import.
             "",
             "",
             "",
@@ -2196,7 +2217,7 @@
             "",
             "",
             "",
-            "",
+            // Censoring and robust-dataset fields are populated during analysis/import.
             "",
             "",
             "",
@@ -2355,28 +2376,58 @@
     "confirm-developmentTime",
     "toggle-developmentTime",
     "developmentTimeDetails",
-    () => { document.getElementById("developmentTimeToEclosionDays").value = "14"; },
+    () => {
+      document.getElementById("developmentTimeToEclosionDays").value = "14";
+      document.getElementById("developmentTimeToEclosionDays").disabled = false;
+      document.getElementById("developmentTimeUnknown").checked = false;
+    },
   );
   document.getElementById("toggle-developmentTime").addEventListener("change", () => {
     const changed = document.getElementById("toggle-developmentTime").checked;
     document.getElementById("developmentTimeDetails").classList.toggle("open", changed);
-    if (!changed) document.getElementById("developmentTimeToEclosionDays").value = "14";
+    if (!changed) {
+      document.getElementById("developmentTimeToEclosionDays").value = "14";
+      document.getElementById("developmentTimeToEclosionDays").disabled = false;
+      document.getElementById("developmentTimeUnknown").checked = false;
+    }
     validateAll();
   });
   document.getElementById("developmentTimeToEclosionDays").addEventListener("input", validateAll);
+  document.getElementById("developmentTimeUnknown").addEventListener("change", (event) => {
+    const input = document.getElementById("developmentTimeToEclosionDays");
+    input.disabled = event.target.checked;
+    if (event.target.checked) input.value = "";
+    else input.value = "14";
+    validateAll();
+  });
   connectStaticCondition(
     "confirm-monitoringAge",
     "toggle-monitoringAge",
     "monitoringAgeDetails",
-    () => { document.getElementById("monitoringAgeDays").value = "1"; },
+    () => {
+      document.getElementById("monitoringAgeDays").value = "1";
+      document.getElementById("monitoringAgeDays").disabled = false;
+      document.getElementById("monitoringAgeUnknown").checked = false;
+    },
   );
   document.getElementById("toggle-monitoringAge").addEventListener("change", () => {
     const changed = document.getElementById("toggle-monitoringAge").checked;
     document.getElementById("monitoringAgeDetails").classList.toggle("open", changed);
-    if (!changed) document.getElementById("monitoringAgeDays").value = "1";
+    if (!changed) {
+      document.getElementById("monitoringAgeDays").value = "1";
+      document.getElementById("monitoringAgeDays").disabled = false;
+      document.getElementById("monitoringAgeUnknown").checked = false;
+    }
     validateAll();
   });
   document.getElementById("monitoringAgeDays").addEventListener("input", validateAll);
+  document.getElementById("monitoringAgeUnknown").addEventListener("change", (event) => {
+    const input = document.getElementById("monitoringAgeDays");
+    input.disabled = event.target.checked;
+    if (event.target.checked) input.value = "";
+    else input.value = "1";
+    validateAll();
+  });
   connectStaticCondition(
     "confirm-relatedness",
     "toggle-relatedness",
